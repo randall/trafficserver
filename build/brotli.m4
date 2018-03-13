@@ -68,6 +68,7 @@ if test "$has_brotli" != "0"; then
   if test "$brotli_have_headers" != "0"; then
     AC_SUBST([LIB_BROTLIENC], [-lbrotlienc])
     AC_SUBST([CFLAGS_BROTLIENC], [-I${brotli_include}])
+    AC_DEFINE(HAVE_BROTLI_ENCODE_H, 1, [Compiling with brotli support])
   else
     has_brotli=0
     CPPFLAGS=$saved_cppflags
@@ -82,13 +83,18 @@ AC_CHECK_LIB([brotlienc], BrotliEncoderCreateInstance, [], [has_brotli=0])
 if test "x$has_brotli" == "x0"; then
     PKG_CHECK_EXISTS([libbrotlienc],
     [
-      PKG_CHECK_MODULES([libbrotlienc], [libbrotlienc >= 0.6.0], [
-        AC_SUBST([LIB_BROTLIENC], [$libbrotlienc_LIBS])
-        AC_SUBST([CFLAGS_BROTLIENC], [$libbrotlienc_CFLAGS])
+      PKG_CHECK_MODULES([LIBBROTLIENC], [libbrotlienc >= 0.6.0], [
+        AC_SUBST([LIB_BROTLIENC], [$LIBBROTLIENC_LIBS])
+        AC_SUBST([CFLAGS_BROTLIENC], [$LIBBROTLIENC_CFLAGS])
+        AC_DEFINE(HAVE_BROTLI_ENCODE_H, 1, [Compiling with brotli support])
+
+        TS_ADDTO(CPPFLAGS, [${LIBBROTLIENC_CFLAGS}])
+        TS_ADDTO(LDFLAGS, [${LIBBROTLIENC_LIBS}])
       ], [])
     ], [])
 else
     AC_SUBST([LIB_BROTLIENC], [-lbrotlienc])
+    AC_DEFINE(HAVE_BROTLI_ENCODE_H, 1, [Compiling with brotli support])
 fi
 ])
 
