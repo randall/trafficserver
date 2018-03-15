@@ -346,7 +346,8 @@ brotli_transform_one(Data *data, const char *upstream_buffer, int64_t upstream_l
   int err;
 
   data->bstrm.avail_in = upstream_length;
-
+//  warning("%.*s", upstream_length, upstream_buffer);
+  warning("brotli_transform_one: %ld", upstream_length);
   while (data->bstrm.avail_in > 0) {
     downstream_blkp   = TSIOBufferStart(data->downstream_buffer);
     downstream_buffer = TSIOBufferBlockWriteStart(downstream_blkp, &downstream_length);
@@ -356,32 +357,39 @@ brotli_transform_one(Data *data, const char *upstream_buffer, int64_t upstream_l
     data->bstrm.total_out = 0;
 
     data->bstrm.next_in = (uint8_t *)upstream_buffer;
-    if (!data->hc->flush()) {
-      err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_PROCESS, &data->bstrm.avail_in,
-                                        (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
-                                        &data->bstrm.total_out);
-    } else {
-      err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_FLUSH, &data->bstrm.avail_in,
-                                        (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
-                                        &data->bstrm.total_out);
-    }
 
+    err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_PROCESS, &data->bstrm.avail_in,
+            (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
+            &data->bstrm.total_out);
     if (err != BROTLI_TRUE) {
-      warning("BrotliEncoderCompressStream() call failed: %d", err);
+        error("BrotliEncoderCompressStream() call failed: %d", err);
+        return;
     }
 
-    if (downstream_length > (int64_t)data->bstrm.avail_out) {
+    if (data->hc->flush()) {
+        err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_FLUSH, &data->bstrm.avail_in,
+                (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
+                &data->bstrm.total_out);
+
+
+        if (err != BROTLI_TRUE) {
+            error("BrotliEncoderCompressStream() call failed: %d", err);
+            return;
+        }
+    }
+      warning("transform: has_more : %d", BrotliEncoderHasMoreOutput(data->bstrm.br));
+//    if (BrotliEncoderHasMoreOutput(data->bstrm.br)) {
+
+//    if (downstream_length > (int64_t)data->bstrm.avail_out) {
       TSIOBufferProduce(data->downstream_buffer, downstream_length - data->bstrm.avail_out);
       data->downstream_length += (downstream_length - data->bstrm.avail_out);
-    }
+ //   }
 
-    if (data->bstrm.avail_out > 0) {
-      if (data->bstrm.avail_in != 0) {
-        error("brotli-transform: ERROR: brotli avail_in is (%lu): should be 0", data->bstrm.avail_in);
-      }
-    }
+   //   data->bstrm.total_in += upstream_length;
+//    }
+//  data->bstrm.total_in += data->bstrm.next_in;
   }
-  data->bstrm.total_in += upstream_length;
+ data->bstrm.total_in += upstream_length;
 #else
   error("brotli-transform: ERROR: compile with brotli support");
 #endif
@@ -445,8 +453,8 @@ gzip_transform_finish(Data *data)
       err = deflate(&data->zstrm, Z_FINISH);
 
       if (downstream_length > (int64_t)data->zstrm.avail_out) {
-        TSIOBufferProduce(data->downstream_buffer, downstream_length - data->zstrm.avail_out);
-        data->downstream_length += (downstream_length - data->zstrm.avail_out);
+          TSIOBufferProduce(data->downstream_buffer, downstream_length - data->zstrm.avail_out);
+          data->downstream_length += (downstream_length - data->zstrm.avail_out);
       }
 
       if (err == Z_OK) { /* some more data to encode */
@@ -486,28 +494,56 @@ brotli_transform_finish(Data *data)
       data->bstrm.next_out  = (unsigned char *)downstream_buffer;
       data->bstrm.avail_out = downstream_length;
 
+      warning("0is finished: %d", BrotliEncoderIsFinished(data->bstrm.br));
+      warning(" is more out: %d", BrotliEncoderHasMoreOutput(data->bstrm.br));
+      warning(" avail    in: %zu", data->bstrm.avail_in);
+      warning(" total out : %zu", data->bstrm.total_out);
+/*
+          err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_PROCESS, &data->bstrm.avail_in,
+                  (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
+                  &data->bstrm.total_out);
+          if (err != BROTLI_TRUE) {
+              error("brotli_transform: BrotliEncoderCompressStream failed");
+              return;
+          }
+          warning("1is finished: %d", BrotliEncoderIsFinished(data->bstrm.br));
+          warning(" is more out: %d", BrotliEncoderHasMoreOutput(data->bstrm.br));
+
+          TSIOBufferProduce(data->downstream_buffer, downstream_length - data->bstrm.avail_out);
+          data->downstream_length += (downstream_length - data->bstrm.avail_out);
+      //    warning("Zis finished: %d", BrotliEncoderIsFinished(data->bstrm.br));
+//          continue;
+
+*/
+      warning("2is finished: %d", BrotliEncoderIsFinished(data->bstrm.br));
+      warning(" is more out: %d", BrotliEncoderHasMoreOutput(data->bstrm.br));
+      warning(" avail    in: %zu", data->bstrm.avail_in);
+      warning(" total out : %zu", data->bstrm.total_out);
       err = BrotliEncoderCompressStream(data->bstrm.br, BROTLI_OPERATION_FINISH, &data->bstrm.avail_in,
-                                        (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
-                                        &data->bstrm.total_out);
-
-      if (downstream_length > (int64_t)data->bstrm.avail_out) {
-        TSIOBufferProduce(data->downstream_buffer, downstream_length - data->bstrm.avail_out);
-        data->downstream_length += (downstream_length - data->bstrm.avail_out);
+              (const uint8_t **)&data->bstrm.next_in, &data->bstrm.avail_out, &data->bstrm.next_out,
+              &data->bstrm.total_out);
+      if (err != BROTLI_TRUE) {
+          error("brotli_transform: BrotliEncoderCompressStream should return BROTLI_TRUE");
+          return;
       }
-      if (!BrotliEncoderIsFinished(data->bstrm.br)) {
-        continue;
+      warning("3is finished: %d", BrotliEncoderIsFinished(data->bstrm.br));
+      warning(" is more out: %d", BrotliEncoderHasMoreOutput(data->bstrm.br));
+      warning(" avail    in: %zu", data->bstrm.avail_in);
+      warning(" total out : %zu", data->bstrm.total_out);
+//      if (downstream_length > (int64_t)data->bstrm.avail_out) {
+          TSIOBufferProduce(data->downstream_buffer, downstream_length - data->bstrm.avail_out);
+          data->downstream_length += (downstream_length - data->bstrm.avail_out);
+ //     }
+      if (!BrotliEncoderHasMoreOutput(data->bstrm.br)) {
+        break;
       }
-
-      if (err != BROTLI_TRUE) { /* some more data to encode */
-        warning("brotli_transform: BrotliEncoderCompressStream should return BROTLI_TRUE");
-      }
-
-      break;
+      warning("HAS MORE OUTPUT");
     }
 
     if (data->downstream_length != (int64_t)(data->bstrm.total_out)) {
       error("brotli-transform: ERROR: output lengths don't match (%d, %ld)", data->downstream_length, data->bstrm.total_out);
     }
+
     debug("brotli-transform: Finished brotli");
     gzip_log_ratio(data->bstrm.total_in, data->downstream_length);
   }
@@ -519,6 +555,7 @@ brotli_transform_finish(Data *data)
 static void
 compress_transform_finish(Data *data)
 {
+    warning("compress_transform_finish");
   if (data->compression_type & COMPRESSION_TYPE_BROTLI && data->compression_algorithms & ALGORITHM_BROTLI) {
     brotli_transform_finish(data);
     debug("brotli-transform: Brotli compression finish.");
@@ -534,6 +571,8 @@ compress_transform_finish(Data *data)
 static void
 compress_transform_do(TSCont contp)
 {
+  warning("compress_transform_do");
+
   TSVIO upstream_vio;
   Data *data;
   int64_t upstream_todo;
@@ -549,7 +588,7 @@ compress_transform_do(TSCont contp)
   downstream_bytes_written = data->downstream_length;
 
   if (!TSVIOBufferGet(upstream_vio)) {
-    compress_transform_finish(data);
+//    compress_transform_finish(data);
 
     TSVIONBytesSet(data->downstream_vio, data->downstream_length);
 
@@ -608,12 +647,15 @@ compress_transform(TSCont contp, TSEvent event, void * /* edata ATS_UNUSED */)
       TSContCall(TSVIOContGet(upstream_vio), TS_EVENT_ERROR, upstream_vio);
     } break;
     case TS_EVENT_VCONN_WRITE_COMPLETE:
+      debug("TS_EVENT_VCONN_WRITE_COMPLETE");
       TSVConnShutdown(TSTransformOutputVConnGet(contp), 0, 1);
       break;
     case TS_EVENT_VCONN_WRITE_READY:
+      debug("TS_EVENT_VCONN_WRITE_READY");
       compress_transform_do(contp);
       break;
     case TS_EVENT_IMMEDIATE:
+      debug("TS_EVENT_IMMEDIATE");
       compress_transform_do(contp);
       break;
     default:
