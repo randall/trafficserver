@@ -1102,6 +1102,8 @@ HttpConfig::startup()
 
   HttpEstablishStaticConfigByte(c.keepalive_internal_vc, "proxy.config.http.keepalive_internal_vc");
 
+  HttpEstablishStaticConfigByte(c.better_502s_enabled, "proxy.config.http.better_502s");
+
   HttpEstablishStaticConfigByte(c.oride.cache_open_write_fail_action, "proxy.config.http.cache.open_write_fail_action");
 
   HttpEstablishStaticConfigByte(c.oride.cache_when_to_revalidate, "proxy.config.http.cache.when_to_revalidate");
@@ -1381,6 +1383,7 @@ HttpConfig::reconfigure()
   params->disallow_post_100_continue = INT_TO_BOOL(m_master.disallow_post_100_continue);
   params->parser_allow_non_http      = INT_TO_BOOL(m_master.parser_allow_non_http);
   params->keepalive_internal_vc      = INT_TO_BOOL(m_master.keepalive_internal_vc);
+  params->better_502s_enabled        = INT_TO_BOOL(m_master.better_502s_enabled);
 
   params->oride.cache_open_write_fail_action = m_master.oride.cache_open_write_fail_action;
 

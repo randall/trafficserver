@@ -252,6 +252,14 @@ is_negative_caching_appropriate(HttpTransact::State *s)
   case HTTP_STATUS_BAD_GATEWAY:
   case HTTP_STATUS_SERVICE_UNAVAILABLE:
   case HTTP_STATUS_GATEWAY_TIMEOUT:
+  // NOTE TO RRM: might not be needed
+  case HTTP_STATUS_UNKNOWN_ERROR:
+  case HTTP_STATUS_ORIGIN_DOWN:
+  case HTTP_STATUS_CONNECTION_TIMED_OUT:
+  case HTTP_STATUS_ORIGIN_UNREACHABLE:
+  case HTTP_STATUS_ORIGIN_TIMEOUT:
+  case HTTP_STATUS_ORIGIN_SSL_HANDSHAKE_FAILED:
+  case HTTP_STATUS_ORIGIN_INVALID_SSL_CERTIFICATE:
     return true;
   default:
     break;
@@ -1529,7 +1537,8 @@ HttpTransact::ReDNSRoundRobin(State *s)
     s->next_action = how_to_open_connection(s);
   } else {
     // Our ReDNS failed so output the DNS failure error message
-    build_error_response(s, HTTP_STATUS_BAD_GATEWAY, "Cannot find server.", "connect#dns_failed");
+    build_error_response(s, s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_UNREACHABLE : HTTP_STATUS_BAD_GATEWAY,
+                         "Cannot find server.", "connect#dns_failed");
     s->cache_info.action = CACHE_DO_NO_ACTION;
     s->next_action       = SM_ACTION_SEND_ERROR_CACHE_NOOP;
     //  s->next_action = PROXY_INTERNAL_CACHE_NOOP;
@@ -1629,7 +1638,9 @@ HttpTransact::OSDNSLookup(State *s)
         }
         // output the DNS failure error message
         SET_VIA_STRING(VIA_DETAIL_TUNNEL, VIA_DETAIL_TUNNEL_NO_FORWARD);
-        build_error_response(s, HTTP_STATUS_BAD_GATEWAY, "Cannot find server.", "connect#dns_failed");
+        build_error_response(s,
+                             s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_UNREACHABLE : HTTP_STATUS_BAD_GATEWAY,
+                             "Cannot find server.", "connect#dns_failed");
         // s->cache_info.action = CACHE_DO_NO_ACTION;
         TRANSACT_RETURN(SM_ACTION_SEND_ERROR_CACHE_NOOP, nullptr);
       }
@@ -7394,11 +7405,7 @@ HttpTransact::handle_server_died(State *s)
 {
   const char *reason    = nullptr;
   const char *body_type = "UNKNOWN";
-  HTTPStatus status     = HTTP_STATUS_BAD_GATEWAY;
-
-  ////////////////////////////////////////////////////////
-  // FIX: all the body types below need to be filled in //
-  ////////////////////////////////////////////////////////
+  HTTPStatus status     = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_DOWN : HTTP_STATUS_BAD_GATEWAY;
 
   switch (s->current.state) {
   case CONNECTION_ALIVE: /* died while alive for unknown reason */
@@ -7408,7 +7415,8 @@ HttpTransact::handle_server_died(State *s)
     body_type = "response#bad_response";
     break;
   case CONNECTION_ERROR:
-    status    = HTTP_STATUS_BAD_GATEWAY;
+    // RRM
+    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_DOWN : HTTP_STATUS_BAD_GATEWAY;
     reason    = get_error_string(s->cause_of_death_errno == 0 ? -ENET_CONNECT_FAILED : s->cause_of_death_errno);
     body_type = "connect#failed_connect";
     break;
@@ -7426,7 +7434,7 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_active_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum active time of %d msec exceeded", s->api_txn_active_timeout_value);
     }
-    status    = HTTP_STATUS_GATEWAY_TIMEOUT;
+    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_TIMEOUT : HTTP_STATUS_BAD_GATEWAY;
     reason    = "Maximum Transaction Time Exceeded";
     body_type = "timeout#activity";
     break;
@@ -7434,13 +7442,13 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_connect_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum connect time of %d msec exceeded", s->api_txn_connect_timeout_value);
     }
-    status    = HTTP_STATUS_GATEWAY_TIMEOUT;
+    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_TIMEOUT : HTTP_STATUS_BAD_GATEWAY;
     reason    = "Connection Timed Out";
     body_type = "timeout#inactivity";
     break;
   case PARSE_ERROR:
   case BAD_INCOMING_RESPONSE:
-    status    = HTTP_STATUS_BAD_GATEWAY;
+    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_UNKNOWN_ERROR : HTTP_STATUS_BAD_GATEWAY;
     reason    = "Invalid HTTP Response";
     body_type = "response#bad_response";
     break;
@@ -7448,7 +7456,7 @@ HttpTransact::handle_server_died(State *s)
   case TRANSACTION_COMPLETE:
   default: /* unknown death */
     ink_release_assert(!"[handle_server_died] Unreasonable state - not dead, shouldn't be here");
-    status    = HTTP_STATUS_BAD_GATEWAY;
+    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_UNKNOWN_ERROR : HTTP_STATUS_BAD_GATEWAY;
     reason    = nullptr;
     body_type = "response#bad_response";
     break;
@@ -7869,6 +7877,13 @@ HttpTransact::build_error_response(State *s, HTTPStatus status_code, const char 
     SET_VIA_STRING(VIA_CLIENT_REQUEST, VIA_CLIENT_ERROR);
     SET_VIA_STRING(VIA_ERROR_TYPE, VIA_ERROR_HEADER_SYNTAX);
     break;
+  case HTTP_STATUS_UNKNOWN_ERROR:
+  case HTTP_STATUS_ORIGIN_DOWN:
+  case HTTP_STATUS_CONNECTION_TIMED_OUT:
+  case HTTP_STATUS_ORIGIN_UNREACHABLE:
+  case HTTP_STATUS_ORIGIN_TIMEOUT:
+  case HTTP_STATUS_ORIGIN_SSL_HANDSHAKE_FAILED:
+  case HTTP_STATUS_ORIGIN_INVALID_SSL_CERTIFICATE:
   case HTTP_STATUS_BAD_GATEWAY:
     SET_VIA_STRING(VIA_ERROR_TYPE, VIA_ERROR_CONNECTION);
     break;
