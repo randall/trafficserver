@@ -190,7 +190,7 @@ FileManager::rereadConfig()
   for (entry = ink_hash_table_iterator_first(bindings, &iterator_state); entry != nullptr;
        entry = ink_hash_table_iterator_next(bindings, &iterator_state)) {
     rb = (Rollback *)ink_hash_table_entry_value(bindings, entry);
-    if (rb->checkForUserUpdate(rb->isVersioned() ? ROLLBACK_CHECK_AND_UPDATE : ROLLBACK_CHECK_ONLY)) {
+    if (rb->checkForUserUpdate(ROLLBACK_CHECK_AND_UPDATE)) {
       changedFiles.push_back(rb);
       if (rb->isChildRollback()) {
         if (std::find(parentFileNeedChange.begin(), parentFileNeedChange.end(), rb->getParentRollback()) ==
@@ -262,7 +262,6 @@ FileManager::isConfigStale()
   ink_mutex_release(&accessLock);
   return stale;
 }
-
 // void configFileChild(const char *parent, const char *child)
 //
 // Add child to the bindings with parentRollback

@@ -30,8 +30,7 @@ extern FileManager *configFiles;
 
 /****************************************************************************
  *
- *  AddConfigFilesHere.cc - Structs for config files and
- *
+ *  AddConfigFilesHere.cc - Structs for config files
  *
  ****************************************************************************/
 

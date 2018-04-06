@@ -65,6 +65,7 @@ Rollback::Rollback(const char *fileName_, bool root_access_needed_, Rollback *pa
   ExpandingArray existVer(25, true); // Exsisting versions
   struct stat fileInfo;
   MgmtInt numBak;
+  MgmtInt disableCfgMod;
   char *alarmMsg;
 
   // To Test, Read/Write access to the file
@@ -98,13 +99,13 @@ Rollback::Rollback(const char *fileName_, bool root_access_needed_, Rollback *pa
   ink_mutex_init(&fileAccessLock);
 
   if (varIntFromName("proxy.config.admin.number_config_bak", &numBak) == true) {
-    if (numBak > 1) {
-      numberBackups = (int)numBak;
-    } else {
-      numberBackups = 1;
-    }
+    numberBackups = (int)numBak;
   } else {
     numberBackups = DEFAULT_BACKUPS;
+  }
+
+  if (varIntFromName("proxy.config.disable_configuration_modification", &disableCfgMod) == true && disableCfgMod) {
+      numberBackups = 0;
   }
 
   // If we are not doing backups, bail early.
@@ -887,7 +888,7 @@ Rollback::setLastModifiedTime()
 //    of creating a new timestamp
 //
 bool
-Rollback::checkForUserUpdate(RollBackCheckType how)
+Rollback::checkForUserUpdate(RollBackCheckType checkType)
 {
   struct stat fileInfo;
   bool result;
@@ -896,7 +897,6 @@ Rollback::checkForUserUpdate(RollBackCheckType how)
   version_t currentVersion_local;
   TextBuffer *buf;
   RollBackCodes r;
-
   ink_mutex_acquire(&fileAccessLock);
 
   if (this->statFile(ACTIVE_VERSION, &fileInfo) < 0) {
@@ -905,22 +905,29 @@ Rollback::checkForUserUpdate(RollBackCheckType how)
   }
 
   if (fileLastModified < TS_ARCHIVE_STAT_MTIME(fileInfo)) {
-    if (how == ROLLBACK_CHECK_AND_UPDATE) {
-      // We've been modified, Roll a new version
-      currentVersion_local = this->getCurrentVersion();
-      r                    = this->getVersion_ml(currentVersion_local, &buf);
-      if (r == OK_ROLLBACK) {
-        r = this->updateVersion_ml(buf, currentVersion_local);
-        delete buf;
-      }
-      if (r != OK_ROLLBACK) {
-        mgmt_log("[Rollback::checkForUserUpdate] Failed to roll changed user file %s: %s", fileName, RollbackStrings[r]);
-      }
+      if (checkType == ROLLBACK_CHECK_AND_UPDATE) {
+          if (isVersioned()) {
+              // We've been modified, Roll a new version
+              currentVersion_local = this->getCurrentVersion();
+              r                    = this->getVersion_ml(currentVersion_local, &buf);
+              if (r == OK_ROLLBACK) {
+                  r = this->updateVersion_ml(buf, currentVersion_local);
+                  delete buf;
+              }
+              if (r != OK_ROLLBACK) {
+                  mgmt_log("[Rollback::checkForUserUpdate] Failed to roll changed user file %s: %s", fileName, RollbackStrings[r]);
+              }
+          } else {
+              // Post the change to the config file manager
+              if (configFiles) {
+                  setLastModifiedTime();
+                  configFiles->fileChanged(fileName, false);
+              }
+          }
 
-      mgmt_log("User has changed config file %s\n", fileName);
-    }
-
-    result = true;
+          mgmt_log("User has changed config file %s\n", fileName);
+      }
+      result = true;
   } else {
     result = false;
   }
