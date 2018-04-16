@@ -54,9 +54,12 @@ def MakeATSProcess(obj, name, command='traffic_server', select_ports=True):
         ts_dir, obj.Variables.PLUGINDIR.replace(obj.Variables.PREFIX + "/", ""))
     # the log directory
     log_dir = os.path.join(ts_dir, 'log')
-    runtime_dir = os.path.join(
-        ts_dir, obj.Variables.RUNTIMEDIR.replace(obj.Variables.PREFIX + "/", ""))
-    ssl_dir = os.path.join(ts_dir, 'ssl')
+
+     # runtime dir
+    runtime_dir = os.path.join(ts_dir, 'runtime')
+
+    ssl_dir = ts_dir
+
     storage_dir = os.path.join(ts_dir, 'storage')
     # create process
     p = obj.Processes.Process(name, command)

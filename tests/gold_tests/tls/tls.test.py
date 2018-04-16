@@ -24,7 +24,7 @@ Test tls
 
 def Build(Test, filename, host):
     tr = Test.AddTestRun("Build", "Build test file: {0}".format(filename))
-    tr.Command = 'gcc -o ssl-post -O2 -g {0} -lssl -lpthread -lcrypto'.format(filename)
+    tr.Command = 'gcc -o ssl-post -O2 -g {0} -L/opt/bazinga/lib64 -lssl -lpthread -lcrypto -I/opt/bazinga/include'.format(filename)
     tr.ReturnCode = 0
     tr = Test.addTestRun("Run-Test")
     tr.Command = './ssl-post {0} 40 378'.format(host)
@@ -43,7 +43,7 @@ server = Test.MakeOriginServer("server")
 
 
 tr = Test.AddTestRun("Build-Test", "build test file: ssl-post.c")
-tr.Command = 'gcc -o ssl-post -O2 -g {0}/ssl-post.c -lssl -lpthread -lcrypto'.format(Test.RunDirectory)
+tr.Command = 'gcc -o ssl-post -O2 -g {0}/ssl-post.c -L/opt/bazinga/lib64 -lssl -lpthread -lcrypto -I/opt/bazinga/include'.format(Test.RunDirectory)
 tr.ReturnCode = 0
 tr.Setup.CopyAs('ssl-post.c', Test.RunDirectory)
 
