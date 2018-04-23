@@ -768,6 +768,7 @@ public:
     int orig_scheme          = scheme; // pre-mapped scheme
     int method               = 0;
     int cause_of_death_errno = -UNKNOWN_INTERNAL_ERROR; // in
+    int last_ssl_err         = -UNKNOWN_INTERNAL_ERROR; // in
     Ptr<HostDBInfo> hostdb_entry;                       // Pointer to the entry we are referencing in hostdb-- to keep our ref
     HostDBInfo host_db_info;                            // in
 
