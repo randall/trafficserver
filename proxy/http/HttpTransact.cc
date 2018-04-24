@@ -2854,7 +2854,9 @@ HttpTransact::build_response_from_cache(State *s, HTTPWarningCode warning_code)
       // and server is not reacheable: 502
       //
       TxnDebug("http_trans", "[build_response_from_cache] No match! Connection failed.");
-      build_error_response(s, HTTP_STATUS_BAD_GATEWAY, "Connection Failed", "connect#failed_connect");
+
+      HTTPStatus status    = s->http_config_param->better_502s_enabled ? populate_expanded_502(s) : HTTP_STATUS_BAD_GATEWAY;
+      build_error_response(s, status, "Connection Failed", "connect#failed_connect");
       s->cache_info.action = CACHE_DO_NO_ACTION;
       s->next_action       = SM_ACTION_INTERNAL_CACHE_NOOP;
       warning_code         = HTTP_WARNING_CODE_NONE;
@@ -7395,8 +7397,10 @@ void
 HttpTransact::handle_parent_died(State *s)
 {
   ink_assert(s->parent_result.result == PARENT_FAIL);
-
-  build_error_response(s, HTTP_STATUS_BAD_GATEWAY, "Next Hop Connection Failed", "connect#failed_connect");
+  
+  HTTPStatus status = s->http_config_param->better_502s_enabled ? populate_expanded_502(s) : HTTP_STATUS_BAD_GATEWAY;
+  
+  build_error_response(s, status, "Next Hop Connection Failed", "connect#failed_connect");
   TRANSACT_RETURN(SM_ACTION_SEND_ERROR_CACHE_NOOP, nullptr);
 }
 
@@ -7405,7 +7409,7 @@ HttpTransact::handle_server_died(State *s)
 {
   const char *reason    = nullptr;
   const char *body_type = "UNKNOWN";
-  HTTPStatus status     = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_DOWN : HTTP_STATUS_BAD_GATEWAY;
+  HTTPStatus status     = HTTP_STATUS_BAD_GATEWAY;
 
   switch (s->current.state) {
   case CONNECTION_ALIVE: /* died while alive for unknown reason */
@@ -7417,7 +7421,7 @@ HttpTransact::handle_server_died(State *s)
   case CONNECTION_ERROR:
     // RRM
     Warning("s: %d", s->cause_of_death_errno);
-    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_DOWN : HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_BAD_GATEWAY;
     reason    = get_error_string(s->cause_of_death_errno == 0 ? -ENET_CONNECT_FAILED : s->cause_of_death_errno);
     body_type = "connect#failed_connect";
     break;
@@ -7435,7 +7439,7 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_active_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum active time of %d msec exceeded", s->api_txn_active_timeout_value);
     }
-    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_TIMEOUT : HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_BAD_GATEWAY;
     reason    = "Maximum Transaction Time Exceeded";
     body_type = "timeout#activity";
     break;
@@ -7443,13 +7447,13 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_connect_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum connect time of %d msec exceeded", s->api_txn_connect_timeout_value);
     }
-    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_TIMEOUT : HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_BAD_GATEWAY;
     reason    = "Connection Timed Out";
     body_type = "timeout#inactivity";
     break;
   case PARSE_ERROR:
   case BAD_INCOMING_RESPONSE:
-    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_UNKNOWN_ERROR : HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_BAD_GATEWAY;
     reason    = "Invalid HTTP Response";
     body_type = "response#bad_response";
     break;
@@ -7457,7 +7461,7 @@ HttpTransact::handle_server_died(State *s)
   case TRANSACTION_COMPLETE:
   default: /* unknown death */
     ink_release_assert(!"[handle_server_died] Unreasonable state - not dead, shouldn't be here");
-    status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_UNKNOWN_ERROR : HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_BAD_GATEWAY;
     reason    = nullptr;
     body_type = "response#bad_response";
     break;
@@ -7497,10 +7501,58 @@ HttpTransact::handle_server_died(State *s)
     reason    = "Server Connection Failed";
     body_type = "connect#failed_connect";
   }
-
+  
+  if (s->http_config_param->better_502s_enabled) {
+    status = populate_expanded_502(s);
+  }
+  
   build_error_response(s, status, reason, body_type);
 
   return;
+}
+
+HTTPStatus
+HttpTransact::populate_expanded_502(State *s)
+{
+  HTTPStatus status =  HTTP_STATUS_UNKNOWN_ERROR;
+  
+  switch (s->current.state) {
+    
+    case CONNECTION_ERROR:
+      //Warning("s: %d", s->cause_of_death_errno);
+      // TODO need to carry forward actual SSL errors(bad cert, invalid handshake) to here
+      status    = HTTP_STATUS_ORIGIN_DOWN;
+      break;
+    case OPEN_RAW_ERROR:
+      status    = HTTP_STATUS_ORIGIN_UNREACHABLE;
+      break;
+    case ACTIVE_TIMEOUT:
+    case INACTIVE_TIMEOUT:
+      status    = HTTP_STATUS_ORIGIN_TIMEOUT;
+      break;
+    case PARSE_ERROR:
+    case BAD_INCOMING_RESPONSE:
+    case STATE_UNDEFINED:
+    case TRANSACTION_COMPLETE:
+    default: /* unknown death */
+      status    = HTTP_STATUS_UNKNOWN_ERROR;
+      break;
+  }
+  
+  switch (s->hdr_info.response_error) {
+    case NON_EXISTANT_RESPONSE_HEADER:
+      status    = HTTP_STATUS_ORIGIN_TIMEOUT;
+      break;
+    case MISSING_REASON_PHRASE:
+    case NO_RESPONSE_HEADER_ERROR:
+    case NOT_A_RESPONSE_HEADER:
+      status    = HTTP_STATUS_UNKNOWN_ERROR;
+      break;
+    default:
+      break;
+  }
+
+  return status;
 }
 
 // return true if the response to the given request is likely cacheable
