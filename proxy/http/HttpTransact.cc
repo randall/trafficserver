@@ -7963,7 +7963,7 @@ HttpTransact::build_error_response(State *s, HTTPStatus status_code, const char 
   s->source = SOURCE_INTERNAL;
 
   // override status_code if enabled
-  if (status_code == HTTP_STATUS_BAD_GATEWAY && s->http_config_param->better_502s_enabled) {
+  if (status_code == HTTP_STATUS_BAD_GATEWAY && s->http_config_param->expanded_502s_enabled) {
     status_code = populate_expanded_502(s);
   }
 

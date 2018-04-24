@@ -856,7 +856,7 @@ public:
   MgmtByte parser_allow_non_http      = 1;
   MgmtByte keepalive_internal_vc      = 0;
 
-  MgmtByte better_502s_enabled = 0;
+  MgmtByte expanded_502s_enabled = 0;
 
   MgmtByte server_session_sharing_pool = TS_SERVER_SESSION_SHARING_POOL_THREAD;
 
