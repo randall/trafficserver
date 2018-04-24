@@ -1370,6 +1370,7 @@ SSLNetVConnection::sslClientHandShakeEvent(int &err)
 
   case SSL_ERROR_SSL:
   default: {
+    err = (errno) ? errno : -ENET_CONNECT_FAILED;
     char buf[512];
     unsigned long e = ERR_peek_last_error();
     ERR_error_string_n(e, buf, sizeof(buf));
@@ -1382,7 +1383,6 @@ SSLNetVConnection::sslClientHandShakeEvent(int &err)
       Error("SSL connection failed for '%s': %s", buff, buf);
     }
 
-    err = (errno) ? errno : -ENET_CONNECT_FAILED;
     // FIXME -- This triggers a retry on cases of cert validation errors....
     Debug("ssl", "SSLNetVConnection::sslClientHandShakeEvent, SSL_ERROR_SSL");
     SSL_CLR_ERR_INCR_DYN_STAT(this, ssl_error_ssl, "SSLNetVConnection::sslClientHandShakeEvent, SSL_ERROR_SSL errno=%d", errno);

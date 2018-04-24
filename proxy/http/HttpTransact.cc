@@ -7416,6 +7416,7 @@ HttpTransact::handle_server_died(State *s)
     break;
   case CONNECTION_ERROR:
     // RRM
+    Warning("s: %d", s->cause_of_death_errno);
     status    = s->http_config_param->better_502s_enabled ? HTTP_STATUS_ORIGIN_DOWN : HTTP_STATUS_BAD_GATEWAY;
     reason    = get_error_string(s->cause_of_death_errno == 0 ? -ENET_CONNECT_FAILED : s->cause_of_death_errno);
     body_type = "connect#failed_connect";
