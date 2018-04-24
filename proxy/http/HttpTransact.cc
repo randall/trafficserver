@@ -7422,7 +7422,7 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_active_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum active time of %d msec exceeded", s->api_txn_active_timeout_value);
     }
-    status    = HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_GATEWAY_TIMEOUT;
     reason    = "Maximum Transaction Time Exceeded";
     body_type = "timeout#activity";
     break;
@@ -7430,7 +7430,7 @@ HttpTransact::handle_server_died(State *s)
     if (s->api_txn_connect_timeout_value != -1) {
       TxnDebug("http_timeout", "Maximum connect time of %d msec exceeded", s->api_txn_connect_timeout_value);
     }
-    status    = HTTP_STATUS_BAD_GATEWAY;
+    status    = HTTP_STATUS_GATEWAY_TIMEOUT;
     reason    = "Connection Timed Out";
     body_type = "timeout#inactivity";
     break;
@@ -7912,13 +7912,6 @@ HttpTransact::build_error_response(State *s, HTTPStatus status_code, const char 
     SET_VIA_STRING(VIA_CLIENT_REQUEST, VIA_CLIENT_ERROR);
     SET_VIA_STRING(VIA_ERROR_TYPE, VIA_ERROR_HEADER_SYNTAX);
     break;
-  case HTTP_STATUS_UNKNOWN_ERROR:
-  case HTTP_STATUS_ORIGIN_DOWN:
-  case HTTP_STATUS_CONNECTION_TIMED_OUT:
-  case HTTP_STATUS_ORIGIN_UNREACHABLE:
-  case HTTP_STATUS_ORIGIN_TIMEOUT:
-  case HTTP_STATUS_ORIGIN_SSL_HANDSHAKE_FAILED:
-  case HTTP_STATUS_ORIGIN_INVALID_SSL_CERTIFICATE:
   case HTTP_STATUS_BAD_GATEWAY:
     SET_VIA_STRING(VIA_ERROR_TYPE, VIA_ERROR_CONNECTION);
     break;
