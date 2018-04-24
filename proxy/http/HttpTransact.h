@@ -1079,6 +1079,7 @@ public:
                                                HTTPHdr *obj_response);
   static void handle_parent_died(State *s);
   static void handle_server_died(State *s);
+  static HTTPStatus populate_expanded_500s(State *s);
   static void build_error_response(State *s, HTTPStatus status_code, const char *reason_phrase_or_null,
                                    const char *error_body_type);
   static void build_redirect_response(State *s);

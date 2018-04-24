@@ -1225,6 +1225,8 @@ static const RecordElement RecordsConfig[] =
   // (PLuginVC) sessions. See TS-4960 and friends.
   {RECT_LOCAL, "proxy.config.http.keepalive_internal_vc", RECD_INT, "0", RECU_DYNAMIC, RR_NULL, RECC_INT, "[0-1]", RECA_NULL},
 
+  {RECT_CONFIG, "proxy.config.http.expanded_500s", RECD_INT, "0", RECU_DYNAMIC, RR_NULL, RECC_INT, "[0-1]", RECA_NULL},
+
   //##############################################################################
   //#
   //# Local Manager Specific Records File

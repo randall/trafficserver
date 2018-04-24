@@ -7504,6 +7504,52 @@ HttpTransact::handle_server_died(State *s)
   return;
 }
 
+HTTPStatus
+HttpTransact::populate_expanded_500s(State *s)
+{
+  HTTPStatus status = HTTP_STATUS_UNKNOWN_ERROR;
+
+  switch (s->current.state) {
+  case CONNECTION_ERROR:
+    // TODO need to carry forward actual SSL errors(bad cert, invalid handshake) to here
+    status = HTTP_STATUS_ORIGIN_DOWN;
+    break;
+  case OPEN_RAW_ERROR:
+    status = HTTP_STATUS_ORIGIN_UNREACHABLE;
+    break;
+  case ACTIVE_TIMEOUT:
+  case INACTIVE_TIMEOUT:
+    status = HTTP_STATUS_ORIGIN_TIMEOUT;
+    break;
+  case PARSE_ERROR:
+  case BAD_INCOMING_RESPONSE:
+  case STATE_UNDEFINED:
+  case TRANSACTION_COMPLETE:
+  default: /* unknown death */
+    status = HTTP_STATUS_UNKNOWN_ERROR;
+    break;
+  }
+
+  switch (s->hdr_info.response_error) {
+  case NON_EXISTANT_RESPONSE_HEADER:
+    status = HTTP_STATUS_ORIGIN_TIMEOUT;
+    break;
+  case MISSING_REASON_PHRASE:
+  case NO_RESPONSE_HEADER_ERROR:
+  case NOT_A_RESPONSE_HEADER:
+    status = HTTP_STATUS_UNKNOWN_ERROR;
+    break;
+  default:
+    break;
+  }
+
+  if (!s->dns_info.lookup_success) {
+    status = HTTP_STATUS_ORIGIN_DNS_ERROR;
+  }
+
+  return status;
+}
+
 // return true if the response to the given request is likely cacheable
 // This function is called by build_request() to determine if the conditional
 // headers should be removed from server request.
@@ -7917,11 +7963,17 @@ HttpTransact::build_error_response(State *s, HTTPStatus status_code, const char 
   const char *reason_phrase = (reason_phrase_or_null ? reason_phrase_or_null : (char *)(http_hdr_reason_lookup(status_code)));
   if (unlikely(!reason_phrase)) {
     reason_phrase = "Unknown HTTP Status";
-
-    // set the source to internal so that chunking is handled correctly
   }
+
+  // set the source to internal so that chunking is handled correctly
   s->source = SOURCE_INTERNAL;
-  build_response(s, &s->hdr_info.client_response, s->client_info.http_version, status_code, reason_phrase);
+
+  HTTPStatus overridden_status_code = status_code;
+  if (status_code >= HTTP_STATUS_INTERNAL_SERVER_ERROR && s->http_config_param->expanded_500s_enabled) {
+    overridden_status_code = populate_expanded_500s(s);
+  }
+
+  build_response(s, &s->hdr_info.client_response, s->client_info.http_version, overridden_status_code, reason_phrase);
 
   if (status_code == HTTP_STATUS_SERVICE_UNAVAILABLE) {
     int ret_tmp;

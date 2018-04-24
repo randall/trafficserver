@@ -814,7 +814,17 @@ http_hdr_reason_lookup(unsigned status)
     // 509 Unassigned
     HTTP_STATUS_ENTRY(510, Not Extended);                    // [RFC2774]
     HTTP_STATUS_ENTRY(511, Network Authentication Required); // [RFC6585]
-    // 512-599 Unassigned
+    // 512-519 Unassigned
+    HTTP_STATUS_ENTRY(520, Unknown Error);           // Cloudflare
+    HTTP_STATUS_ENTRY(521, Web Server Is Down);      // Cloudflare
+    HTTP_STATUS_ENTRY(522, Connection Timed Out);    // Cloudflare
+    HTTP_STATUS_ENTRY(523, Origin Is Unreachable);   // Cloudflare
+    HTTP_STATUS_ENTRY(524, A Timeout Occurred);      // Cloudflare
+    HTTP_STATUS_ENTRY(525, SSL Handshake Failed);    // Cloudflare
+    HTTP_STATUS_ENTRY(526, Invalid SSL Certificate); // Cloudflare
+    // 527-529 Unassigned
+    HTTP_STATUS_ENTRY(530, Origin DNS Error);        // Cloudflare
+    // 530-599 Unassigned
   }
 
 #undef HTTP_STATUS_ENTRY
