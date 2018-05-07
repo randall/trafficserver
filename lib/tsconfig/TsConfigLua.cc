@@ -45,9 +45,4 @@ ts::Errata TsConfigBool::loader(lua_State* s)
     return zret;
 }
 
-//template <>
-//ts::Errata TsConfigEnum<Level>::loader(lua_State* s)
-//{
-//    ts::Errata zret;
-//    return zret;
-//}
+

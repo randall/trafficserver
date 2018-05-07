@@ -72,7 +72,9 @@ liblogging_a_SOURCES = \
 	LogSock.cc \
 	LogSock.h \
 	LogUtils.cc \
-	LogUtils.h
+	LogUtils.h \
+	YamlLogConfig.cc \
+	YamlLogConfig.h
 
 liblogcollation_a_SOURCES = \
 	LogCollationAccept.cc \

@@ -51,6 +51,8 @@
 
 #include "LogCollationAccept.h"
 
+#include "YamlLogConfig.h"
+
 #define DISK_IS_CONFIG_FULL_MESSAGE                    \
   "Access logging to local log directory suspended - " \
   "configured space allocation exhausted."
@@ -473,6 +475,12 @@ LogConfig::display(FILE *fd)
   fprintf(fd, "\n");
   fprintf(fd, "************ Log Objects (%u objects) ************\n", (unsigned int)log_object_manager.get_num_objects());
   log_object_manager.display(fd);
+
+  fprintf(fd, "************ Filter List (%u filters) ************\n", filter_list.count());
+  filter_list.display(fd);
+
+  fprintf(fd, "************ Format List (%u formats) ************\n", format_list.count());
+  format_list.display(fd);
 }
 
 //-----------------------------------------------------------------------------
@@ -488,6 +496,8 @@ void
 LogConfig::setup_log_objects()
 {
   Debug("log", "creating objects...");
+
+  filter_list.clear();
 
   // Evaluate logging.config to construct the custome log objects.
   evaluate_config();
@@ -917,18 +927,18 @@ LogConfig::update_space_used()
 bool
 LogConfig::evaluate_config()
 {
-  BindingInstance binding;
   ats_scoped_str path(RecConfigReadConfigPath("proxy.config.log.config.filename", "logging.config"));
 
-  if (!binding.construct()) {
-    Fatal("failed to initialize Lua runtime");
+  Note("loading logging.config");
+
+  bool zret = YamlLogConfig::populateLogConfig(this, path);
+  if (zret) {
+    Note("logging.config done reloading!");
+  } else {
+    Note("failed to reload logging.config");
   }
 
-  if (MakeLogBindings(binding, this)) {
-    return binding.require(path.get());
-  }
-
-  return false;
+  return zret;
 }
 
 /*-------------------------------------------------------------------------
