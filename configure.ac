@@ -1339,6 +1339,14 @@ AM_CONDITIONAL([BUILD_URI_SIGNING_PLUGIN], [test ! -z "${LIBCJOSE}" -a ! -z "${L
 AC_SUBST([LIBCJOSE])
 AC_SUBST([LIBJANSSON])
 
+# Check for yaml-cpp library
+#
+TS_CHECK_YAML_CPP
+if test "x${has_yaml_cpp}" != "xyes"; then
+    echo $has_yaml_cpp
+  AC_MSG_ERROR([Cannot find yaml-cpp library. Configure --with-yaml-cpp=DIR])
+fi
+
 # Check for backtrace() support
 has_backtrace=0
 AC_CHECK_HEADERS([execinfo.h], [has_backtrace=1],[])
