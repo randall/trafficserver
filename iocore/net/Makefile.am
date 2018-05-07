@@ -93,8 +93,8 @@ libinknet_a_SOURCES = \
 	Inline.cc \
 	I_SessionAccept.h \
 	SessionAccept.cc \
-	LuaSNIConfig.h \
-	LuaSNIConfig.cc \
+	YamlSNIConfig.h \
+	YamlSNIConfig.cc \
 	Net.cc \
 	NetVConnection.cc \
 	P_SNIActionPerformer.h \

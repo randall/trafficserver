@@ -217,6 +217,7 @@ traffic_server_LDADD += \
 	@LIBLZMA@ \
 	@LIBPROFILER@ \
 	@OPENSSL_LIBS@ \
+	@LIB_YAMLCPP@ \
 	-lm
 
 if BUILD_LUAJIT
@@ -244,7 +245,8 @@ traffic_logcat_LDADD += \
 endif
 
 traffic_logcat_LDADD += \
-	@LIBTCL@ @HWLOC_LIBS@\
+	@LIBTCL@ @HWLOC_LIBS@ \
+	@LIB_YAMLCPP@ \
 	@LIBPROFILER@ -lm
 
 if SYSTEM_LUAJIT
@@ -269,6 +271,7 @@ endif
 
 traffic_logstats_LDADD += \
   @LIBTCL@ @HWLOC_LIBS@ \
+  @LIB_YAMLCPP@ \
   @LIBPROFILER@ -lm
 
 if SYSTEM_LUAJIT
