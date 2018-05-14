@@ -149,21 +149,8 @@ SNIConfigParams::Initialize()
     return 1;
   }
 
-  lua_State *L = lua_open(); /* opens Lua */
-  luaL_openlibs(L);
-  if (luaL_loadfile(L, sni_filename)) {
-    Error("Loading SNI configuration - luaL_loadfile: %s", lua_tostring(L, -1));
-    lua_pop(L, 1);
-    return 1;
-  }
 
-  if (lua_pcall(L, 0, 0, 0)) {
-    Error("Loading SNI configuration - luap_pcall: %s failed: %s", sni_filename, lua_tostring(L, -1));
-    lua_pop(L, 1);
-    return 1;
-  }
-
-  L_sni.loader(L);
+  L_sni.loader(sni_filename);
   loadSNIConfig();
   return 0;
 }

@@ -9,5 +9,5 @@ class YamlLogConfig
 {
 public:
   static bool populateLogConfig(LogConfig* cfg, const char* cfgFilename);
-  static LogFormat* createLogFormat(const YAML::Node &node);
+//  static LogFormat* createLogFormat(const YAML::Node &node);
 };

@@ -20,108 +20,141 @@
  */
 
 #include "LuaSNIConfig.h"
-#include <cstring>
-#include "ts/Diags.h"
-#include "P_SNIActionPerformer.h"
+
+#include <unordered_map>
+#include <set>
+
+#include <yaml-cpp/yaml.h>
+
 #include "tsconfig/Errata.h"
-#include "tsconfig/TsConfigLua.h"
+#include "ts/string_view.h"
+#include "ts/HashFNV.h"
 
-TsConfigDescriptor LuaSNIConfig::desc = {TsConfigDescriptor::Type::ARRAY, "Array", "Item vector", "Vector"};
-TsConfigArrayDescriptor LuaSNIConfig::DESCRIPTOR(LuaSNIConfig::desc);
-TsConfigDescriptor LuaSNIConfig::Item::FQDN_DESCRIPTOR               = {TsConfigDescriptor::Type::STRING, "String", TS_fqdn,
-                                                          "Fully Qualified Domain Name"};
-TsConfigDescriptor LuaSNIConfig::Item::DISABLE_h2_DESCRIPTOR         = {TsConfigDescriptor::Type::BOOL, "Boolean", TS_disable_H2,
-                                                                "Disable H2"};
-TsConfigEnumDescriptor LuaSNIConfig::Item::LEVEL_DESCRIPTOR          = {TsConfigDescriptor::Type::ENUM,
-                                                               "enum",
-                                                               "Level",
-                                                               "Level for client verification",
-                                                               {{"NONE", 0}, {"MODERATE", 1}, {"STRICT", 2}}};
-TsConfigDescriptor LuaSNIConfig::Item::TUNNEL_DEST_DESCRIPTOR        = {TsConfigDescriptor::Type::STRING, "String", TS_tunnel_route,
-                                                                 "tunnel route destination"};
-TsConfigDescriptor LuaSNIConfig::Item::CLIENT_CERT_DESCRIPTOR        = {TsConfigDescriptor::Type::STRING, "String", TS_client_cert,
-                                                                 "Client certificate to present to the next hop server"};
-TsConfigDescriptor LuaSNIConfig::Item::VERIFY_NEXT_SERVER_DESCRIPTOR = {TsConfigDescriptor::Type::INT, "Int",
-                                                                        TS_verify_origin_server, "Next hop verification level"};
+
 
 ts::Errata
-LuaSNIConfig::loader(lua_State *L)
+LuaSNIConfig::loader(const char* cfgFilename) {
+
+  try {
+    YAML::Node config = YAML::LoadFile(cfgFilename);
+    if (!config.IsSequence()) {
+      return ts::Errata("expected sequence");
+    }
+
+    for (auto it = config.begin(); it != config.end(); ++it) {
+      items.push_back(it->as<LuaSNIConfig::Item>());
+    }
+  } catch (std::exception& ex) {
+    return ts::Errata(ex.what());
+  }
+  return ts::Errata();
+}
+
+
+
+/// Hash functor for @c string_view
+inline size_t TsLuaConfigSVHash(ts::string_view const& sv)
 {
-  ts::Errata zret;
-  //  char buff[256];
-  //  int error;
+  ATSHash64FNV1a h;
+  h.update(sv.data(), sv.size());
+  return h.get();
+}
 
-  lua_getfield(L, LUA_GLOBALSINDEX, "server_config");
-  int l_type = lua_type(L, -1);
+class TsEnumDescriptor {
+public:
+  struct Pair { ts::string_view key; int value; };
+  TsEnumDescriptor(std::initializer_list<Pair> pairs)
+  : values{pairs.size(), &TsLuaConfigSVHash}, keys{pairs.size()}
+  {
+  for ( auto& p : pairs ) {
+    values[p.key] = p.value;
+    keys[p.value] = p.key;
+  }
+  }
+  std::unordered_map<ts::string_view, int, size_t(*)(ts::string_view const&) > values;
+  std::unordered_map<int, ts::string_view> keys;
+  int get(ts::string_view key)
+  {
+  return values[key];
+  }
+};
 
-  switch (l_type) {
-  case LUA_TTABLE: // this has to be a multidimensional table
-    lua_pushnil(L);
-    while (lua_next(L, -2) != 0) {
-      l_type = lua_type(L, -1);
-      if (l_type == LUA_TTABLE) { // the item should be table
-        // new Item
-        LuaSNIConfig::Item item;
-        item.loader(L);
-        items.push_back(item);
-      } else {
-        zret.push(ts::Errata::Message(0, 0, "Invalid Entry at SNI config"));
+TsEnumDescriptor LEVEL_DESCRIPTOR = {{{"NONE", 0}, {"MODERATE", 1}, {"STRICT", 2}}};
+
+std::set<std::string> valid_sni_config_keys = {TS_fqdn};
+
+namespace YAML {
+  template <>
+  struct convert<LuaSNIConfig::Item> {
+    static bool
+    decode(const Node& node, LuaSNIConfig::Item& item) {
+      for (auto&& item : node) {
+        if (std::none_of(valid_sni_config_keys.begin(), valid_sni_config_keys.end(), [&item](std::string s) {
+          return s == item.first.as<std::string>();
+        })) {
+          throw std::runtime_error("unsupported key");  //item.first.as<std::string>()
+        }
       }
-      lua_pop(L, 1);
-    }
-    break;
-  case LUA_TSTRING:
-    Debug("ssl", "string value %s", lua_tostring(L, -1));
-    break;
-  default:
-    zret.push(ts::Errata::Message(0, 0, "Invalid Lua SNI Config"));
-    Debug("ssl", "Please check your SNI config");
-    break;
-  }
 
-  return zret;
+
+      if (node[TS_fqdn]) {
+        item.fqdn = node[TS_fqdn].as<std::string>();
+      }
+      if (node[TS_disable_H2]) {
+        item.fqdn = node[TS_disable_H2].as<bool>();
+      }
+
+      // enum
+      if (node[TS_verify_client]) {
+        auto value = node[TS_verify_client].as<std::string>();
+        int level = LEVEL_DESCRIPTOR.get(value);
+        if (level < 0) {
+          // throw
+          return false;
+        }
+        item.verify_client_level = static_cast<uint8_t>(level);
+      }
+
+      if (node[TS_tunnel_route]) {
+        item.tunnel_destination = node[TS_tunnel_route].as<std::string>();
+      }
+
+      if (node[TS_verify_origin_server]) {
+        auto value = node[TS_verify_origin_server].as<std::string>();
+        int level = LEVEL_DESCRIPTOR.get(value);
+        if (level < 0) {
+          // throw
+          return false;
+        }
+        item.verify_origin_server = static_cast<uint8_t>(level);
+      }
+
+      if (node[TS_client_cert]) {
+        item.client_cert = node[TS_client_cert].as<std::string>();
+      }
+      return true;
+    }
+
+  };
 }
 
-ts::Errata
-LuaSNIConfig::Item::loader(lua_State *L)
-{
-  ts::Errata zret;
-  //-1 will contain the subarray now (since it is a value in the main table))
-  lua_pushnil(L);
-  while (lua_next(L, -2)) {
-    if (lua_type(L, -2) != LUA_TSTRING) {
-      Debug("ssl", "string keys expected for entries in %s", SSL_SERVER_NAME_CONFIG);
-    }
-    const char *name = lua_tostring(L, -2);
-    if (!strncmp(name, TS_fqdn, strlen(TS_fqdn))) {
-      FQDN_CONFIG.loader(L);
-    } else if (!strncmp(name, TS_disable_H2, strlen(TS_disable_H2))) {
-      DISABLEH2_CONFIG.loader(L);
-    } else if (!strncmp(name, TS_verify_client, strlen(TS_verify_client))) {
-      VERIFYCLIENT_CONFIG.loader(L);
-    } else if (!strncmp(name, TS_verify_origin_server, strlen(TS_verify_origin_server))) {
-      VERIFY_NEXT_SERVER_CONFIG.loader(L);
-    } else if (!strncmp(name, TS_client_cert, strlen(TS_client_cert))) {
-      CLIENT_CERT_CONFIG.loader(L);
-    } else if (!strncmp(name, TS_tunnel_route, strlen(TS_tunnel_route))) {
-      TUNNEL_DEST_CONFIG.loader(L);
-    } else {
-      zret.push(ts::Errata::Message(0, 0, "Invalid Entry at SNI config"));
-    }
-    lua_pop(L, 1);
-  }
-  return zret;
-}
 
-ts::Errata
-LuaSNIConfig::registerEnum(lua_State *L)
-{
-  ts::Errata zret;
-  lua_newtable(L);
-  lua_setglobal(L, "LevelTable");
-  int i = start;
-  LUA_ENUM(L, "NONE", i++);
-  LUA_ENUM(L, "MODERATE", i++);
-  LUA_ENUM(L, "STRICT", i++);
-  return zret;
-}
+/*
+
+ - fqdn: one.com
+ disable_h2: true
+ verify_origin_server: NONE
+ client_cert: somepem.pem
+ verify_client: STRICT
+
+
+ struct Item  {
+ std::string fqdn;
+ bool disable_h2             = false;
+ uint8_t verify_client_level = 0;
+ std::string tunnel_destination;
+ uint8_t verify_origin_server = 0;
+ std::string client_cert;
+
+ };
+ */

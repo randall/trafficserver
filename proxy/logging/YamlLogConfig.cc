@@ -1,5 +1,7 @@
 #include "YamlLogConfig.h"
 
+#include <algorithm>    // std::none_of
+
 bool loadLogConfig(LogConfig* cfg, const char* cfgFilename);
 
 bool
@@ -22,7 +24,7 @@ bool loadLogConfig(LogConfig* cfg, const char* cfgFilename)
   }
   return true;
 }
-
+/*
 LogFormat*
 YamlLogConfig::createLogFormat(const YAML::Node &node)
 {
@@ -34,3 +36,33 @@ YamlLogConfig::createLogFormat(const YAML::Node &node)
   }
   new LogFormat(
 }
+*/
+
+std::string log_format_keys[]{ "name","format", "interval"};
+
+
+/*
+namespace YAML {
+template <>
+struct convert<LogFormat*> {
+  static bool
+  decode(const Node& node, LogFormat& logFormat) {
+    for (auto&& item : node) {
+      if (std::none_of(log_format_keys, [&item](std::string s) {
+        return s == item.first.as<std::string>();
+      })) {
+        throw std::runtime_error("unsupported key");  //item.first.as<std::string>()
+      }
+    }
+    if (!node["name"] || !node["format"]) {
+      return false;
+    }
+    logFormat = new LogFormat(node["name"])
+    
+
+
+  }
+}
+
+}
+*/
