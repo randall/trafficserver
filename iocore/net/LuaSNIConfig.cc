@@ -30,8 +30,6 @@
 #include "ts/string_view.h"
 #include "ts/HashFNV.h"
 
-
-
 ts::Errata
 LuaSNIConfig::loader(const char* cfgFilename) {
 
@@ -46,11 +44,15 @@ LuaSNIConfig::loader(const char* cfgFilename) {
     }
   } catch (std::exception& ex) {
     return ts::Errata(ex.what());
+  } catch (std::runtime_error& ex) {
+    return ts::Errata(ex.what());
+  } catch (...) {
+    return ts::Errata("bad");
   }
+
+  printf("A OK?");
   return ts::Errata();
 }
-
-
 
 /// Hash functor for @c string_view
 inline size_t TsLuaConfigSVHash(ts::string_view const& sv)
@@ -137,24 +139,3 @@ namespace YAML {
 
   };
 }
-
-
-/*
-
- - fqdn: one.com
- disable_h2: true
- verify_origin_server: NONE
- client_cert: somepem.pem
- verify_client: STRICT
-
-
- struct Item  {
- std::string fqdn;
- bool disable_h2             = false;
- uint8_t verify_client_level = 0;
- std::string tunnel_destination;
- uint8_t verify_origin_server = 0;
- std::string client_cert;
-
- };
- */

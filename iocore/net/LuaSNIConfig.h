@@ -35,7 +35,6 @@ constexpr char TS_client_cert[]          = "client_cert";
 
 const int start = 0;
 struct LuaSNIConfig {
-  using self = LuaSNIConfig;
   enum class Action {
     disable_h2 = start,
     verify_client,
@@ -60,5 +59,5 @@ struct LuaSNIConfig {
 
   ts::Errata loader(const char* cfgFilename);
 
-  std::vector<self::Item> items;
+  std::vector<LuaSNIConfig::Item> items;
 };

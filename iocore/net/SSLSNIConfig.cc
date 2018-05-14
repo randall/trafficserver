@@ -143,15 +143,25 @@ int
 SNIConfigParams::Initialize()
 {
   sni_filename = ats_stringdup(RecConfigReadConfigPath("proxy.config.ssl.servername.filename"));
+
+  Note("loading %s", sni_filename);
+
   struct stat sbuf;
   if (stat(sni_filename, &sbuf) == -1 && errno == ENOENT) {
+    Note("failed to reload ssl_server_name.config");
     Warning("Loading SNI configuration - filename: %s doesn't exist", sni_filename);
     return 1;
   }
 
+  ts::Errata zret = L_sni.loader(sni_filename);
+  if (!zret.isOK()) {
+    Note("failed to reload ssl_server_name.config");
+    return 1;
+  }
 
-  L_sni.loader(sni_filename);
   loadSNIConfig();
+  Note("ssl_server_name.config done reloading!");
+
   return 0;
 }
 

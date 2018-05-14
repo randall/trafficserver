@@ -117,7 +117,7 @@ RecConfigOverrideFromEnvironment(const char *name, const char *value)
 int
 RecConfigFileParse(const char *path, RecConfigEntryCallback handler, bool inc_version)
 {
-  Note("loading %s", path);
+//  Note("loading %s", path);
 
   char *fbuf;
   int fsize;
@@ -268,7 +268,7 @@ RecConfigFileParse(const char *path, RecConfigEntryCallback handler, bool inc_ve
   ink_mutex_release(&g_rec_config_lock);
   ats_free(fbuf);
 
-  Note("records.config done reloading!");
+//  Note("records.config done reloading!");
 
   return REC_ERR_OKAY;
 }
