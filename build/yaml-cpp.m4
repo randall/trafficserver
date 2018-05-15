@@ -44,9 +44,7 @@ AC_ARG_WITH(yaml-cpp, [AC_HELP_STRING([--with-yaml-cpp=DIR],[use a specific yaml
       esac
     fi
   fi
-  echo $yaml_cpp_include
-  echo $yaml_cpp_ldflags
-  echo $yaml_cpp_include/yaml-cpp/yaml.h
+
   if test -d $yaml_cpp_include && test -d $yaml_cpp_ldflags && test -f $yaml_cpp_include/yaml-cpp/yaml.h; then
     AC_MSG_RESULT([ok])
   else
@@ -64,10 +62,6 @@ if test "$has_yaml_cpp" != "no"; then
     TS_ADDTO_RPATH(${yaml_cpp_ldflags})
   fi
 
-#  AC_CHECK_LIB([yaml-cpp], BrotliEncoderCreateInstance, [yaml_cpp_have_libs=1])
-#  if test "$yaml_cpp_have_libs" != "0"; then
-#    AC_CHECK_HEADERS(yaml-cpp/yaml.h, [yaml_cpp_have_headers=1])
-#  fi
   if test "$yaml_cpp_include" != "0"; then
     AC_SUBST([LIB_YAMLCPP], [-lyaml-cpp])
     AC_SUBST([CFLAGS_YAMLCPP], [-I${yaml_cpp_include}])
@@ -79,11 +73,6 @@ if test "$has_yaml_cpp" != "no"; then
 fi
 ],
 [
-    echo "FUDGE"
-#AC_CHECK_HEADER([yaml-cpp/yaml.h], [], [has_yaml_cpp=no])
-#AC_CHECK_LIB([yaml-cpp], YAML::Node, [], [has_yaml_cpp=no])
-
-#    AC_SUBST([LIB_YAMLCPP], [-lyaml-cpp])
 ])
 
 ])

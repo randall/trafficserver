@@ -1343,7 +1343,6 @@ AC_SUBST([LIBJANSSON])
 #
 TS_CHECK_YAML_CPP
 if test "x${has_yaml_cpp}" != "xyes"; then
-    echo $has_yaml_cpp
   AC_MSG_ERROR([Cannot find yaml-cpp library. Configure --with-yaml-cpp=DIR])
 fi
 
