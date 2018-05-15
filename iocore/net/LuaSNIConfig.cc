@@ -29,6 +29,7 @@
 #include "tsconfig/Errata.h"
 #include "ts/string_view.h"
 #include "ts/HashFNV.h"
+#include "ts/Diags.h"
 
 ts::Errata
 LuaSNIConfig::loader(const char* cfgFilename) {
@@ -36,21 +37,16 @@ LuaSNIConfig::loader(const char* cfgFilename) {
   try {
     YAML::Node config = YAML::LoadFile(cfgFilename);
     if (!config.IsSequence()) {
-      return ts::Errata("expected sequence");
+      return ts::Errata::Message(1, 1, "expected sequence");
     }
 
     for (auto it = config.begin(); it != config.end(); ++it) {
       items.push_back(it->as<LuaSNIConfig::Item>());
     }
   } catch (std::exception& ex) {
-    return ts::Errata(ex.what());
-  } catch (std::runtime_error& ex) {
-    return ts::Errata(ex.what());
-  } catch (...) {
-    return ts::Errata("bad");
+    return ts::Errata::Message(1, 1, ex.what());
   }
 
-  printf("A OK?");
   return ts::Errata();
 }
 
@@ -83,7 +79,7 @@ public:
 
 TsEnumDescriptor LEVEL_DESCRIPTOR = {{{"NONE", 0}, {"MODERATE", 1}, {"STRICT", 2}}};
 
-std::set<std::string> valid_sni_config_keys = {TS_fqdn};
+std::set<std::string> valid_sni_config_keys = {TS_fqdn, TS_disable_H2, TS_verify_client, TS_tunnel_route, TS_verify_origin_server, TS_client_cert  };
 
 namespace YAML {
   template <>
@@ -94,10 +90,9 @@ namespace YAML {
         if (std::none_of(valid_sni_config_keys.begin(), valid_sni_config_keys.end(), [&item](std::string s) {
           return s == item.first.as<std::string>();
         })) {
-          throw std::runtime_error("unsupported key");  //item.first.as<std::string>()
+          throw std::runtime_error("unsupported key " + item.first.as<std::string>());
         }
       }
-
 
       if (node[TS_fqdn]) {
         item.fqdn = node[TS_fqdn].as<std::string>();
@@ -111,6 +106,7 @@ namespace YAML {
         auto value = node[TS_verify_client].as<std::string>();
         int level = LEVEL_DESCRIPTOR.get(value);
         if (level < 0) {
+          // TODO FIX ^
           // throw
           return false;
         }
@@ -125,6 +121,7 @@ namespace YAML {
         auto value = node[TS_verify_origin_server].as<std::string>();
         int level = LEVEL_DESCRIPTOR.get(value);
         if (level < 0) {
+          // TODO FIX ^
           // throw
           return false;
         }
