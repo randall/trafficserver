@@ -32,8 +32,8 @@
 #include "ts/Diags.h"
 
 ts::Errata
-LuaSNIConfig::loader(const char* cfgFilename) {
-
+LuaSNIConfig::loader(const char *cfgFilename)
+{
   try {
     YAML::Node config = YAML::LoadFile(cfgFilename);
     if (!config.IsSequence()) {
@@ -43,7 +43,7 @@ LuaSNIConfig::loader(const char* cfgFilename) {
     for (auto it = config.begin(); it != config.end(); ++it) {
       items.push_back(it->as<LuaSNIConfig::Item>());
     }
-  } catch (std::exception& ex) {
+  } catch (std::exception &ex) {
     return ts::Errata::Message(1, 1, ex.what());
   }
 
@@ -51,88 +51,93 @@ LuaSNIConfig::loader(const char* cfgFilename) {
 }
 
 /// Hash functor for @c string_view
-inline size_t TsLuaConfigSVHash(ts::string_view const& sv)
+inline size_t
+TsLuaConfigSVHash(ts::string_view const &sv)
 {
   ATSHash64FNV1a h;
   h.update(sv.data(), sv.size());
   return h.get();
 }
 
-class TsEnumDescriptor {
+class TsEnumDescriptor
+{
 public:
-  struct Pair { ts::string_view key; int value; };
-  TsEnumDescriptor(std::initializer_list<Pair> pairs)
-  : values{pairs.size(), &TsLuaConfigSVHash}, keys{pairs.size()}
+  struct Pair {
+    ts::string_view key;
+    int value;
+  };
+  TsEnumDescriptor(std::initializer_list<Pair> pairs) : values{pairs.size(), &TsLuaConfigSVHash}, keys{pairs.size()}
   {
-  for ( auto& p : pairs ) {
-    values[p.key] = p.value;
-    keys[p.value] = p.key;
+    for (auto &p : pairs) {
+      values[p.key] = p.value;
+      keys[p.value] = p.key;
+    }
   }
-  }
-  std::unordered_map<ts::string_view, int, size_t(*)(ts::string_view const&) > values;
+  std::unordered_map<ts::string_view, int, size_t (*)(ts::string_view const &)> values;
   std::unordered_map<int, ts::string_view> keys;
-  int get(ts::string_view key)
+  int
+  get(ts::string_view key)
   {
-  return values[key];
+    auto it = values.find(key);
+    if (it != values.end()) {
+      return it->second;
+    }
+    return -1;
   }
 };
 
 TsEnumDescriptor LEVEL_DESCRIPTOR = {{{"NONE", 0}, {"MODERATE", 1}, {"STRICT", 2}}};
 
-std::set<std::string> valid_sni_config_keys = {TS_fqdn, TS_disable_H2, TS_verify_client, TS_tunnel_route, TS_verify_origin_server, TS_client_cert  };
+std::set<std::string> valid_sni_config_keys = {TS_fqdn,         TS_disable_H2,           TS_verify_client,
+                                               TS_tunnel_route, TS_verify_origin_server, TS_client_cert};
 
-namespace YAML {
-  template <>
-  struct convert<LuaSNIConfig::Item> {
-    static bool
-    decode(const Node& node, LuaSNIConfig::Item& item) {
-      for (auto&& item : node) {
-        if (std::none_of(valid_sni_config_keys.begin(), valid_sni_config_keys.end(), [&item](std::string s) {
-          return s == item.first.as<std::string>();
-        })) {
-          throw std::runtime_error("unsupported key " + item.first.as<std::string>());
-        }
+namespace YAML
+{
+template <> struct convert<LuaSNIConfig::Item> {
+  static bool
+  decode(const Node &node, LuaSNIConfig::Item &item)
+  {
+    for (auto &&item : node) {
+      if (std::none_of(valid_sni_config_keys.begin(), valid_sni_config_keys.end(),
+                       [&item](std::string s) { return s == item.first.as<std::string>(); })) {
+        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
       }
-
-      if (node[TS_fqdn]) {
-        item.fqdn = node[TS_fqdn].as<std::string>();
-      }
-      if (node[TS_disable_H2]) {
-        item.fqdn = node[TS_disable_H2].as<bool>();
-      }
-
-      // enum
-      if (node[TS_verify_client]) {
-        auto value = node[TS_verify_client].as<std::string>();
-        int level = LEVEL_DESCRIPTOR.get(value);
-        if (level < 0) {
-          // TODO FIX ^
-          // throw
-          return false;
-        }
-        item.verify_client_level = static_cast<uint8_t>(level);
-      }
-
-      if (node[TS_tunnel_route]) {
-        item.tunnel_destination = node[TS_tunnel_route].as<std::string>();
-      }
-
-      if (node[TS_verify_origin_server]) {
-        auto value = node[TS_verify_origin_server].as<std::string>();
-        int level = LEVEL_DESCRIPTOR.get(value);
-        if (level < 0) {
-          // TODO FIX ^
-          // throw
-          return false;
-        }
-        item.verify_origin_server = static_cast<uint8_t>(level);
-      }
-
-      if (node[TS_client_cert]) {
-        item.client_cert = node[TS_client_cert].as<std::string>();
-      }
-      return true;
     }
 
-  };
-}
+    if (node[TS_fqdn]) {
+      item.fqdn = node[TS_fqdn].as<std::string>();
+    }
+    if (node[TS_disable_H2]) {
+      item.fqdn = node[TS_disable_H2].as<bool>();
+    }
+
+    // enum
+    if (node[TS_verify_client]) {
+      auto value = node[TS_verify_client].as<std::string>();
+      int level  = LEVEL_DESCRIPTOR.get(value);
+      if (level < 0) {
+        throw std::runtime_error("unknown value " + value);
+      }
+      item.verify_client_level = static_cast<uint8_t>(level);
+    }
+
+    if (node[TS_tunnel_route]) {
+      item.tunnel_destination = node[TS_tunnel_route].as<std::string>();
+    }
+
+    if (node[TS_verify_origin_server]) {
+      auto value = node[TS_verify_origin_server].as<std::string>();
+      int level  = LEVEL_DESCRIPTOR.get(value);
+      if (level < 0) {
+        throw std::runtime_error("unknown value " + value);
+      }
+      item.verify_origin_server = static_cast<uint8_t>(level);
+    }
+
+    if (node[TS_client_cert]) {
+      item.client_cert = node[TS_client_cert].as<std::string>();
+    }
+    return true;
+  }
+};
+} // namespace YAML

@@ -45,19 +45,18 @@ struct LuaSNIConfig {
   };
   enum class Level { NONE = 0, MODERATE, STRICT };
 
-  LuaSNIConfig() {  }
+  LuaSNIConfig() {}
 
-  struct Item  {
+  struct Item {
     std::string fqdn;
     bool disable_h2             = false;
     uint8_t verify_client_level = 0;
     std::string tunnel_destination;
     uint8_t verify_origin_server = 0;
     std::string client_cert;
-
   };
 
-  ts::Errata loader(const char* cfgFilename);
+  ts::Errata loader(const char *cfgFilename);
 
   std::vector<LuaSNIConfig::Item> items;
 };
