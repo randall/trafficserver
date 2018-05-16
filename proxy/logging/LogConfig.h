@@ -168,6 +168,9 @@ public:
 
   LogObjectManager log_object_manager;
 
+  LogFilterList filter_list;
+  LogFormatList format_list;
+
   int log_buffer_size;
   int max_secs_per_buffer;
   int max_space_mb_for_logs;

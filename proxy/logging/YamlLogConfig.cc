@@ -27,44 +27,66 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 
   auto formats = config["formats"];
   for (auto it = formats.begin(); it != formats.end(); ++it) {
-    
+    auto fmt = it->as<LogFormat*>();
+    if (fmt->valid()) {
+      cfg->format_list.add(fmt, false);
+
+      if (is_debug_tag_set("xml")) {
+        printf("The following format was added to the global format list\n");
+        fmt->display(stdout);
+      }
+    } else {
+      Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
+      delete fmt;
+      // ??? ERROR or just ignore?
+    }
+  }
+  auto filters = config["filters"];
+    for (auto it = filters.begin(); it != filters.end(); ++it) {
+      auto filter = it->as<LogFilter*>();
+
+      if (filter) {
+        cfg->filter_list.add(filter, false);
+
+        if (is_debug_tag_set("xml")) {
+          printf("The following filter was added to the global filter list\n");
+          filter->display(stdout);
+        }
+      }
   }
   return true;
 }
 
 
 std::set<std::string> valid_log_format_keys = {"name", "format", "interval"};
+std::set<std::string> valid_log_filter_keys = {"name", "action", "condition"};
 
 namespace YAML {
 template <>
-struct convert<LogFormat*> {
+struct convert<LogFilter*> {
   static bool
-  decode(const Node& node, LogFormat* logFormat) {
+  decode(const Node& node, LogFilter* logFilter) {
     for (auto&& item : node) {
-      if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
+      if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
         throw std::runtime_error("unsupported key " + item.first.as<std::string>());
       }
     }
 
-    if (!node["format"]) {
-      throw std::runtime_error("missing 'format' argument");
-    }
-    std::string format = node["format"].as<std::string>();
-
-    unsigned interval = 0;
-    if (node["interval"]) {
-      interval = node["interval"].as<unsigned>();
-    }
-    std::string name;
-    if (node["name"]) {
-      name = node["name"].as<std::string>();
+    // we require all keys for LogFilter
+    for (auto&& item : valid_log_filter_keys ) {
+      if (!node[item]) {
+        throw std::runtime_error("missing '" + item + "' argument");
+      }
     }
 
-    logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
+    // TODO need to convert action enumj
+    logFilter = LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT ,node["condition"].as<std::string>().c_str() );
 
     return true;
   }
 };
 
+
+  
 }

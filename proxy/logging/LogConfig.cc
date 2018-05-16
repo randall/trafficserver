@@ -473,6 +473,12 @@ LogConfig::display(FILE *fd)
   fprintf(fd, "\n");
   fprintf(fd, "************ Log Objects (%u objects) ************\n", (unsigned int)log_object_manager.get_num_objects());
   log_object_manager.display(fd);
+
+  fprintf(fd, "************ Filter List (%u filters) ************\n", filter_list.count());
+  filter_list.display(fd);
+
+  fprintf(fd, "************ Format List (%u formats) ************\n", format_list.count());
+  format_list.display(fd);
 }
 
 //-----------------------------------------------------------------------------
@@ -488,6 +494,8 @@ void
 LogConfig::setup_log_objects()
 {
   Debug("log", "creating objects...");
+
+  filter_list.clear();
 
   // Evaluate logging.config to construct the custome log objects.
   evaluate_config();
