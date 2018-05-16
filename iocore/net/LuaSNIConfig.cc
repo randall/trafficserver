@@ -23,11 +23,11 @@
 
 #include <unordered_map>
 #include <set>
+#include <string_view>
 
 #include <yaml-cpp/yaml.h>
 
 #include "tsconfig/Errata.h"
-#include "ts/string_view.h"
 #include "ts/HashFNV.h"
 #include "ts/Diags.h"
 
@@ -52,7 +52,7 @@ LuaSNIConfig::loader(const char *cfgFilename)
 
 /// Hash functor for @c string_view
 inline size_t
-TsLuaConfigSVHash(ts::string_view const &sv)
+TsLuaConfigSVHash(std::string_view const &sv)
 {
   ATSHash64FNV1a h;
   h.update(sv.data(), sv.size());
@@ -63,7 +63,7 @@ class TsEnumDescriptor
 {
 public:
   struct Pair {
-    ts::string_view key;
+    std::string_view key;
     int value;
   };
   TsEnumDescriptor(std::initializer_list<Pair> pairs) : values{pairs.size(), &TsLuaConfigSVHash}, keys{pairs.size()}
@@ -73,10 +73,10 @@ public:
       keys[p.value] = p.key;
     }
   }
-  std::unordered_map<ts::string_view, int, size_t (*)(ts::string_view const &)> values;
-  std::unordered_map<int, ts::string_view> keys;
+  std::unordered_map<std::string_view, int, size_t (*)(std::string_view const &)> values;
+  std::unordered_map<int, std::string_view> keys;
   int
-  get(ts::string_view key)
+  get(std::string_view key)
   {
     auto it = values.find(key);
     if (it != values.end()) {
