@@ -63,6 +63,51 @@ std::set<std::string> valid_log_filter_keys = {"name", "action", "condition"};
 
 namespace YAML {
 template <>
+struct convert<LogFormat*> {
+  static bool
+  decode(const Node& node, LogFormat* logFormat) {
+    for (auto&& item : node) {
+      if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
+                       [&item](std::string s) { return s == item.first.as<std::string>(); })) {
+        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
+      }
+    }
+
+    if (!node["format"]) {
+      throw std::runtime_error("missing 'format' argument");
+    }
+    std::string format = node["format"].as<std::string>();
+
+    std::string name;
+    if (node["name"]) {
+      name = node["name"].as<std::string>();
+    }
+
+    // if the format_str contains any of the aggregate operators,
+    // we need to ensure that an interval was specified.
+    //
+    if (LogField::fieldlist_contains_aggregates(format.c_str())) {
+      if (!node["interval"]) {
+        Note("'interval' attribute missing for LogFormat object"
+             " %s that contains aggregate operators: %s",
+             name.c_str(), format.c_str());
+        return false;
+      }
+    }
+
+      unsigned interval = 0;
+      if (node["interval"]) {
+        interval = node["interval"].as<unsigned>();
+      }
+
+
+    logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
+
+    return true;
+  }
+};
+
+template <>
 struct convert<LogFilter*> {
   static bool
   decode(const Node& node, LogFilter* logFilter) {
