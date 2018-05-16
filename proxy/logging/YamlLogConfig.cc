@@ -20,48 +20,51 @@ bool
 loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 {
   YAML::Node config = YAML::LoadFile(cfgFilename);
-  for (auto it = config.begin(); it != config.end(); ++it) {
+  if (!config.IsSequence()) {
+   // return ts::Errata::Message(1, 1, "expected sequence");
+    return false;
+  }
+
+  auto formats = config["formats"];
+  for (auto it = formats.begin(); it != formats.end(); ++it) {
+    
   }
   return true;
 }
-/*
-LogFormat*
-YamlLogConfig::createLogFormat(const YAML::Node &node)
-{
-  auto name = node["name"];
-  auto format = node["format"];
 
-  if (!node["name"] || !node["format"]) {
-    return nullptr;
-  }
-  new LogFormat(
-}
-*/
 
-std::string log_format_keys[]{"name", "format", "interval"};
+std::set<std::string> valid_log_format_keys = {"name", "format", "interval"};
 
-/*
 namespace YAML {
 template <>
 struct convert<LogFormat*> {
   static bool
-  decode(const Node& node, LogFormat& logFormat) {
+  decode(const Node& node, LogFormat* logFormat) {
     for (auto&& item : node) {
-      if (std::none_of(log_format_keys, [&item](std::string s) {
-        return s == item.first.as<std::string>();
-      })) {
-        throw std::runtime_error("unsupported key");  //item.first.as<std::string>()
+      if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
+                       [&item](std::string s) { return s == item.first.as<std::string>(); })) {
+        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
       }
     }
-    if (!node["name"] || !node["format"]) {
-      return false;
+
+    if (!node["format"]) {
+      throw std::runtime_error("missing 'format' argument");
     }
-    logFormat = new LogFormat(node["name"])
+    std::string format = node["format"].as<std::string>();
 
+    unsigned interval = 0;
+    if (node["interval"]) {
+      interval = node["interval"].as<unsigned>();
+    }
+    std::string name;
+    if (node["name"]) {
+      name = node["name"].as<std::string>();
+    }
 
+    logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
 
+    return true;
   }
-}
+};
 
 }
-*/

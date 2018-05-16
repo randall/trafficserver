@@ -128,7 +128,7 @@ create_reject_filter_object(lua_State *L)
 static int
 create_wipe_filter_object(lua_State *L)
 {
-  return create_filter_object(L, "filter.wipe", LogFilter::WIPE_FIELD_VALUE);
+  return creafte_filter_object(L, "filter.wipe", LogFilter::WIPE_FIELD_VALUE);
 }
 
 static LogHost *
