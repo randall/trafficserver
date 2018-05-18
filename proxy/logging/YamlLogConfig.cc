@@ -7,6 +7,10 @@
 
 bool loadLogConfig(LogConfig *cfg, const char *cfgFilename);
 
+LogFormat* decodeLogFormat(const YAML::Node &node);
+LogFilter *decodeLogFilter(const YAML::Node &node);
+LogObject *decodeLogObject(const YAML::Node &node);
+
 bool
 YamlLogConfig::populateLogConfig(LogConfig *cfg, const char *cfgFilename)
 {
@@ -20,36 +24,34 @@ YamlLogConfig::populateLogConfig(LogConfig *cfg, const char *cfgFilename)
   return result;
 }
 
+typedef std::pair<LogConfig*, LogFormat*> logFormatter;
+
 bool
 loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 {
   YAML::Node config = YAML::LoadFile(cfgFilename);
-  /*
-  if (!config.IsSequence()) {
+
+  if (!config.IsMap()) {
     Error("malformed logging.config file; expected a map");
     return false;
   }
-  */
   auto formats = config["formats"];
   for (auto it = formats.begin(); it != formats.end(); ++it) {
-    auto fmt = it->as<LogFormat *>();
-    if (fmt->valid()) {
+    auto fmt = decodeLogFormat(*it);
+    if (fmt && fmt->valid()) {
       cfg->format_list.add(fmt, false);
 
       if (is_debug_tag_set("log")) {
         printf("The following format was added to the global format list\n");
         fmt->display(stdout);
       }
-    } else {
-      Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
-      // delete fmt;
-      // ??? ERROR or just ignore?
+      continue;
     }
   }
 
   auto filters = config["filters"];
   for (auto it = filters.begin(); it != filters.end(); ++it) {
-    auto filter = it->as<LogFilter *>();
+    auto filter = decodeLogFilter(*it);
 
     if (filter) {
       cfg->filter_list.add(filter, false);
@@ -63,7 +65,7 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 
   auto logs = config["logs"];
   for (auto it = logs.begin(); it != logs.end(); ++it) {
-    auto obj = it->as<LogObject *>();
+    auto obj = decodeLogObject(*it);
     cfg->log_object_manager.manage_object(obj);
   }
   return true;
@@ -75,57 +77,49 @@ std::set<std::string> valid_log_object_keys = {
   "filename",          "format",          "mode",    "header",         "rolling_enabled", "rolling_interval_sec",
   "rolling_offset_hr", "rolling_size_mb", "filters", "collation_hosts"};
 
-namespace YAML
+
+LogFormat* decodeLogFormat(const YAML::Node &node)
 {
-template <> struct convert<LogFormat *> {
-  static bool
-  decode(const Node &node, LogFormat *logFormat)
-  {
-    for (auto &&item : node) {
-      if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
-                       [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() + "'");
-      }
+  for (auto &&item : node) {
+    if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
+                     [&item](std::string s) { return s == item.first.as<std::string>(); })) {
+      throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() + "'");
     }
-
-    if (!node["format"]) {
-      throw std::runtime_error("missing 'format' argument");
-    }
-    std::string format = node["format"].as<std::string>();
-
-    std::string name;
-    if (node["name"]) {
-      name = node["name"].as<std::string>();
-    }
-
-    // if the format_str contains any of the aggregate operators,
-    // we need to ensure that an interval was specified.
-    //
-    if (LogField::fieldlist_contains_aggregates(format.c_str())) {
-      if (!node["interval"]) {
-        Note("'interval' attribute missing for LogFormat object"
-             " %s that contains aggregate operators: %s",
-             name.c_str(), format.c_str());
-        return false;
-      }
-    }
-
-    unsigned interval = 0;
-    if (node["interval"]) {
-      interval = node["interval"].as<unsigned>();
-    }
-    Note("OK");
-
-    logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
-    Note("Format named \"%s\" ", logFormat->name() ? logFormat->name() : "");
-
-    return true;
   }
-};
 
-template <> struct convert<LogFilter *> {
-  static bool
-  decode(const Node &node, LogFilter *logFilter)
+  if (!node["format"]) {
+    throw std::runtime_error("missing 'format' argument");
+  }
+  std::string format = node["format"].as<std::string>();
+
+  std::string name;
+  if (node["name"]) {
+    name = node["name"].as<std::string>();
+  }
+
+  // if the format_str contains any of the aggregate operators,
+  // we need to ensure that an interval was specified.
+  //
+  if (LogField::fieldlist_contains_aggregates(format.c_str())) {
+    if (!node["interval"]) {
+      Note("'interval' attribute missing for LogFormat object"
+           " %s that contains aggregate operators: %s",
+           name.c_str(), format.c_str());
+      return nullptr;
+    }
+  }
+
+  unsigned interval = 0;
+  if (node["interval"]) {
+    interval = node["interval"].as<unsigned>();
+  }
+  Note("OK");
+
+  return new LogFormat(name.c_str(), format.c_str(), interval);
+}
+
+
+  LogFilter *decodeLogFilter(const YAML::Node &node)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
@@ -142,16 +136,11 @@ template <> struct convert<LogFilter *> {
     }
 
     // TODO need to convert action enumj
-    logFilter =
-      LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT, node["condition"].as<std::string>().c_str());
 
-    return true;
+  return LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT, node["condition"].as<std::string>().c_str());;
   }
-};
 
-template <> struct convert<LogObject *> {
-  static bool
-  decode(const Node &node, LogObject *logObject)
+LogObject *decodeLogObject(const YAML::Node &node)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_object_keys.begin(), valid_log_object_keys.end(),
@@ -178,7 +167,7 @@ template <> struct convert<LogObject *> {
     LogFormat *fmt       = Log::config->format_list.find_by_name(format.c_str());
     if (!fmt) {
       Warning("Format %s not in the global format list; cannot create LogObject", format.c_str());
-      return false;
+      return nullptr;
     }
 
     // file format
@@ -213,14 +202,14 @@ template <> struct convert<LogObject *> {
       Warning("Invalid log rolling value '%d' in log object  TODO", obj_rolling_enabled);
     }
 
-    logObject = new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
+    LogObject *logObject = new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
                               (Log::RollingEnabledValues)obj_rolling_enabled, Log::config->collation_preproc_threads,
                               obj_rolling_interval_sec, obj_rolling_offset_hr, obj_rolling_size_mb);
 
     // filters
     //
     auto filters = node["filters"];
-    if (filters.IsSequence()) {
+    if (!filters.IsSequence()) {
       throw std::runtime_error("'filters' should be a list");
     }
 
@@ -234,8 +223,6 @@ template <> struct convert<LogObject *> {
       }
     }
 
-    return true;
+  return logObject;
   }
-};
 
-} // namespace YAML
