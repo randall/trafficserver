@@ -37,7 +37,6 @@ traffic_wccp_LDADD = \
 	$(top_builddir)/lib/tsconfig/libtsconfig.la \
 	$(top_builddir)/lib/wccp/libwccp.a \
 	$(top_builddir)/lib/ts/libtsutil.la \
-	$(top_builddir)/lib/luajit/src/libluajit.a \
 	@OPENSSL_LIBS@
 
 include $(top_srcdir)/build/tidy.mk

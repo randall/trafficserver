@@ -1623,8 +1623,8 @@ case $host_os_def in
 esac
 
 # Flags for building and linking against our internal copy of LuaJIT.
-AC_SUBST([LUAJIT_LDFLAGS])
-AC_SUBST([LUAJIT_CPPFLAGS], ['-I$(abs_top_srcdir)/lib/luajit/src'])
+#AC_SUBST([LUAJIT_LDFLAGS])
+#AC_SUBST([LUAJIT_CPPFLAGS], ['-I$(abs_top_srcdir)/lib/luajit/src'])
 
 # We should be able to build http_load if epoll(2) is available.
 AM_CONDITIONAL([BUILD_HTTP_LOAD], [test x"$ac_cv_func_epoll_ctl" = x"yes"])
@@ -2057,7 +2057,6 @@ AC_CONFIG_FILES([
   iocore/utils/Makefile
   lib/Makefile
   lib/cppapi/Makefile
-  lib/bindings/Makefile
   lib/perl/Makefile
   lib/perl/lib/Apache/TS.pm
   lib/records/Makefile

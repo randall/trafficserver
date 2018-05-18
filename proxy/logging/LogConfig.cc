@@ -46,7 +46,6 @@
 #include "LogObject.h"
 #include "LogConfig.h"
 #include "LogUtils.h"
-#include "LogBindings.h"
 #include "ts/SimpleTokenizer.h"
 
 #include "LogCollationAccept.h"
@@ -925,6 +924,7 @@ LogConfig::update_space_used()
 bool
 LogConfig::evaluate_config()
 {
+    /*
   BindingInstance binding;
   ats_scoped_str path(RecConfigReadConfigPath("proxy.config.log.config.filename", "logging.config"));
 
@@ -937,6 +937,7 @@ LogConfig::evaluate_config()
   }
 
   return false;
+  */
 }
 
 /*-------------------------------------------------------------------------
