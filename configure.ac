@@ -357,8 +357,7 @@ AC_ARG_ENABLE([system-luajit],
 )
 AC_MSG_RESULT([$enable_system_luajit])
 TS_ARG_ENABLE_VAR([has],[system_luajit])
-AM_CONDITIONAL([BUILD_LUAJIT], [test 0 -eq $has_system_luajit])
-AM_CONDITIONAL([SYSTEM_LUAJIT], [test 0 -ne $has_system_luajit])
+AM_CONDITIONAL([HAS_LUAJIT], [test 0 -ne $has_system_luajit])
 
 
 # Disable all static library builds
@@ -1623,8 +1622,8 @@ case $host_os_def in
 esac
 
 # Flags for building and linking against our internal copy of LuaJIT.
-AC_SUBST([LUAJIT_LDFLAGS])
-AC_SUBST([LUAJIT_CPPFLAGS], ['-I$(abs_top_srcdir)/lib/luajit/src'])
+#AC_SUBST([LUAJIT_LDFLAGS])
+#AC_SUBST([LUAJIT_CPPFLAGS], ['-I$(abs_top_srcdir)/lib/luajit/src'])
 
 # We should be able to build http_load if epoll(2) is available.
 AM_CONDITIONAL([BUILD_HTTP_LOAD], [test x"$ac_cv_func_epoll_ctl" = x"yes"])
@@ -2057,7 +2056,6 @@ AC_CONFIG_FILES([
   iocore/utils/Makefile
   lib/Makefile
   lib/cppapi/Makefile
-  lib/bindings/Makefile
   lib/perl/Makefile
   lib/perl/lib/Apache/TS.pm
   lib/records/Makefile
