@@ -42,7 +42,7 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
       }
     } else {
       Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
-      //delete fmt;
+      // delete fmt;
       // ??? ERROR or just ignore?
     }
   }
@@ -84,7 +84,7 @@ template <> struct convert<LogFormat *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() +"'");
+        throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() + "'");
       }
     }
 
@@ -114,10 +114,10 @@ template <> struct convert<LogFormat *> {
     if (node["interval"]) {
       interval = node["interval"].as<unsigned>();
     }
-  Note("OK");
+    Note("OK");
 
     logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
-  Note("Format named \"%s\" ", logFormat->name() ? logFormat->name() : "");
+    Note("Format named \"%s\" ", logFormat->name() ? logFormat->name() : "");
 
     return true;
   }
@@ -130,7 +130,7 @@ template <> struct convert<LogFilter *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("filter: unsupported key '" + item.first.as<std::string>() +"'");
+        throw std::runtime_error("filter: unsupported key '" + item.first.as<std::string>() + "'");
       }
     }
 
@@ -156,7 +156,7 @@ template <> struct convert<LogObject *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_object_keys.begin(), valid_log_object_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("log: unsupported key '" + item.first.as<std::string>() +"'");
+        throw std::runtime_error("log: unsupported key '" + item.first.as<std::string>() + "'");
       }
     }
 
