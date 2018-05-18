@@ -18,7 +18,6 @@
 bin_PROGRAMS = traffic_manager
 
 AM_CPPFLAGS += \
-	$(LUAJIT_CPPFLAGS) \
 	$(iocore_include_dirs) \
 	-I$(abs_top_srcdir)/lib/records \
 	-I$(abs_top_srcdir)/proxy/hdrs \
@@ -29,11 +28,6 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/mgmt/utils \
 	-I$(abs_top_srcdir)/lib \
 	$(TS_INCLUDES)
-
-if BUILD_LUAJIT
-AM_CPPFLAGS += \
-	-I$(abs_top_srcdir)/lib/luajit/src
-endif
 
 AM_LDFLAGS += \
 	@OPENSSL_LDFLAGS@ \
@@ -52,14 +46,6 @@ traffic_manager_LDADD = \
 	$(top_builddir)/lib/records/librecords_lm.a \
 	$(top_builddir)/proxy/shared/libdiagsconfig.a
 
-AM_LDFLAGS += \
-	$(LUAJIT_LDFLAGS)
-
-if SYSTEM_LUAJIT
-traffic_manager_LDADD +=\
-	@LIBLUAJIT@
-endif
-
 traffic_manager_LDADD +=\
 	$(LIBUNWIND_LIBS) \
 	@LIBPCRE@ @LIBTCL@ @LIBCAP@ @HWLOC_LIBS@ \
@@ -73,14 +59,6 @@ traffic_manager_LDADD += \
 	$(top_builddir)/lib/tsconfig/libtsconfig.la \
 	@OPENSSL_LIBS@
 
-endif
-
-traffic_manager_LDADD += \
-	$(top_builddir)/lib/bindings/libbindings.la
-
-if BUILD_LUAJIT
-traffic_manager_LDADD += \
-	$(top_builddir)/lib/luajit/src/libluajit.a
 endif
 
 include $(top_srcdir)/build/tidy.mk
