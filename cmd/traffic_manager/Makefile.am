@@ -30,7 +30,8 @@ AM_CPPFLAGS += \
 	$(TS_INCLUDES)
 
 AM_LDFLAGS += \
-	@OPENSSL_LDFLAGS@
+	@OPENSSL_LDFLAGS@ \
+	@LIB_YAMLCPP@
 
 traffic_manager_SOURCES = \
 	AddConfigFilesHere.cc \

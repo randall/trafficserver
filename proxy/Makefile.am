@@ -155,7 +155,8 @@ traffic_logcat_LDADD = \
 	$(top_builddir)/lib/ts/libtsutil.la
 
 traffic_logcat_LDADD += \
-	@LIBTCL@ @HWLOC_LIBS@\
+	@LIBTCL@ @HWLOC_LIBS@ \
+	@LIB_YAMLCPP@ \
 	@LIBPROFILER@ -lm
 
 if SYSTEM_LUAJIT
@@ -174,6 +175,7 @@ traffic_logstats_LDADD = \
 
 traffic_logstats_LDADD += \
   @LIBTCL@ @HWLOC_LIBS@ \
+  @LIB_YAMLCPP@ \
   @LIBPROFILER@ -lm
 
 if SYSTEM_LUAJIT
