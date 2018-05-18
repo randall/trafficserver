@@ -63,7 +63,7 @@ if test "$has_yaml_cpp" != "no"; then
   fi
 
   if test "$yaml_cpp_include" != "0"; then
-    AC_SUBST([LIB_YAMLCPP], [-lyaml-cpp])
+    AC_SUBST([LIB_YAMLCPP], [-Wl,-lyaml-cpp])
     AC_SUBST([CFLAGS_YAMLCPP], [-I${yaml_cpp_include}])
   else
     has_yaml_cpp=no

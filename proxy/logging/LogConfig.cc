@@ -50,6 +50,8 @@
 
 #include "LogCollationAccept.h"
 
+#include "YamlLogConfig.h"
+
 #define DISK_IS_CONFIG_FULL_MESSAGE                    \
   "Access logging to local log directory suspended - " \
   "configured space allocation exhausted."
@@ -924,20 +926,18 @@ LogConfig::update_space_used()
 bool
 LogConfig::evaluate_config()
 {
-    /*
-  BindingInstance binding;
   ats_scoped_str path(RecConfigReadConfigPath("proxy.config.log.config.filename", "logging.config"));
 
-  if (!binding.construct()) {
-    Fatal("failed to initialize Lua runtime");
+  Note("loading logging.config");
+
+  bool zret = YamlLogConfig::populateLogConfig(this, path);
+  if (zret) {
+    Note("logging.config done reloading!");
+  } else {
+    Note("failed to reload logging.config");
   }
 
-  if (MakeLogBindings(binding, this)) {
-    return binding.require(path.get());
-  }
-
-  return false;
-  */
+  return zret;
 }
 
 /*-------------------------------------------------------------------------

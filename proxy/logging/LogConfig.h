@@ -26,6 +26,7 @@
 #include "ts/ink_platform.h"
 #include "P_RecProcess.h"
 #include "ProxyConfig.h"
+#include "LogObject.h"
 
 /* Instead of enumerating the stats in DynamicStats.h, each module needs
    to enumerate its stats separately and register them with librecords

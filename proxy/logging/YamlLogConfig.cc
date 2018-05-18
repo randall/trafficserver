@@ -1,6 +1,9 @@
 #include "YamlLogConfig.h"
 
-#include <algorithm> // std::none_of
+#include "LogObject.h"
+
+#include <yaml-cpp/yaml.h>
+#include <algorithm>
 
 bool loadLogConfig(LogConfig *cfg, const char *cfgFilename);
 
@@ -11,6 +14,7 @@ YamlLogConfig::populateLogConfig(LogConfig *cfg, const char *cfgFilename)
   try {
     result = loadLogConfig(cfg, cfgFilename);
   } catch (std::exception &ex) {
+    Error("%s", ex.what());
     result = false;
   }
   return result;
@@ -20,24 +24,25 @@ bool
 loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 {
   YAML::Node config = YAML::LoadFile(cfgFilename);
+  /*
   if (!config.IsSequence()) {
-    // return ts::Errata::Message(1, 1, "expected sequence");
+    Error("malformed logging.config file; expected a map");
     return false;
   }
-
+  */
   auto formats = config["formats"];
   for (auto it = formats.begin(); it != formats.end(); ++it) {
     auto fmt = it->as<LogFormat *>();
     if (fmt->valid()) {
       cfg->format_list.add(fmt, false);
 
-      if (is_debug_tag_set("xml")) {
+      if (is_debug_tag_set("log")) {
         printf("The following format was added to the global format list\n");
         fmt->display(stdout);
       }
     } else {
       Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
-      delete fmt;
+      //delete fmt;
       // ??? ERROR or just ignore?
     }
   }
@@ -79,7 +84,7 @@ template <> struct convert<LogFormat *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
+        throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() +"'");
       }
     }
 
@@ -109,8 +114,10 @@ template <> struct convert<LogFormat *> {
     if (node["interval"]) {
       interval = node["interval"].as<unsigned>();
     }
+  Note("OK");
 
     logFormat = new LogFormat(name.c_str(), format.c_str(), interval);
+  Note("Format named \"%s\" ", logFormat->name() ? logFormat->name() : "");
 
     return true;
   }
@@ -123,7 +130,7 @@ template <> struct convert<LogFilter *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
+        throw std::runtime_error("filter: unsupported key '" + item.first.as<std::string>() +"'");
       }
     }
 
@@ -149,7 +156,7 @@ template <> struct convert<LogObject *> {
     for (auto &&item : node) {
       if (std::none_of(valid_log_object_keys.begin(), valid_log_object_keys.end(),
                        [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-        throw std::runtime_error("unsupported key " + item.first.as<std::string>());
+        throw std::runtime_error("log: unsupported key '" + item.first.as<std::string>() +"'");
       }
     }
 
@@ -158,7 +165,7 @@ template <> struct convert<LogObject *> {
     }
     std::string format = node["format"].as<std::string>();
 
-    if (node["filename"]) {
+    if (!node["filename"]) {
       throw std::runtime_error("missing 'filename' argument");
     }
 
@@ -184,7 +191,7 @@ template <> struct convert<LogObject *> {
                      (strcasecmp(mode_str, "ascii_pipe") == 0 ? LOG_FILE_PIPE : LOG_FILE_ASCII));
     }
 
-    int obj_rolling_enabled;
+    int obj_rolling_enabled      = 0;
     int obj_rolling_interval_sec = Log::config->rolling_interval_sec;
     int obj_rolling_offset_hr    = Log::config->rolling_offset_hr;
     int obj_rolling_size_mb      = Log::config->rolling_size_mb;
