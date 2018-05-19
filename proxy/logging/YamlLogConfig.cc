@@ -5,11 +5,15 @@
 #include <yaml-cpp/yaml.h>
 #include <algorithm>
 
-bool loadLogConfig(LogConfig *cfg, const char *cfgFilename);
+template <class T> class wrappedConfigObject
+{
+public:
+  T value;
 
-LogFormat* decodeLogFormat(const YAML::Node &node);
-LogFilter *decodeLogFilter(const YAML::Node &node);
-LogObject *decodeLogObject(const YAML::Node &node);
+  wrappedConfigObject() : value(nullptr){};
+};
+
+bool loadLogConfig(LogConfig *cfg, const char *cfgFilename);
 
 bool
 YamlLogConfig::populateLogConfig(LogConfig *cfg, const char *cfgFilename)
@@ -24,8 +28,6 @@ YamlLogConfig::populateLogConfig(LogConfig *cfg, const char *cfgFilename)
   return result;
 }
 
-typedef std::pair<LogConfig*, LogFormat*> logFormatter;
-
 bool
 loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 {
@@ -35,23 +37,29 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
     Error("malformed logging.config file; expected a map");
     return false;
   }
+
   auto formats = config["formats"];
   for (auto it = formats.begin(); it != formats.end(); ++it) {
-    auto fmt = decodeLogFormat(*it);
-    if (fmt && fmt->valid()) {
+    auto wrapped = it->as<wrappedConfigObject<LogFormat *>>();
+    auto fmt     = wrapped.value;
+    if (fmt->valid()) {
       cfg->format_list.add(fmt, false);
 
       if (is_debug_tag_set("log")) {
         printf("The following format was added to the global format list\n");
         fmt->display(stdout);
       }
-      continue;
+    } else {
+      Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
+      delete fmt;
+      // ??? ERROR or just ignore?
     }
   }
 
   auto filters = config["filters"];
   for (auto it = filters.begin(); it != filters.end(); ++it) {
-    auto filter = decodeLogFilter(*it);
+    auto wrapped = it->as<wrappedConfigObject<LogFilter *>>();
+    auto filter  = wrapped.value;
 
     if (filter) {
       cfg->filter_list.add(filter, false);
@@ -65,7 +73,7 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 
   auto logs = config["logs"];
   for (auto it = logs.begin(); it != logs.end(); ++it) {
-    auto obj = decodeLogObject(*it);
+    auto obj = it->as<wrappedConfigObject<LogObject *>>().value;
     cfg->log_object_manager.manage_object(obj);
   }
   return true;
@@ -77,49 +85,57 @@ std::set<std::string> valid_log_object_keys = {
   "filename",          "format",          "mode",    "header",         "rolling_enabled", "rolling_interval_sec",
   "rolling_offset_hr", "rolling_size_mb", "filters", "collation_hosts"};
 
-
-LogFormat* decodeLogFormat(const YAML::Node &node)
+namespace YAML
 {
-  for (auto &&item : node) {
-    if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
-                     [&item](std::string s) { return s == item.first.as<std::string>(); })) {
-      throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() + "'");
+template <> struct convert<wrappedConfigObject<LogFormat *>> {
+  static bool
+  decode(const Node &node, wrappedConfigObject<LogFormat *> &wrapped)
+  {
+    for (auto &&item : node) {
+      if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
+                       [&item](std::string s) { return s == item.first.as<std::string>(); })) {
+        throw std::runtime_error("format: unsupported key '" + item.first.as<std::string>() + "'");
+      }
     }
-  }
 
-  if (!node["format"]) {
-    throw std::runtime_error("missing 'format' argument");
-  }
-  std::string format = node["format"].as<std::string>();
-
-  std::string name;
-  if (node["name"]) {
-    name = node["name"].as<std::string>();
-  }
-
-  // if the format_str contains any of the aggregate operators,
-  // we need to ensure that an interval was specified.
-  //
-  if (LogField::fieldlist_contains_aggregates(format.c_str())) {
-    if (!node["interval"]) {
-      Note("'interval' attribute missing for LogFormat object"
-           " %s that contains aggregate operators: %s",
-           name.c_str(), format.c_str());
-      return nullptr;
+    if (!node["format"]) {
+      throw std::runtime_error("missing 'format' argument");
     }
+    std::string format = node["format"].as<std::string>();
+
+    std::string name;
+    if (node["name"]) {
+      name = node["name"].as<std::string>();
+    }
+
+    // if the format_str contains any of the aggregate operators,
+    // we need to ensure that an interval was specified.
+    //
+    if (LogField::fieldlist_contains_aggregates(format.c_str())) {
+      if (!node["interval"]) {
+        Note("'interval' attribute missing for LogFormat object"
+             " %s that contains aggregate operators: %s",
+             name.c_str(), format.c_str());
+        return false;
+      }
+    }
+
+    unsigned interval = 0;
+    if (node["interval"]) {
+      interval = node["interval"].as<unsigned>();
+    }
+    Note("OK");
+
+    wrapped.value = new LogFormat(name.c_str(), format.c_str(), interval);
+    Note("Format named \"%s\" ", wrapped.value->name() ? wrapped.value->name() : "");
+
+    return true;
   }
+};
 
-  unsigned interval = 0;
-  if (node["interval"]) {
-    interval = node["interval"].as<unsigned>();
-  }
-  Note("OK");
-
-  return new LogFormat(name.c_str(), format.c_str(), interval);
-}
-
-
-  LogFilter *decodeLogFilter(const YAML::Node &node)
+template <> struct convert<wrappedConfigObject<LogFilter *>> {
+  static bool
+  decode(const Node &node, wrappedConfigObject<LogFilter *> &wrapped)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
@@ -136,11 +152,16 @@ LogFormat* decodeLogFormat(const YAML::Node &node)
     }
 
     // TODO need to convert action enumj
+    wrapped.value =
+      LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT, node["condition"].as<std::string>().c_str());
 
-  return LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT, node["condition"].as<std::string>().c_str());;
+    return true;
   }
+};
 
-LogObject *decodeLogObject(const YAML::Node &node)
+template <> struct convert<wrappedConfigObject<LogObject *>> {
+  static bool
+  decode(const Node &node, wrappedConfigObject<LogObject *> &wrapped)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_object_keys.begin(), valid_log_object_keys.end(),
@@ -167,7 +188,7 @@ LogObject *decodeLogObject(const YAML::Node &node)
     LogFormat *fmt       = Log::config->format_list.find_by_name(format.c_str());
     if (!fmt) {
       Warning("Format %s not in the global format list; cannot create LogObject", format.c_str());
-      return nullptr;
+      return false;
     }
 
     // file format
@@ -202,13 +223,17 @@ LogObject *decodeLogObject(const YAML::Node &node)
       Warning("Invalid log rolling value '%d' in log object  TODO", obj_rolling_enabled);
     }
 
-    LogObject *logObject = new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
-                              (Log::RollingEnabledValues)obj_rolling_enabled, Log::config->collation_preproc_threads,
-                              obj_rolling_interval_sec, obj_rolling_offset_hr, obj_rolling_size_mb);
+    wrapped.value = new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
+                                  (Log::RollingEnabledValues)obj_rolling_enabled, Log::config->collation_preproc_threads,
+                                  obj_rolling_interval_sec, obj_rolling_offset_hr, obj_rolling_size_mb);
 
     // filters
     //
     auto filters = node["filters"];
+    if (!filters) {
+      return true;
+    }
+
     if (!filters.IsSequence()) {
       throw std::runtime_error("'filters' should be a list");
     }
@@ -219,10 +244,12 @@ LogObject *decodeLogObject(const YAML::Node &node)
       if (!f) {
         Warning("Filter %s not in the global filter list; cannot add to this LogObject", filter_name);
       } else {
-        logObject->add_filter(f);
+        wrapped.value->add_filter(f);
       }
     }
 
-  return logObject;
+    return true;
   }
+};
 
+} // namespace YAML
