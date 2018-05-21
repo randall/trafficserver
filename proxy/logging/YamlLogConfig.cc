@@ -1,17 +1,33 @@
+/** @file
+
+  @section license License
+
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
+
 #include "YamlLogConfig.h"
 
+#include "LogConfig.h"
 #include "LogObject.h"
+#include "ts/EnumDescriptor.h"
 
 #include <yaml-cpp/yaml.h>
 #include <algorithm>
-
-template <class T> class wrappedConfigObject
-{
-public:
-  T value;
-
-  wrappedConfigObject() : value(nullptr){};
-};
+#include <memory>
 
 bool loadLogConfig(LogConfig *cfg, const char *cfgFilename);
 
@@ -40,8 +56,7 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 
   auto formats = config["formats"];
   for (auto it = formats.begin(); it != formats.end(); ++it) {
-    auto wrapped = it->as<wrappedConfigObject<LogFormat *>>();
-    auto fmt     = wrapped.value;
+    auto fmt = it->as<std::unique_ptr<LogFormat>>().release();
     if (fmt->valid()) {
       cfg->format_list.add(fmt, false);
 
@@ -52,14 +67,12 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
     } else {
       Note("Format named \"%s\" will not be active; not a valid format", fmt->name() ? fmt->name() : "");
       delete fmt;
-      // ??? ERROR or just ignore?
     }
   }
 
   auto filters = config["filters"];
   for (auto it = filters.begin(); it != filters.end(); ++it) {
-    auto wrapped = it->as<wrappedConfigObject<LogFilter *>>();
-    auto filter  = wrapped.value;
+    auto filter = it->as<std::unique_ptr<LogFilter>>().release();
 
     if (filter) {
       cfg->filter_list.add(filter, false);
@@ -73,7 +86,7 @@ loadLogConfig(LogConfig *cfg, const char *cfgFilename)
 
   auto logs = config["logs"];
   for (auto it = logs.begin(); it != logs.end(); ++it) {
-    auto obj = it->as<wrappedConfigObject<LogObject *>>().value;
+    auto obj = it->as<std::unique_ptr<LogObject>>().release();
     cfg->log_object_manager.manage_object(obj);
   }
   return true;
@@ -87,9 +100,9 @@ std::set<std::string> valid_log_object_keys = {
 
 namespace YAML
 {
-template <> struct convert<wrappedConfigObject<LogFormat *>> {
+template <> struct convert<std::unique_ptr<LogFormat>> {
   static bool
-  decode(const Node &node, wrappedConfigObject<LogFormat *> &wrapped)
+  decode(const Node &node, std::unique_ptr<LogFormat> &logFormat)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_format_keys.begin(), valid_log_format_keys.end(),
@@ -124,18 +137,18 @@ template <> struct convert<wrappedConfigObject<LogFormat *>> {
     if (node["interval"]) {
       interval = node["interval"].as<unsigned>();
     }
-    Note("OK");
 
-    wrapped.value = new LogFormat(name.c_str(), format.c_str(), interval);
-    Note("Format named \"%s\" ", wrapped.value->name() ? wrapped.value->name() : "");
+    logFormat.reset(new LogFormat(name.c_str(), format.c_str(), interval));
 
     return true;
   }
 };
 
-template <> struct convert<wrappedConfigObject<LogFilter *>> {
+TsEnumDescriptor LEVEL_DESCRIPTOR = {{{"NONE", 0}, {"MODERATE", 1}, {"STRICT", 2}}};
+
+template <> struct convert<std::unique_ptr<LogFilter>> {
   static bool
-  decode(const Node &node, wrappedConfigObject<LogFilter *> &wrapped)
+  decode(const Node &node, std::unique_ptr<LogFilter> &logFilter)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_filter_keys.begin(), valid_log_filter_keys.end(),
@@ -151,17 +164,33 @@ template <> struct convert<wrappedConfigObject<LogFilter *>> {
       }
     }
 
-    // TODO need to convert action enumj
-    wrapped.value =
-      LogFilter::parse(node["name"].as<std::string>().c_str(), LogFilter::REJECT, node["condition"].as<std::string>().c_str());
+    auto name      = node["name"].as<std::string>();
+    auto action    = node["action"].as<std::string>();
+    auto condition = node["condition"].as<std::string>();
+
+    auto action_str       = action.c_str();
+    LogFilter::Action act = LogFilter::REJECT; /* lv: make gcc happy */
+    int i;
+    for (i = 0; i < LogFilter::N_ACTIONS; i++) {
+      if (strcasecmp(action_str, LogFilter::ACTION_NAME[i]) == 0) {
+        act = (LogFilter::Action)i;
+        break;
+      }
+    }
+
+    if (i == LogFilter::N_ACTIONS) {
+      Warning("%s is not a valid filter action value; cannot create filter %s.", action_str, name.c_str());
+      return false;
+    }
+    logFilter.reset(LogFilter::parse(name.c_str(), act, condition.c_str()));
 
     return true;
   }
 };
 
-template <> struct convert<wrappedConfigObject<LogObject *>> {
+template <> struct convert<std::unique_ptr<LogObject>> {
   static bool
-  decode(const Node &node, wrappedConfigObject<LogObject *> &wrapped)
+  decode(const Node &node, std::unique_ptr<LogObject> &logObject)
   {
     for (auto &&item : node) {
       if (std::none_of(valid_log_object_keys.begin(), valid_log_object_keys.end(),
@@ -223,9 +252,9 @@ template <> struct convert<wrappedConfigObject<LogObject *>> {
       Warning("Invalid log rolling value '%d' in log object  TODO", obj_rolling_enabled);
     }
 
-    wrapped.value = new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
+    logObject.reset(new LogObject(fmt, Log::config->logfile_dir, filename.c_str(), file_type, header.c_str(),
                                   (Log::RollingEnabledValues)obj_rolling_enabled, Log::config->collation_preproc_threads,
-                                  obj_rolling_interval_sec, obj_rolling_offset_hr, obj_rolling_size_mb);
+                                  obj_rolling_interval_sec, obj_rolling_offset_hr, obj_rolling_size_mb));
 
     // filters
     //
@@ -244,7 +273,7 @@ template <> struct convert<wrappedConfigObject<LogObject *>> {
       if (!f) {
         Warning("Filter %s not in the global filter list; cannot add to this LogObject", filter_name);
       } else {
-        wrapped.value->add_filter(f);
+        logObject.get()->add_filter(f);
       }
     }
 
