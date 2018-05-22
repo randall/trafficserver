@@ -921,7 +921,7 @@ Rollback::checkForUserUpdate(RollBackCheckType how)
   return result;
 }
 
-// int versionCmp(const void* i1, const void* i2) {
+// int versionCmp(const void* i1, const void* i2)
 //   A function that can be passed to qsort to sort arrays
 //     of versionInfo ptrs
 //

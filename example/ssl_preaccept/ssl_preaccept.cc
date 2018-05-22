@@ -73,7 +73,6 @@ void
 Load_Config_Value(Value const &parent, const char *name, IpRangeQueue &addrs)
 {
   Value v = parent[name];
-  std::string zret;
   IpRange ipRange;
   if (v.isLiteral()) {
     auto txt = v.getText();

@@ -356,7 +356,6 @@ protected:
 public:
   ProxyClientTransaction *ua_txn   = nullptr;
   BackgroundFill_t background_fill = BACKGROUND_FILL_NONE;
-  // AuthHttpAdapter authAdapter;
   void set_http_schedule(Continuation *);
   int get_http_schedule(int event, void *data);
 
@@ -410,7 +409,6 @@ protected:
   int state_read_client_request_header(int event, void *data);
   int state_watch_for_client_abort(int event, void *data);
   int state_read_push_response_header(int event, void *data);
-  int state_srv_lookup(int event, void *data);
   int state_hostdb_lookup(int event, void *data);
   int state_hostdb_reverse_lookup(int event, void *data);
   int state_mark_os_down(int event, void *data);

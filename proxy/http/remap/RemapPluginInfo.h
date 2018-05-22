@@ -68,7 +68,6 @@ public:
 
   remap_plugin_info *find_by_path(char *_path);
   void add_to_list(remap_plugin_info *pi);
-  void delete_my_list();
   void indicate_reload();
 };
 

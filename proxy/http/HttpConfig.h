@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <bitset>
+#include <string_view>
 
 #ifdef HAVE_CTYPE_H
 #include <cctype>
@@ -44,7 +45,6 @@
 #include "ts/ink_platform.h"
 #include "ts/ink_inet.h"
 #include "ts/Regex.h"
-#include "string_view"
 #include "ts/BufferWriter.h"
 #include "HttpProxyAPIEnums.h"
 #include "ProxyConfig.h"

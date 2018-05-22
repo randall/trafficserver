@@ -103,5 +103,3 @@ private:
   InkHashTable *bindings;
   void addFileHelper(const char *fileName, bool root_access_needed, Rollback *parentRollback, unsigned flags = 0);
 };
-
-void initializeRegistry(); // implemented in AddConfigFilesHere.cc

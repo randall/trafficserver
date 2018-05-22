@@ -424,7 +424,7 @@ CB_Pre_Accept(TSCont /*contp*/, TSEvent event, void *edata)
         }
         // Return before we reenable
         return TS_SUCCESS;
-      } else { // if (entry->ctx != NULL) {
+      } else { // (entry->ctx != NULL)
         SSL_set_SSL_CTX(ssl, entry->ctx);
         TSDebug(PN, "Replace cert based on IP");
         TSMutexUnlock(entry->mutex);
@@ -474,7 +474,7 @@ CB_servername(TSCont /*contp*/, TSEvent /*event*/, void *edata)
         }
         // Won't reenable until the certificate has been loaded
         return TS_SUCCESS;
-      } else { // if (entry->ctx != NULL) {
+      } else { // (entry->ctx != NULL)
         SSL_set_SSL_CTX(ssl, entry->ctx);
         TSDebug(PN, "Replace cert based on name %s", servername);
       }

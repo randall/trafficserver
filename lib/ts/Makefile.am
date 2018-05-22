@@ -215,12 +215,6 @@ libtsutil_la_SOURCES = \
 
 BufferWriterFormat.o : AM_CPPFLAGS += -Wno-char-subscripts
 
-#test_UNUSED_SOURCES = \
-#  load_http_hdr.cc \
-#  IntrusivePtrTest.cc \
-#  IpMapTest.cc \
-#  TestHttpHeader.cc
-
 # Special hacks to generate the parser rules
 $(srcdir)/ParseRules.cc: ParseRulesCType
 
@@ -280,7 +274,7 @@ test_tslib_SOURCES = \
 	unit-tests/test_Regex.cc \
 	unit-tests/test_Scalar.cc \
 	unit-tests/test_scoped_resource.cc \
-	unit-tests/test_TextView.cc 
+	unit-tests/test_TextView.cc
 
 CompileParseRules_SOURCES = CompileParseRules.cc
 

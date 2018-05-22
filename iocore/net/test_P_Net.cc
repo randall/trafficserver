@@ -90,7 +90,6 @@ int
 main()
 {
   ink_event_system_init(EVENT_SYSTEM_MODULE_VERSION);
-  MIOBuffer *mbuf = new_MIOBuffer(5);
   eventProcessor.start(1);
   netProcessor.start();
   netProcessor.accept(new NetTesterAccept(new_ProxyMutex()), 8080, true);

@@ -45,10 +45,6 @@ libinkdns_a_SOURCES = \
 	SRV.h \
 	SplitDNS.cc
 
-#test_UNUSED_SOURCES = \
-#  test_I_DNS.cc \
-#  test_P_DNS.cc
-
 include $(top_srcdir)/build/tidy.mk
 
 clang-tidy-local: $(DIST_SOURCES)

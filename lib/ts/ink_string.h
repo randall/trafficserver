@@ -157,7 +157,7 @@ ptr_len_str(const char *p1, int l1, const char *str)
   return nullptr;
 }
 
-// int ptr_len_ncmp(const char* p1, int l1, const char* str, int n) {
+// int ptr_len_ncmp(const char* p1, int l1, const char* str, int n)
 //
 //    strncmp like functionality for comparing a ptr,len pair with
 //       a null terminated string for n chars
@@ -198,7 +198,7 @@ ptr_len_ncmp(const char *p1, int l1, const char *str, int n)
   }
 }
 
-// int ptr_len_ncasecmp(const char* p1, int l1, const char* str, int n) {
+// int ptr_len_ncasecmp(const char* p1, int l1, const char* str, int n)
 //
 //    strncasecmp like functionality for comparing a ptr,len pair with
 //       a null terminated string for n chars
@@ -239,7 +239,7 @@ ptr_len_ncasecmp(const char *p1, int l1, const char *str, int n)
   }
 }
 
-// int ptr_len_casecmp(const char* p1, int l1, const char* str) {
+// int ptr_len_casecmp(const char* p1, int l1, const char* str)
 //
 //    strcasecmp like functionality for comparing a ptr,len pair with
 //       a null terminated string

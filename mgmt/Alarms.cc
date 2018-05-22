@@ -358,17 +358,6 @@ Alarms::clearUnSeen(char *ip)
   return;
 } /* End Alarms::clearUnSeen */
 
-/*
- * checkSystemNAlert(...)
- *   This function should test the system and signal local alarms. Sending
- * out remote notification commands if necessary.
- */
-void
-Alarms::checkSystemNAlert()
-{
-  return;
-} /* End Alarms::checkSystenNAlert */
-
 void
 Alarms::execAlarmBin(const char *desc)
 {

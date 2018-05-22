@@ -21,7 +21,8 @@
 #include <cstdio>
 #include <unistd.h>
 
-#include "mysql/mysql.h"
+#include <mysql/mysql.h>
+
 #include "lib/iniparser.h"
 #include "default.h"
 
@@ -199,6 +200,7 @@ TSPluginInit(int argc, const char *argv[])
 
   if (argc != 2) {
     TSError("[mysql_remap] Usage: %s /path/to/sample.ini", argv[0]);
+    free(data);
     return;
   }
 

@@ -640,7 +640,7 @@ hostArray::Lookup(const char *match_data_in, bool bNotProcess)
   return r;
 }
 
-// HostBranch* hostArray::iter_first(hostArrayIterState* s) {
+// HostBranch* hostArray::iter_first(hostArrayIterState* s)
 //
 //   Initilizes s and returns the first element or
 //     nullptr if no elements exist
@@ -652,7 +652,7 @@ hostArray::iter_first(hostArrayIterState *s, char **key)
   return iter_next(s, key);
 }
 
-// HostBranch* hostArray::iter_next(hostArrayIterState* s) {
+// HostBranch* hostArray::iter_next(hostArrayIterState* s)
 //
 //    Returns the next element in the hostArray or
 //      nullptr if none exist

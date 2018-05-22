@@ -124,7 +124,6 @@ public:
   };
 
   void PerformACLFiltering(HttpTransact::State *s, url_mapping *mapping);
-  url_mapping *SetupBackdoorMapping();
   void PrintStore(MappingsStore &store);
 
   void

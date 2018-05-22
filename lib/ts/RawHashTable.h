@@ -177,11 +177,6 @@ RawHashTable::unbindKey(RawHashTable_Key key)
 inline void
 RawHashTable::replaceString(char *key, char *string)
 {
-  //    if (key_type != RawHashTable_KeyType_String)
-  //    {
-  //      throw BadKeyType();
-  //    }
-
   ink_hash_table_replace_string(ht, key, string);
 }
 

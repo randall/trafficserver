@@ -82,8 +82,6 @@ struct SslHdrInstance {
   AttachOptions attach;
   TSCont cont;
 
-  void register_hooks();
-
   // noncopyable
   SslHdrInstance(const SslHdrInstance &) = delete;
   SslHdrInstance &operator=(const SslHdrInstance &) = delete;

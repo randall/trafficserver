@@ -92,24 +92,6 @@ remap_plugin_info::add_to_list(remap_plugin_info *pi)
 }
 
 //
-// Remove and delete all plugins from a list, including ourselves.
-//
-void
-remap_plugin_info::delete_my_list()
-{
-  remap_plugin_info *p = this->next;
-
-  while (p) {
-    remap_plugin_info *tmp = p;
-
-    p = p->next;
-    delete tmp;
-  }
-
-  delete this;
-}
-
-//
 // Tell all plugins (that so wish) that remap.config is being reloaded
 //
 void

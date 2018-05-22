@@ -71,6 +71,7 @@ genData(int numBytes)
   return s;
 }
 
+#if 0
 void
 writeOnce(MIOBufferWriter &bw, std::size_t len)
 {
@@ -101,6 +102,7 @@ writeOnce(MIOBufferWriter &bw, std::size_t len)
 
   REQUIRE(bw.auxBufferCapacity() <= DEFAULT_BUFFER_NUMBER);
 }
+#endif
 
 class InkAssertExcept
 {

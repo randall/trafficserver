@@ -28,11 +28,6 @@ class Foo
 public:
   int x;
 
-  void
-  foo()
-  {
-  }
-
   SLINK(Foo, slink);
   LINK(Foo, dlink);
 

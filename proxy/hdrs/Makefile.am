@@ -76,8 +76,5 @@ test_mime_LDADD = -L. -lhdrs \
 
 test_mime_SOURCES = test_mime.cc
 
-#test_UNUSED_SOURCES = \
-#  test_urlhash.cc
-
 clang-tidy-local: $(libhdrs_a_SOURCES)
 	$(CXX_Clang_Tidy)

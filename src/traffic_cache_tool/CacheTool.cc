@@ -1299,7 +1299,6 @@ Errata
 Init_disk(FilePath const &input_file_path)
 {
   Errata zret;
-  Cache cache;
   VolumeAllocator va;
 
   if (!OPEN_RW_FLAG) {

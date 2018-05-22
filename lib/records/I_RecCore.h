@@ -172,7 +172,6 @@ int RecGetRecordOrderAndId(const char *name, int *order, int *id, bool lock = tr
 int RecGetRecordUpdateType(const char *name, RecUpdateT *update_type, bool lock = true);
 int RecGetRecordCheckType(const char *name, RecCheckT *check_type, bool lock = true);
 int RecGetRecordCheckExpr(const char *name, char **check_expr, bool lock = true);
-int RecGetRecordDefaultDataString_Xmalloc(char *name, char **buf, bool lock = true);
 int RecGetRecordSource(const char *name, RecSourceT *source, bool lock = true);
 
 int RecGetRecordAccessType(const char *name, RecAccessT *secure, bool lock = true);

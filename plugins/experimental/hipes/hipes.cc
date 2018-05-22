@@ -79,49 +79,6 @@ escapify_url(const char *src, int src_len, char *dst, int dst_len)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Unescape a string. Have to make sure the destination buffer is at least as
-// long as the source buffer.
-//
-char *
-unescapify(const char *src, char *dst, int len)
-{
-  const char *cur = src;
-  char *next;
-  char subStr[3];
-  int size;
-
-  subStr[2] = '\0';
-  while ((next = (char *)memchr(cur, '%', len))) {
-    size = next - cur;
-    if (size > 0) {
-      memcpy(dst, cur, size);
-      dst += size;
-      cur += size;
-      len -= size;
-    }
-
-    if (len > 2 && (*cur + 1) != '\0' && *(cur + 2) != '\0') {
-      subStr[0] = *(++cur);
-      subStr[1] = *(++cur);
-      len -= 2;
-      *dst = (char)strtol(subStr, (char **)nullptr, 16);
-    } else {
-      *dst = *cur;
-    }
-    ++dst;
-    ++cur;
-    --len;
-  }
-
-  if (len > 0) {
-    memcpy(dst, cur, len);
-    dst += len;
-  }
-
-  return dst;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Class encapsulating one service configuration
 //
 struct HIPESService {

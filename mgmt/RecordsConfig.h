@@ -48,5 +48,4 @@ typedef void (*RecordElementCallback)(const RecordElement *, void *);
 void RecordsConfigIterate(RecordElementCallback, void *);
 
 void LibRecordsConfigInit();                 // initializes RecordsConfigIndex
-void RecordsConfigOverrideFromEnvironment(); // Override records from the environment
 void test_librecords();

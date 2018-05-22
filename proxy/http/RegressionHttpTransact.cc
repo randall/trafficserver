@@ -25,11 +25,6 @@
 #include "HttpTransact.h"
 #include "HttpSM.h"
 
-void
-forceLinkRegressionHttpTransact()
-{
-}
-
 static void
 init_sm(HttpSM *sm)
 {

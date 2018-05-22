@@ -99,9 +99,3 @@ test_ForwardedConfig_LDADD = \
 
 clang-tidy-local: $(libhttp_a_SOURCES) $(noinst_HEADERS)
 	$(CXX_Clang_Tidy)
-
-#test_UNUSED_SOURCES = \
-#  TestHttpTransact.cc \
-#  TestUrl.cc \
-#  test_socket_close.cc \
-#  testheaders.cc

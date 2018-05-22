@@ -93,10 +93,6 @@ TSPluginInit(int argc, const char *argv[])
   bool success = false;
   TSPluginRegistrationInfo info;
   TSCont cb_cert                       = nullptr; // Certificate callback continuation
-  static const struct option longopt[] = {
-    {const_cast<char *>("config"), required_argument, nullptr, 'c'},
-    {nullptr, no_argument, nullptr, '\0'},
-  };
 
   info.plugin_name   = PLUGIN_NAME;
   info.vendor_name   = "Apache Software Foundation";

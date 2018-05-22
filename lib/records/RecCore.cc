@@ -710,56 +710,6 @@ RecGetRecordCheckExpr(const char *name, char **check_expr, bool lock)
 }
 
 int
-RecGetRecordDefaultDataString_Xmalloc(char *name, char **buf, bool lock)
-{
-  int err;
-  RecRecord *r = nullptr;
-
-  if (lock) {
-    ink_rwlock_rdlock(&g_records_rwlock);
-  }
-
-  if (ink_hash_table_lookup(g_records_ht, name, (void **)&r)) {
-    *buf = (char *)ats_malloc(sizeof(char) * 1024);
-    memset(*buf, 0, 1024);
-    err = REC_ERR_OKAY;
-
-    switch (r->data_type) {
-    case RECD_INT:
-      snprintf(*buf, 1023, "%" PRId64 "", r->data_default.rec_int);
-      break;
-    case RECD_FLOAT:
-      snprintf(*buf, 1023, "%f", r->data_default.rec_float);
-      break;
-    case RECD_STRING:
-      if (r->data_default.rec_string) {
-        ink_strlcpy(*buf, r->data_default.rec_string, 1024);
-      } else {
-        ats_free(*buf);
-        *buf = nullptr;
-      }
-      break;
-    case RECD_COUNTER:
-      snprintf(*buf, 1023, "%" PRId64 "", r->data_default.rec_counter);
-      break;
-    default:
-      ink_assert(!"Unexpected RecD type");
-      ats_free(*buf);
-      *buf = nullptr;
-      break;
-    }
-  } else {
-    err = REC_ERR_FAIL;
-  }
-
-  if (lock) {
-    ink_rwlock_unlock(&g_records_rwlock);
-  }
-
-  return err;
-}
-
-int
 RecGetRecordAccessType(const char *name, RecAccessT *access, bool lock)
 {
   int err      = REC_ERR_FAIL;

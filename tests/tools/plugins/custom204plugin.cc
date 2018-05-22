@@ -22,7 +22,8 @@
  */
 
 #include "ts/ts.h"
-#include "string.h"
+
+#include <string.h>
 
 #define PLUGIN_NAME "custom204plugintest"
 

@@ -158,7 +158,7 @@ vlogf_errno(Errata& errata, Errata::Id id, Errata::Code code, char const* format
 }
 
 Errata
-logf_errno(Errata::Code code, char const* format, ...) {
+  logf_errno(Errata::Code code, char const* format, ...) {
   Errata zret;
   va_list rest;
   va_start(rest, format);

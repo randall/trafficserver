@@ -192,12 +192,6 @@ escape_json(const char *buf, int64_t size)
 }
 
 /// json_entry(): Formats to map-style entry i.e. "field": "value"
-// static inline std::string
-// json_entry(std::string const &name, std::string const &value)
-// {
-//   return "\"" + escape_json(name) + "\": \"" + escape_json(value) + "\"";
-// }
-
 static inline std::string
 json_entry(std::string const &name, const char *buf, int64_t size)
 {
@@ -205,12 +199,6 @@ json_entry(std::string const &name, const char *buf, int64_t size)
 }
 
 /// json_entry_array(): Formats to array-style entry i.e. ["field","value"]
-// static inline std::string
-// json_entry_array(std::string const &name, std::string const &value)
-// {
-//   return "[\"" + escape_json(name) + "\", \"" + escape_json(value) + "\"]";
-// }
-
 static inline std::string
 json_entry_array(const char *name, int name_len, const char *value, int value_len)
 {

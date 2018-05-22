@@ -392,9 +392,9 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
   if (event->cancelled) {
     e->cancel();
     free();
-    //    delete this;
     return EVENT_DONE;
   }
+
   // See if the request has timed out
   if (timeout_interval) {
     elapsed_time += -period;
@@ -404,14 +404,10 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
       c->handleEvent(NET_EVENT_DATAGRAM_READ_ERROR, event);
       e->cancel();
       free();
-      //      delete this;
       return EVENT_DONE;
     }
   }
-  // ink_assert(ifd < 0 || event_ == EVENT_INTERVAL || (event_ == EVENT_POLL && pc->pollDescriptor->nfds > ifd &&
-  // pc->pollDescriptor->pfd[ifd].fd == fd));
-  // if (ifd < 0 || event_ == EVENT_INTERVAL || (pc->pollDescriptor->pfd[ifd].revents & POLLIN)) {
-  // ink_assert(!"incomplete");
+
   c = completionUtil::getContinuation(event);
   // do read
   socklen_t tmp_fromlen = *fromaddrlen;
@@ -428,7 +424,7 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
     c->handleEvent(NET_EVENT_DATAGRAM_READ_COMPLETE, event);
     e->cancel();
     free();
-    // delete this;
+
     return EVENT_DONE;
   } else if (rlen < 0 && rlen != -EAGAIN) {
     // signal error.
@@ -439,7 +435,7 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
     c->handleEvent(NET_EVENT_DATAGRAM_READ_ERROR, event);
     e->cancel();
     free();
-    // delete this;
+
     return EVENT_DONE;
   } else {
     completionUtil::setThread(event, nullptr);
@@ -448,7 +444,7 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
   if (event->cancelled) {
     e->cancel();
     free();
-    // delete this;
+
     return EVENT_DONE;
   }
   // reestablish poll
@@ -942,7 +938,7 @@ UDPNetHandler::mainNetEvent(int event, Event *e)
   udpOutQueue.service(this);
 
   // handle UDP read operations
-  int i, nread = 0;
+  int i = 0;
   PollCont *pc = get_UDPPollCont(e->ethread);
   EventIO *epd = nullptr;
   for (i = 0; i < pc->pollDescriptor->result; i++) {
@@ -959,7 +955,6 @@ UDPNetHandler::mainNetEvent(int event, Event *e)
           uc->Release();
         } else {
           udpNetInternal.udp_read_from_net(this, uc);
-          nread++;
         }
       } else {
         Debug("iocore_udp_main", "Unhandled epoll event: 0x%04x", get_ev_events(pc->pollDescriptor, i));
