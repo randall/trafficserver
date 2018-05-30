@@ -51,7 +51,6 @@ test_certlookup_LDADD = \
 
 test_UDPNet_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
-	$(LUAJIT_CPPFLAGS) \
 	$(iocore_include_dirs) \
 	-I$(abs_top_srcdir)/proxy \
 	-I$(abs_top_srcdir)/proxy/hdrs \
@@ -73,7 +72,6 @@ test_UDPNet_LDADD = \
 	$(top_builddir)/lib/ts/libtsutil.la \
 	$(top_builddir)/proxy/ParentSelectionStrategy.o \
 	$(top_builddir)/lib/tsconfig/libtsconfig.la \
-	$(top_builddir)/lib/luajit/src/libluajit.a \
 	@LIBTCL@ @HWLOC_LIBS@ @OPENSSL_LIBS@
 
 test_UDPNet_SOURCES = \
@@ -93,8 +91,8 @@ libinknet_a_SOURCES = \
 	Inline.cc \
 	I_SessionAccept.h \
 	SessionAccept.cc \
-	LuaSNIConfig.h \
-	LuaSNIConfig.cc \
+	YamlSNIConfig.h \
+	YamlSNIConfig.cc \
 	Net.cc \
 	NetVConnection.cc \
 	P_SNIActionPerformer.h \
@@ -163,7 +161,6 @@ libinknet_a_SOURCES += \
 endif
 
 libinknet_a_LIBADD = \
-	$(top_builddir)/lib/luajit/src/libluajit.a \
 	$(top_builddir)/lib/tsconfig/libtsconfig.la
 
 include $(top_srcdir)/build/tidy.mk

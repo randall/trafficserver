@@ -48,80 +48,10 @@ AM_CPPFLAGS += \
 # NOTE: it is safe to use AM_LDFLAGS here because we are only building executables. If we start
 # building libtool archives, change these to only apply to the executables.
 AM_LDFLAGS += \
-	$(LUAJIT_LDFLAGS) \
 	@OPENSSL_LDFLAGS@
 
 noinst_HEADERS = \
 	Show.h
-
-# These are currently built separate, as part of building the lib/ tree, using
-# the normal LuaJIT build system. We are using the .o's directly, instead of the
-# luajit.a to avoid the linker from optimizing symbols away. We could maybe
-# switch to using the luajit.so, but that involves making sure it installs safely
-# and cleanly.
-LUAJIT = \
-	lib_aux.o \
-	lib_base.o \
-	lib_bit.o \
-	lib_debug.o \
-	lib_ffi.o \
-	lib_init.o \
-	lib_io.o \
-	lib_jit.o \
-	lib_math.o \
-	lib_os.o \
-	lib_package.o \
-	lib_string.o \
-	lib_table.o \
-	lj_alloc.o \
-	lj_api.o \
-	lj_asm.o \
-	lj_bc.o \
-	lj_bcread.o \
-	lj_bcwrite.o \
-	lj_carith.o \
-	lj_ccall.o \
-	lj_ccallback.o \
-	lj_cconv.o \
-	lj_cdata.o \
-	lj_char.o \
-	lj_clib.o \
-	lj_cparse.o \
-	lj_crecord.o \
-	lj_ctype.o \
-	lj_debug.o \
-	lj_dispatch.o \
-	lj_err.o \
-	lj_ffrecord.o \
-	lj_func.o \
-	lj_gc.o \
-	lj_gdbjit.o \
-	lj_ir.o \
-	lj_lex.o \
-	lj_lib.o \
-	lj_load.o \
-	lj_mcode.o \
-	lj_meta.o \
-	lj_obj.o \
-	lj_opt_dce.o \
-	lj_opt_fold.o \
-	lj_opt_loop.o \
-	lj_opt_mem.o \
-	lj_opt_narrow.o \
-	lj_opt_sink.o \
-	lj_opt_split.o \
-	lj_parse.o \
-	lj_record.o \
-	lj_snap.o \
-	lj_state.o \
-	lj_str.o \
-	lj_strscan.o \
-	lj_tab.o \
-	lj_trace.o \
-	lj_udata.o \
-	lj_vm.o \
-	lj_vmevent.o \
-	lj_vmmath.o
 
 EXTRA_DIST = InkAPITestTool.cc example_alarm_bin.sh example_prep.sh
 
@@ -195,13 +125,7 @@ traffic_server_LDADD = \
 	$(top_builddir)/iocore/dns/libinkdns.a \
 	$(top_builddir)/iocore/cache/libinkcache.a \
 	$(top_builddir)/iocore/aio/libinkaio.a \
-	$(top_builddir)/lib/ts/libtsutil.la \
-	$(top_builddir)/lib/bindings/libbindings.la
-
-if BUILD_LUAJIT
-traffic_server_LDADD += \
-	$(top_builddir)/lib/luajit/src/libluajit.a
-endif
+	$(top_builddir)/lib/ts/libtsutil.la
 
 traffic_server_LDADD += \
 	$(top_builddir)/iocore/net/libinknet.a \
@@ -217,15 +141,8 @@ traffic_server_LDADD += \
 	@LIBLZMA@ \
 	@LIBPROFILER@ \
 	@OPENSSL_LIBS@ \
+	@LIB_YAMLCPP@ \
 	-lm
-
-if BUILD_LUAJIT
-traffic_server_LDADD += $(LUAJIT:%=$(top_builddir)/lib/luajit/src/%)
-endif
-
-if SYSTEM_LUAJIT
-traffic_server_LDADD += @LIBLUAJIT@
-endif
 
 traffic_logcat_SOURCES = logcat.cc
 traffic_logcat_LDADD = \
@@ -235,21 +152,12 @@ traffic_logcat_LDADD = \
 	$(top_builddir)/mgmt/libmgmt_p.la \
 	$(top_builddir)/lib/records/librecords_p.a \
 	$(top_builddir)/iocore/eventsystem/libinkevent.a \
-	$(top_builddir)/lib/ts/libtsutil.la \
-	$(top_builddir)/lib/bindings/libbindings.la
-
-if BUILD_LUAJIT
-traffic_logcat_LDADD += \
-	$(top_builddir)/lib/luajit/src/libluajit.a
-endif
+	$(top_builddir)/lib/ts/libtsutil.la
 
 traffic_logcat_LDADD += \
-	@LIBTCL@ @HWLOC_LIBS@\
+	@LIBTCL@ @HWLOC_LIBS@ \
+	@LIB_YAMLCPP@ \
 	@LIBPROFILER@ -lm
-
-if SYSTEM_LUAJIT
-traffic_logcat_LDADD += @LIBLUAJIT@
-endif
 
 traffic_logstats_SOURCES = logstats.cc
 traffic_logstats_LDADD = \
@@ -259,21 +167,12 @@ traffic_logstats_LDADD = \
 	$(top_builddir)/mgmt/libmgmt_p.la \
 	$(top_builddir)/lib/records/librecords_p.a \
 	$(top_builddir)/iocore/eventsystem/libinkevent.a \
-	$(top_builddir)/lib/ts/libtsutil.la \
-	$(top_builddir)/lib/bindings/libbindings.la
-
-if BUILD_LUAJIT
-traffic_logstats_LDADD += \
-  $(top_builddir)/lib/luajit/src/libluajit.a
-endif
+	$(top_builddir)/lib/ts/libtsutil.la
 
 traffic_logstats_LDADD += \
   @LIBTCL@ @HWLOC_LIBS@ \
+  @LIB_YAMLCPP@ \
   @LIBPROFILER@ -lm
-
-if SYSTEM_LUAJIT
-traffic_logstats_LDADD += @LIBLUAJIT@
-endif
 
 versiondir = $(pkgsysconfdir)
 
