@@ -1345,9 +1345,7 @@ AC_SUBST([LIBJANSSON])
 # Check for yaml-cpp library
 #
 TS_CHECK_YAML_CPP
-if test "x${has_yaml_cpp}" != "xyes"; then
-  AC_MSG_ERROR([Cannot find yaml-cpp library. Configure --with-yaml-cpp=DIR])
-fi
+AM_CONDITIONAL([BUILD_YAML_CPP], [test x"$has_yaml_cpp" = x"no"])
 
 # Check for backtrace() support
 has_backtrace=0

@@ -22,7 +22,7 @@ dnl
 dnl TS_CHECK_YAML_CPP: look for yaml-cpp libraries and headers
 dnl
 AC_DEFUN([TS_CHECK_YAML_CPP], [
-has_yaml_cpp=0
+has_yaml_cpp=no
 AC_ARG_WITH(yaml-cpp, [AC_HELP_STRING([--with-yaml-cpp=DIR],[use a specific yaml-cpp library])],
 [
   if test "x$withval" != "xyes" && test "x$withval" != "x"; then
@@ -73,6 +73,10 @@ if test "$has_yaml_cpp" != "no"; then
 fi
 ],
 [
+  has_yaml_cpp=no
+  TS_ADDTO(CPPFLAGS, [-I\${abs_top_srcdir}/lib/yamlcpp/include])
+  TS_ADDTO(LDFLAGS, [-Wl,-L\${abs_top_builddir}/lib/yamlcpp])
+  AC_SUBST([LIB_YAMLCPP], [-Wl,-lyamlcpp])
 ])
 
 ])
