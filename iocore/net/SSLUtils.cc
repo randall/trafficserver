@@ -91,7 +91,6 @@
 /*
  * struct ssl_user_config: gather user provided settings from ssl_multicert.config in to this single struct
  * ssl_ticket_enabled - session ticket enabled
- * ssl_cert_name - certificate
  * dest_ip - IPv[64] address to match
  * ssl_cert_name - certificate
  * first_cert - the first certificate name when multiple cert files are in 'ssl_cert_name'
@@ -180,7 +179,7 @@ SSL_locking_callback(int mode, int type, const char *file, int line)
 }
 #endif
 
-static bool
+bool
 SSL_CTX_add_extra_chain_cert_bio(SSL_CTX *ctx, BIO *bio)
 {
   X509 *cert;
@@ -1615,6 +1614,66 @@ setClientCertLevel(SSL *ssl, uint8_t certLevel)
   SSL_set_verify_depth(ssl, params->verify_depth); // might want to make configurable at some point.
 }
 
+bool
+loadCertificateForContext(SSL_CTX *ctx, const char *certname, const char *keypath, const SSLConfigParams *params,
+                          std::vector<X509 *> &certList)
+{
+  Error("Loading %s", certname);
+  std::string completeServerCertPath = Layout::relative_to(params->serverCertPathOnly, certname);
+  scoped_BIO bio(BIO_new_file(completeServerCertPath.c_str(), "r"));
+  X509 *cert = nullptr;
+  if (bio) {
+    cert = PEM_read_bio_X509(bio.get(), nullptr, nullptr, nullptr);
+  }
+
+  if (!bio || !cert) {
+    SSLError("failed to load certificate chain from %s", completeServerCertPath.c_str());
+    goto fail;
+  }
+
+  if (!SSL_CTX_use_certificate(ctx, cert)) {
+    SSLError("Failed to assign cert from %s to SSL_CTX", completeServerCertPath.c_str());
+    X509_free(cert);
+    goto fail;
+  }
+
+  certList.push_back(cert);
+
+  if (SSLConfigParams::load_ssl_file_cb) {
+    SSLConfigParams::load_ssl_file_cb(completeServerCertPath.c_str(), CONFIG_FLAG_UNVERSIONED);
+  }
+
+  // Load up any additional chain certificates
+  SSL_CTX_add_extra_chain_cert_bio(ctx, bio);
+
+  Error("keypath: %s", keypath);
+
+  if (!SSLPrivateKeyHandler(ctx, params, completeServerCertPath, keypath)) {
+    goto fail;
+  }
+
+  // Must load all the intermediate certificates before starting the next chain
+
+  // First, load any CA chains from the global chain file.  This should probably
+  // eventually be a comma separated list too.  For now we will load it in all chains even
+  // though it only makes sense in one chain
+  if (params->serverCertChainFilename) {
+    ats_scoped_str completeServerCertChainPath(Layout::relative_to(params->serverCertPathOnly, params->serverCertChainFilename));
+    if (!SSL_CTX_add_extra_chain_cert_file(ctx, completeServerCertChainPath)) {
+      SSLError("failed to load global certificate chain from %s", (const char *)completeServerCertChainPath);
+      goto fail;
+    }
+    if (SSLConfigParams::load_ssl_file_cb) {
+      SSLConfigParams::load_ssl_file_cb(completeServerCertChainPath, CONFIG_FLAG_UNVERSIONED);
+    }
+  }
+
+  return true;
+
+fail:
+  return false;
+}
+
 SSL_CTX *
 SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMultCertSettings, std::vector<X509 *> &certList)
 {
@@ -1701,6 +1760,7 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
       }
       SSL_CTX_set_default_passwd_cb(ctx, passwd_cb);
       SSL_CTX_set_default_passwd_cb_userdata(ctx, &ud);
+
       // Clear any password info lingering in the UD data structure
       memset(static_cast<void *>(&ud), 0, sizeof(ud));
     }
@@ -1713,6 +1773,8 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
         Error("the number of certificates in ssl_cert_name and ssl_key_name doesn't match");
         goto fail;
       }
+
+      // RRM ssl_cert_name here
       SimpleTokenizer ca_tok("", SSL_CERT_SEPARATE_DELIM);
       if (sslMultCertSettings->ca) {
         ca_tok.setString(sslMultCertSettings->ca);
@@ -1723,48 +1785,9 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
       }
 
       for (const char *certname = cert_tok.getNext(); certname; certname = cert_tok.getNext()) {
-        std::string completeServerCertPath = Layout::relative_to(params->serverCertPathOnly, certname);
-        scoped_BIO bio(BIO_new_file(completeServerCertPath.c_str(), "r"));
-        X509 *cert = nullptr;
-        if (bio) {
-          cert = PEM_read_bio_X509(bio.get(), nullptr, nullptr, nullptr);
-        }
-        if (!bio || !cert) {
-          SSLError("failed to load certificate chain from %s", completeServerCertPath.c_str());
+        const char *keypath = key_tok.getNext();
+        if (!loadCertificateForContext(ctx, certname, keypath, params, certList)) {
           goto fail;
-        }
-        if (!SSL_CTX_use_certificate(ctx, cert)) {
-          SSLError("Failed to assign cert from %s to SSL_CTX", completeServerCertPath.c_str());
-          X509_free(cert);
-          goto fail;
-        }
-        certList.push_back(cert);
-        if (SSLConfigParams::load_ssl_file_cb) {
-          SSLConfigParams::load_ssl_file_cb(completeServerCertPath.c_str(), CONFIG_FLAG_UNVERSIONED);
-        }
-        // Load up any additional chain certificates
-        SSL_CTX_add_extra_chain_cert_bio(ctx, bio);
-
-        const char *keyPath = key_tok.getNext();
-        if (!SSLPrivateKeyHandler(ctx, params, completeServerCertPath, keyPath)) {
-          goto fail;
-        }
-
-        // Must load all the intermediate certificates before starting the next chain
-
-        // First, load any CA chains from the global chain file.  This should probably
-        // eventually be a comma separated list too.  For now we will load it in all chains even
-        // though it only makes sense in one chain
-        if (params->serverCertChainFilename) {
-          ats_scoped_str completeServerCertChainPath(
-            Layout::relative_to(params->serverCertPathOnly, params->serverCertChainFilename));
-          if (!SSL_CTX_add_extra_chain_cert_file(ctx, completeServerCertChainPath)) {
-            SSLError("failed to load global certificate chain from %s", (const char *)completeServerCertChainPath);
-            goto fail;
-          }
-          if (SSLConfigParams::load_ssl_file_cb) {
-            SSLConfigParams::load_ssl_file_cb(completeServerCertChainPath, CONFIG_FLAG_UNVERSIONED);
-          }
         }
 
         // Now, load any additional certificate chains specified in this entry.
@@ -1804,6 +1827,7 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
       }
     }
   }
+
   if (params->clientCertLevel != 0) {
     if (params->serverCACertFilename != nullptr && params->serverCACertPath != nullptr) {
       if ((!SSL_CTX_load_verify_locations(ctx, params->serverCACertFilename, params->serverCACertPath)) ||
@@ -1822,6 +1846,7 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
       server_verify_client = SSL_VERIFY_NONE;
       Error("illegal client certification level %d in records.config", server_verify_client);
     }
+
     SSL_CTX_set_verify(ctx, server_verify_client, ssl_verify_client_callback);
     SSL_CTX_set_verify_depth(ctx, params->verify_depth); // might want to make configurable at some point.
   }
@@ -1865,6 +1890,7 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
     SSLError("EVP_DigestFinal_ex failed");
     goto fail;
   }
+
   EVP_MD_CTX_free(digest);
   digest = nullptr;
 
@@ -1937,14 +1963,18 @@ SSLInitServerContext(const SSLConfigParams *params, const ssl_user_config *sslMu
   if (SSLConfigParams::init_ssl_ctx_cb) {
     SSLConfigParams::init_ssl_ctx_cb(ctx, true);
   }
+
+  // Success!
   return ctx;
 
 fail:
   if (digest) {
     EVP_MD_CTX_free(digest);
   }
+
   SSL_CLEAR_PW_REFERENCES(ctx)
   SSLReleaseContext(ctx);
+
   for (auto cert : certList) {
     X509_free(cert);
   }

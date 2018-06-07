@@ -8874,6 +8874,7 @@ TSSslContextFindByName(const char *name)
   }
   return ret;
 }
+
 tsapi TSSslContext
 TSSslContextFindByAddr(struct sockaddr const *addr)
 {
