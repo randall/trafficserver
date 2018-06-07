@@ -335,7 +335,7 @@ typedef enum {
 
     TS_LIFECYCLE_MSG_HOOK
 
-      Called in response to an external agent. The data is a pointer to  an instance of TSPluginMsg.
+      Called in response to an external agent. The data is a pointer to an instance of TSPluginMsg.
 
       Event: TS_EVENT_LIFECYCLE_MSG
 

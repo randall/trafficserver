@@ -66,6 +66,7 @@ include experimental/header_normalize/Makefile.inc
 include experimental/hipes/Makefile.inc
 include experimental/hook-trace/Makefile.inc
 include experimental/inliner/Makefile.inc
+include experimental/manifest_cert_loader/Makefile.inc
 include experimental/memcache/Makefile.inc
 include experimental/metalink/Makefile.inc
 include experimental/money_trace/Makefile.inc
