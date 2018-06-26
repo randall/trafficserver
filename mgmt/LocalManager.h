@@ -122,6 +122,7 @@ public:
   char *proxy_binary;
   char *proxy_options = nullptr; // These options should persist across proxy reboots
   char *env_prep;
+  char *log_file;
 
   int process_server_sockfd = ts::NO_FD;
   int watched_process_fd    = ts::NO_FD;

@@ -39,6 +39,9 @@
 
 #define MGMT_OPT "-M"
 
+#define TM_OPT_BIND_STDOUT "bind_stdout"
+#define TM_OPT_BIND_STDERR "bind_stderr"
+
 void
 LocalManager::mgmtCleanup()
 {
@@ -177,6 +180,17 @@ LocalManager::processRunning()
   }
 }
 
+static std::string
+config_read_log_dir()
+{
+  char *logdir = REC_readString("proxy.config.log.logfile_dir", nullptr);
+  if (strlen(logdir) > 0) {
+    return Layout::get()->relative(logdir);
+  } else {
+    return Layout::get()->logdir;
+  }
+}
+
 LocalManager::LocalManager(bool proxy_on) : BaseManager(), run_proxy(proxy_on)
 {
   bool found;
@@ -234,6 +248,10 @@ LocalManager::LocalManager(bool proxy_on) : BaseManager(), run_proxy(proxy_on)
   proxy_name                   = REC_readString("proxy.config.proxy_name", &found);
   proxy_binary                 = REC_readString("proxy.config.proxy_binary", &found);
   env_prep                     = REC_readString("proxy.config.env_prep", &found);
+
+  std::string log_dir = config_read_log_dir();
+  std::string log_file = REC_readString("proxy.config.output.logfile", &found);
+  log_file = ats_stringdup(Layout::relative_to(log_dir, log_file));
 
   // Calculate proxy_binary from the absolute bin_path
   absolute_proxy_binary = ats_stringdup(Layout::relative_to(bindir, proxy_binary));
@@ -838,8 +856,20 @@ LocalManager::startProxy(const char *onetime_options)
   // traffic server binary exists, check permissions
   else if (access(absolute_proxy_binary, R_OK | X_OK) < 0) {
     // Error don't have proper permissions
-    mgmt_elog(errno, "[LocalManager::startProxy] Unable to access %s due to bad permisssions \n", absolute_proxy_binary);
+    mgmt_elog(errno, "[LocalManager::startProxy] Unable to access %s due to bad permisssions\n", absolute_proxy_binary);
     return false;
+  }
+
+  // Move any traffic.out that we can not write to, out of the way
+  // coverity[fs_check_call]
+  if (access(log_file, W_OK) < 0 && errno == EACCES) {
+    char old_log_file[PATH_NAME_MAX];
+    snprintf(old_log_file, sizeof(old_log_file), "%s.old", log_file);
+    mgmt_elog(errno, "[LocalManager::startProxy] renaming %s to %s as it is not writeable\n", log_file, old_log_file);
+    // coverity[toctou]
+    if (rename(log_file, old_log_file) != 0) {
+      mgmt_elog(errno, "[LocalManager::startProxy] unable to rename \"%s\" to \"%s\" [%d '%s']\n", log_file, old_log_file, errno, strerror(errno));
+    }
   }
 
   if (env_prep) {
@@ -861,7 +891,11 @@ LocalManager::startProxy(const char *onetime_options)
       std::string bindir(RecConfigReadBinDir());
 
       ink_filepath_make(env_prep_bin, sizeof(env_prep_bin), bindir.c_str(), env_prep);
-      res = execl(env_prep_bin, env_prep_bin, (char *)nullptr);
+
+      // Bind stdout and stderr of traffic_manager to traffic.out
+      res = execl(env_prep_bin, env_prep_bin, "--" TM_OPT_BIND_STDOUT, log_file, "--" TM_OPT_BIND_STDERR, log_file, nullptr);
+
+      mgmt_elog(errno, "[LocalManager::startProxy] execl of %s failed: %s", env_prep_bin, strerror(errno));
       _exit(res);
     }
   }
