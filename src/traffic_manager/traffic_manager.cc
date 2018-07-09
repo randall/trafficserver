@@ -847,10 +847,6 @@ static void
 SignalAlrmHandler(int /* sig ATS_UNUSED */)
 #endif
 {
-/*
-   fprintf("[TrafficManager] ==> SIGALRM received\n");
-   mgmt_elog(0, "[TrafficManager] ==> SIGALRM received\n");
- */
 #if !defined(linux) && !defined(freebsd) && !defined(darwin)
   if (t) {
     if (t->si_code <= 0) {

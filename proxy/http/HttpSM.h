@@ -43,7 +43,6 @@
 #include "HdrUtils.h"
 #include <string_view>
 #include <ts/History.h>
-//#include "AuthHttpAdapter.h"
 
 /* Enable LAZY_BUF_ALLOC to delay allocation of buffers until they
  * are actually required.

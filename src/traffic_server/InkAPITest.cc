@@ -5453,12 +5453,6 @@ REGRESSION_TEST(SDK_API_TSMimeHdrField)(RegressionTest *test, int /* atype ATS_U
       SDK_RPRINT(test, "TSMimeHdrDestroy", "TestCase1", TC_PASS, "ok");
       test_passed_Mime_Hdr_Destroy = true;
     }
-    /** Commented out as Traffic Server was crashing. Will have to look into it. */
-    /*
-       if (TSHandleMLocRelease(bufp1,TS_NULL_MLOC,mime_loc1)==TS_ERROR) {
-       SDK_RPRINT(test,"TSHandleMLocRelease","TSMimeHdrDestroy",TC_FAIL,"unable to release handle using TSHandleMLocRelease");
-       }
-     */
   } else {
     SDK_RPRINT(test, "TSMimeHdrDestroy", "TestCase1", TC_FAIL, "Cannot run test as TSMimeHdrCreate failed");
   }

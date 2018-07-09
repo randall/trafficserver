@@ -31,7 +31,6 @@
 #include "matcher.h"
 #include "value.h"
 #include "lulu.h"
-//#include <mdbm.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Condition declarations.

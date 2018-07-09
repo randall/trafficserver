@@ -333,7 +333,6 @@ add_executable(ats
         iocore/net/SSLSNIConfig.cc
         iocore/net/SSLUtils.cc
         iocore/net/test_certlookup.cc
-        iocore/net/test_I_Net.cc
         iocore/net/test_I_UDPNet.cc
         iocore/net/test_P_Net.cc
         iocore/net/UDPIOEvent.cc

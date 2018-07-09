@@ -35,8 +35,6 @@
 #include "ts/List.h"
 
 #define MAP_INTEGRAL_SIZE (1 << (2))
-//#define MAP_INITIAL_SHIFT               ((2)+1)
-//#define MAP_INITIAL_SIZE                (1 << MAP_INITIAL_SHIFT)
 
 // Simple Vector class, also supports open hashed sets
 #define VEC_INTEGRAL_SHIFT_DEFAULT 2 /* power of 2 (1 << VEC_INTEGRAL_SHIFT)*/

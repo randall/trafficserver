@@ -118,7 +118,6 @@ HOSTDB_CLIENT_IP_HASH(sockaddr const *lhs, sockaddr const *rhs)
 // DNS entries which failed lookup, should be revalidated every hour
 #define HOST_DB_IP_FAIL_TIMEOUT (60 * 60)
 
-//#define HOST_DB_MAX_INTERVAL                 (0x7FFFFFFF)
 const unsigned int HOST_DB_MAX_TTL = (0x1FFFFF); // 24 days
 
 //
@@ -128,9 +127,6 @@ const unsigned int HOST_DB_MAX_TTL = (0x1FFFFF); // 24 days
 // period to wait for a remote probe...
 #define HOST_DB_RETRY_PERIOD HRTIME_MSECONDS(20)
 #define HOST_DB_ITERATE_PERIOD HRTIME_MSECONDS(5)
-
-//#define TEST(_x) _x
-#define TEST(_x)
 
 struct HostEnt;
 
