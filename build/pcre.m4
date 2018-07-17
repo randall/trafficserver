@@ -23,7 +23,7 @@ dnl TS_CHECK_PCRE: look for pcre libraries and headers
 dnl
 AC_DEFUN([TS_CHECK_PCRE], [
 enable_pcre=no
-AC_ARG_WITH(pcre, [AC_HELP_STRING([--with-pcre=DIR],[use a specific pcre library])],
+AC_ARG_WITH(pcre, [AC_HELP_STRING([--with-pcre=DIR], [use a specific pcre library])],
 [
   if test "x$withval" != "xyes" && test "x$withval" != "x"; then
     pcre_base_dir="$withval"
@@ -88,23 +88,30 @@ if test "$enable_pcre" != "no"; then
   saved_cppflags=$CPPFLAGS
   pcre_have_headers=0
   pcre_have_libs=0
+
   if test "$pcre_base_dir" != "/usr"; then
     TS_ADDTO(CPPFLAGS, [-I${pcre_include}])
     TS_ADDTO(LDFLAGS, [-L${pcre_ldflags}])
     TS_ADDTO_RPATH(${pcre_ldflags})
   fi
+
   AC_CHECK_LIB([pcre], [pcre_exec], [pcre_have_libs=1])
   if test "$pcre_have_libs" != "0"; then
     AC_CHECK_HEADERS(pcre.h, [pcre_have_headers=1])
     AC_CHECK_HEADERS(pcre/pcre.h, [pcre_have_headers=1])
   fi
+
   if test "$pcre_have_headers" != "0"; then
-    AC_DEFINE(HAVE_LIBPCRE,1,[Compiling with pcre support])
+    AC_SUBST([PCRE_LDFLAGS], [-L${pcre_ldflags}])
+    AC_SUBST([PCRE_CPPFLAGS], [-I${pcre_include}])
+
+    AC_DEFINE(HAVE_LIBPCRE,1, [Compiling with pcre support])
     AC_SUBST(LIBPCRE, [-lpcre])
   else
     enable_pcre=no
-    CPPFLAGS=$saved_cppflags
-    LDFLAGS=$saved_ldflags
   fi
+
+  CPPFLAGS=$saved_cppflags
+  LDFLAGS=$saved_ldflags
 fi
 ])

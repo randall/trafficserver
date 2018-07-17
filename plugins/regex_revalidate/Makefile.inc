@@ -15,4 +15,7 @@
 #  limitations under the License.
 
 pkglib_LTLIBRARIES += regex_revalidate/regex_revalidate.la
+
+regex_revalidate_regex_revalidate_la_CPPFLAGS = $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)
+
 regex_revalidate_regex_revalidate_la_SOURCES = regex_revalidate/regex_revalidate.c

@@ -21,3 +21,5 @@ cachekey_cachekey_la_SOURCES = \
   cachekey/configs.cc \
   cachekey/pattern.cc \
   cachekey/plugin.cc
+
+cachekey_cachekey_la_CPPFLAGS = $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)

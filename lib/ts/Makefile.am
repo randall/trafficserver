@@ -36,6 +36,7 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/lib/records \
 	$(TS_INCLUDES) \
+	@PCRE_CPPFLAGS@ \
 	@YAMLCPP_INCLUDES@
 
 libtsutil_la_LDFLAGS = -no-undefined -version-info @TS_LIBTOOL_VERSION@ @YAMLCPP_LDFLAGS@
@@ -257,7 +258,7 @@ test_tsutil_SOURCES = \
 	test_Ptr.cc \
 	tests.cc
 
-test_tslib_CPPFLAGS = $(AM_CPPFLAGS)\
+test_tslib_CPPFLAGS = $(AM_CPPFLAGS) \
 	-I$(abs_top_srcdir)/tests/include
 
 # add you catch based test file here for tslib
@@ -280,7 +281,7 @@ test_tslib_SOURCES = \
 	unit-tests/test_Regex.cc \
 	unit-tests/test_Scalar.cc \
 	unit-tests/test_scoped_resource.cc \
-	unit-tests/test_TextView.cc 
+	unit-tests/test_TextView.cc
 
 CompileParseRules_SOURCES = CompileParseRules.cc
 

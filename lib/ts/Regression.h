@@ -24,8 +24,9 @@
 #pragma once
 
 #include "ts/ink_platform.h"
-#include "ts/Regex.h"
 #include "ts/Diags.h"
+
+class DFA;
 
 //   Each module should provide one or more regression tests
 //

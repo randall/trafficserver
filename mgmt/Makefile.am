@@ -34,11 +34,12 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/proxy/hdrs \
 	-I$(abs_top_srcdir)/lib/records \
 	-I$(abs_top_srcdir)/lib \
+	@PCRE_CPPFLAGS@ \
 	$(TS_INCLUDES)
 
 libmgmt_c_la_SOURCES = \
 	RecordsConfig.cc \
-	RecordsConfig.h 
+	RecordsConfig.h
 
 libmgmt_COMMON = \
 	BaseManager.cc \

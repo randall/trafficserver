@@ -35,7 +35,6 @@
 
 #include <cstdarg>
 #include "ink_mutex.h"
-#include "Regex.h"
 #include "ink_apidefs.h"
 #include "ContFlags.h"
 #include "ink_inet.h"
@@ -46,6 +45,7 @@
 #define BYTES_IN_MB 1000000
 
 class Diags;
+class DFA;
 
 // extern int diags_on_for_plugins;
 enum DiagsTagType {

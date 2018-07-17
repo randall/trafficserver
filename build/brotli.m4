@@ -55,6 +55,7 @@ if test "$has_brotli" != "0"; then
   saved_cppflags=$CPPFLAGS
   brotli_have_headers=0
   brotli_have_libs=0
+
   if test "$brotli_base_dir" != "/usr"; then
     TS_ADDTO(CPPFLAGS, [-I${brotli_include}])
     TS_ADDTO(LDFLAGS, [-L${brotli_ldflags}])
@@ -65,14 +66,17 @@ if test "$has_brotli" != "0"; then
   if test "$brotli_have_libs" != "0"; then
     AC_CHECK_HEADERS(brotli/encode.h, [brotli_have_headers=1])
   fi
+
   if test "$brotli_have_headers" != "0"; then
     AC_SUBST([BROTLIENC_LIB], [-lbrotlienc])
+    AC_SUBST([BROTLIENC_LDFLAGS], [-L${brotli_ldflags}])
     AC_SUBST([BROTLIENC_CFLAGS], [-I${brotli_include}])
   else
     has_brotli=0
-    CPPFLAGS=$saved_cppflags
-    LDFLAGS=$saved_ldflags
   fi
+
+  CPPFLAGS=$saved_cppflags
+  LDFLAGS=$saved_ldflags
 fi
 ],
 [

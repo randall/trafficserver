@@ -16,6 +16,9 @@
 
 pkglib_LTLIBRARIES += experimental/tls_bridge/tls_bridge.la
 
+experimental_tls_bridge_tls_bridge_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)
+
 experimental_tls_bridge_tls_bridge_la_SOURCES = \
   experimental/tls_bridge/tls_bridge.cc \
   experimental/tls_bridge/regex.h \

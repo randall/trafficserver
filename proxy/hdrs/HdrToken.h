@@ -30,9 +30,9 @@
 #include "ts/ink_defs.h"
 #include "ts/ink_string.h"
 #include "ts/Allocator.h"
-#include "ts/Regex.h"
+//#include "ts/Regex.h"
 #include "ts/ink_apidefs.h"
-
+class DFA;
 ////////////////////////////////////////////////////////////////////////////
 //
 //      tokenized string data

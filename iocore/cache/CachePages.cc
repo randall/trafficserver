@@ -21,6 +21,8 @@
   limitations under the License.
  */
 
+#include <pcre.h>
+
 #include "P_Cache.h"
 
 #include "Show.h"

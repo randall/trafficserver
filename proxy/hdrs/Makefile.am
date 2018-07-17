@@ -22,6 +22,7 @@ AM_CPPFLAGS += \
 	$(iocore_include_dirs) \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/lib/records \
+	@PCRE_CPPFLAGS@ \
 	$(TS_INCLUDES)
 
 noinst_LIBRARIES = libhdrs.a

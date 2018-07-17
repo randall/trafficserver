@@ -24,6 +24,7 @@
 #include "ts/ink_defs.h"
 #include "ts/ink_platform.h"
 #include "ts/ink_memory.h"
+#include "ts/Regex.h"
 #include "ts/TsBuffer.h"
 #include <cassert>
 #include <cstdio>

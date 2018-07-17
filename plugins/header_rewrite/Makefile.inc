@@ -18,6 +18,8 @@ pkglib_LTLIBRARIES += header_rewrite/header_rewrite.la
 
 noinst_LTLIBRARIES += header_rewrite/parser.la
 
+header_rewrite_header_rewrite_la_CPPFLAGS = $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)
+
 header_rewrite_header_rewrite_la_SOURCES = \
 	header_rewrite/condition.cc \
 	header_rewrite/condition.h \

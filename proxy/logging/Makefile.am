@@ -30,6 +30,7 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/mgmt \
 	-I$(abs_top_srcdir)/mgmt/utils \
 	$(TS_INCLUDES) \
+	@PCRE_CPPFLAGS@ \
 	@YAMLCPP_INCLUDES@
 
 EXTRA_DIST = LogStandalone.cc

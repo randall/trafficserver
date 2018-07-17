@@ -28,6 +28,7 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/mgmt/utils \
 	-I$(abs_top_srcdir)/proxy/http \
 	$(TS_INCLUDES) \
+	@PCRE_CPPFLAGS@ \
 	@OPENSSL_INCLUDES@ \
 	@YAMLCPP_INCLUDES@
 

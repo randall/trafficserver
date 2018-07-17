@@ -229,9 +229,6 @@ public:
   bool verifyURL(std::string &url1);
   Errata parseURL(TextView URI);
   int getPort(std::string &fullURL, int &port_ptr, int &port_len);
-
-private:
-  //   DFA regex;
 };
 
 class CacheURL

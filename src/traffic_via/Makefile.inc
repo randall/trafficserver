@@ -24,7 +24,8 @@ traffic_via_traffic_via_CPPFLAGS = \
 	$(iocore_include_dirs) \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/mgmt/api/include \
-	$(TS_INCLUDES)
+	$(TS_INCLUDES) \
+	@PCRE_CPPFLAGS@
 
 traffic_via_traffic_via_LDFLAGS = \
     $(AM_LDFLAGS) \

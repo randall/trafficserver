@@ -43,7 +43,6 @@
 
 #include "ts/ink_platform.h"
 #include "ts/ink_inet.h"
-#include "ts/Regex.h"
 #include "string_view"
 #include "ts/BufferWriter.h"
 #include "HttpProxyAPIEnums.h"

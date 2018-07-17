@@ -20,7 +20,8 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/lib/records \
 	-I$(abs_top_srcdir)/iocore/eventsystem \
-	$(TS_INCLUDES)
+	$(TS_INCLUDES) \
+	@PCRE_CPPFLAGS@
 
 noinst_LIBRARIES = libinkutils.a
 

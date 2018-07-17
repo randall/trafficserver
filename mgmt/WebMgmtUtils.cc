@@ -21,6 +21,8 @@
   limitations under the License.
  */
 
+#include <pcre.h>
+
 #include "ts/ink_platform.h"
 #include "ts/ink_string.h"
 #include "ts/Tokenizer.h"
@@ -29,7 +31,6 @@
 #include "LocalManager.h"
 #include "MgmtUtils.h"
 #include "WebMgmtUtils.h"
-#include "ts/Regex.h"
 
 /****************************************************************************
  *
@@ -1191,8 +1192,6 @@ recordRangeCheck(const char *pattern, const char *value)
 bool
 recordIPCheck(const char *pattern, const char *value)
 {
-  //  regex_t regex;
-  //  int result;
   bool check;
   const char *range_pattern =
     R"(\[[0-9]+\-[0-9]+\]\\\.\[[0-9]+\-[0-9]+\]\\\.\[[0-9]+\-[0-9]+\]\\\.\[[0-9]+\-[0-9]+\])";

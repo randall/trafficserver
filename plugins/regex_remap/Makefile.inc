@@ -15,4 +15,7 @@
 #  limitations under the License.
 
 pkglib_LTLIBRARIES += regex_remap/regex_remap.la
+
+regex_remap_regex_remap_la_CPPFLAGS = $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)
+
 regex_remap_regex_remap_la_SOURCES = regex_remap/regex_remap.cc

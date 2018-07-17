@@ -33,6 +33,7 @@
 #include "ts/ink_platform.h"
 #include "ts/ink_assert.h"
 #include "ts/ink_args.h"
+#include "ts/Regex.h"
 
 static RegressionTest *test           = nullptr;
 static RegressionTest *exclusive_test = nullptr;

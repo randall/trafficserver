@@ -44,6 +44,7 @@
 #include "ts/ink_thread.h"
 #include "ts/BufferWriter.h"
 #include "ts/Diags.h"
+#include "ts/Regex.h"
 
 int diags_on_for_plugins         = 0;
 int DiagsConfigState::enabled[2] = {0, 0};

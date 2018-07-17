@@ -29,6 +29,7 @@
 #include "P_RecCore.h"
 #include "P_RecUtils.h"
 #include "ts/I_Layout.h"
+#include "ts/Regex.h"
 
 static bool g_initialized = false;
 
