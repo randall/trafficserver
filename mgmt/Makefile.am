@@ -35,6 +35,7 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/lib/records \
 	-I$(abs_top_srcdir)/lib \
 	@PCRE_CPPFLAGS@ \
+	@OPENSSL_INCLUDES@ \
 	$(TS_INCLUDES)
 
 libmgmt_c_la_SOURCES = \

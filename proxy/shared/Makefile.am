@@ -32,7 +32,8 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/proxy/hdrs \
 	-I$(abs_top_srcdir)/proxy/http \
 	-I$(abs_top_srcdir)/proxy/logging \
-	@PCRE_CPPFLAGS@
+	@PCRE_CPPFLAGS@ \
+	@OPENSSL_INCLUDES@
 
 libdiagsconfig_a_SOURCES = \
 	DiagsConfig.cc

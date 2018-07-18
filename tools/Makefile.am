@@ -26,6 +26,7 @@ AM_CPPFLAGS += \
 	$(iocore_include_dirs) \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/lib/wccp \
+	$(OPENSSL_INCLUDES) \
 	$(TS_INCLUDES)
 
 if BUILD_TEST_TOOLS

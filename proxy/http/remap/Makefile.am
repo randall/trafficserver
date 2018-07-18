@@ -28,8 +28,9 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/proxy/hdrs \
 	-I$(abs_top_srcdir)/proxy/shared \
 	-I$(abs_top_srcdir)/proxy/http \
+	$(TS_INCLUDES) \
 	@PCRE_CPPFLAGS@ \
-	$(TS_INCLUDES)
+	@OPENSSL_INCLUDES@
 
 noinst_LIBRARIES = libhttp_remap.a
 

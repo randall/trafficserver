@@ -32,8 +32,9 @@ AM_CPPFLAGS += \
 	-I$(abs_srcdir)/hdrs \
 	-I$(abs_top_srcdir)/mgmt \
 	-I$(abs_top_srcdir)/mgmt/utils \
-	@PCRE_CPPFLAGS@ \
-	$(TS_INCLUDES)
+	$(TS_INCLUDES) \
+	@OPENSSL_INCLUDES@ \
+	@PCRE_CPPFLAGS@
 
 noinst_HEADERS = \
 	Show.h

@@ -18,6 +18,8 @@ include $(top_srcdir)/build/plugins.mk
 include $(top_srcdir)/build/tidy.mk
 
 AM_CXXFLAGS += -Wno-unused-variable
+AM_CPPFLAGS += $(OPENSSL_INCLUDES)
+
 AM_LDFLAGS = $(TS_PLUGIN_LD_FLAGS)
 
 libatscppapi = $(top_builddir)/lib/cppapi/libatscppapi.la

@@ -32,8 +32,9 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/proxy/http/remap \
 	-I$(abs_top_srcdir)/proxy/logging \
 	-I$(abs_top_srcdir)/proxy/http2 \
+	$(TS_INCLUDES) \
 	@PCRE_CPPFLAGS@ \
-	$(TS_INCLUDES)
+	@OPENSSL_INCLUDES@
 
 noinst_HEADERS = HttpProxyServerMain.h
 noinst_LIBRARIES = libhttp.a

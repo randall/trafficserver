@@ -18,3 +18,6 @@ pkglib_LTLIBRARIES += cache_promote/cache_promote.la
 
 cache_promote_cache_promote_la_SOURCES = \
   cache_promote/cache_promote.cc
+
+cache_promote_cache_promote_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) $(OPENSSL_INCLUDES)

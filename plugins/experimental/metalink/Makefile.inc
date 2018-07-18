@@ -16,5 +16,9 @@
 
 pkglib_LTLIBRARIES += experimental/metalink/metalink.la
 
+experimental_metalink_metalink_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) \
+  $(OPENSSL_INCLUDES)
+
 experimental_metalink_metalink_la_SOURCES = \
   experimental/metalink/metalink.cc

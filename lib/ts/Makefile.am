@@ -36,6 +36,7 @@ AM_CPPFLAGS += \
 	-I$(abs_top_srcdir)/lib \
 	-I$(abs_top_srcdir)/lib/records \
 	$(TS_INCLUDES) \
+	@OPENSSL_INCLUDES@ \
 	@PCRE_CPPFLAGS@ \
 	@YAMLCPP_INCLUDES@
 

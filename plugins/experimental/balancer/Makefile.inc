@@ -16,6 +16,8 @@
 
 pkglib_LTLIBRARIES += experimental/balancer/balancer.la
 
+experimental_balancer_balancer_la_CPPFLAGS = $(AM_CPPFLAGS) $(OPENSSL_INCLUDES)
+
 experimental_balancer_balancer_la_SOURCES = \
   experimental/balancer/balancer.cc\
   experimental/balancer/roundrobin.cc \

@@ -1149,6 +1149,13 @@ AC_SUBST([CURSES_LDFLAGS],[$curses_ldflags])
 #
 # Check for SSL presence and usability
 TS_CHECK_CRYPTO
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+saved_CPPFLAGS="$CPPFLAGS"
+TS_ADDTO([LIBS], ["$OPENSSL_LIBS"])
+TS_ADDTO(LDFLAGS, [$OPENSSL_LDFLAGS])
+TS_ADDTO(CPPFLAGS, [$OPENSSL_INCLUDES])
+TS_ADDTO(CPPFLAGS, [-DOPENSSL_NO_SSL_INTERN])
 
 #
 # Check for NextProtocolNegotiation TLS extension support.
@@ -1180,8 +1187,8 @@ TS_CHECK_CRYPTO_DH_GET_2048_256
 # Check for OCSP
 TS_CHECK_CRYPTO_OCSP
 
-saved_LIBS="$LIBS"
-TS_ADDTO([LIBS], ["$OPENSSL_LIBS"])
+#saved_LIBS="$LIBS"
+#TS_ADDTO([LIBS], ["$OPENSSL_LIBS"])
 
 AC_CHECK_FUNCS([ \
   BIO_meth_new \
@@ -1215,6 +1222,8 @@ AC_CHECK_FUNC([EVP_MD_CTX_free], [],
               [AC_DEFINE([EVP_MD_CTX_free], [EVP_MD_CTX_destroy], [Renamed in OpenSSL 1.1])])
 
 LIBS="$saved_LIBS"
+LDFLAGS="$saved_LDFLAGS"
+CPPFLAGS="$saved_CPPFLAGS"
 
 #
 # Check for zlib presence and usability

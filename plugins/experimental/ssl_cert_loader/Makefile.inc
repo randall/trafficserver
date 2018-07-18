@@ -16,6 +16,10 @@
 
 pkglib_LTLIBRARIES += experimental/ssl_cert_loader/ssl_cert_loader.la
 
+experimental_ssl_cert_loader_ssl_cert_loader_la_CPPFLAGS = \
+  $(AM_CPPFLAGS) \
+  $(OPENSSL_INCLUDES)
+
 experimental_ssl_cert_loader_ssl_cert_loader_la_SOURCES = \
   experimental/ssl_cert_loader/ssl-cert-loader.cc \
   experimental/ssl_cert_loader/domain-tree.cc

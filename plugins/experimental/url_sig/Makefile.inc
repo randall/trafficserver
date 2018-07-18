@@ -17,7 +17,9 @@
 pkglib_LTLIBRARIES += experimental/url_sig/url_sig.la
 
 experimental_url_sig_url_sig_la_CPPFLAGS = \
-  $(AM_CPPFLAGS) $(PCRE_CPPFLAGS)
+  $(AM_CPPFLAGS) \
+  $(PCRE_CPPFLAGS) \
+  $(OPENSSL_INCLUDES)
 
 experimental_url_sig_url_sig_la_SOURCES = \
   experimental/url_sig/url_sig.c
