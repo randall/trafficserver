@@ -64,28 +64,28 @@ formats:
     # reporting tools, simply create a log that uses this format.
     - name: welf
       format: |-
-          id=firewall time="%<cqtd> %<cqtt>" fw=%<phn> pri=6 proto=%<cqus> duration=%<ttmsf> sent=%<psql> rcvd=%<cqhl> src=%<chi> dst=%<shi> dstname=%<shn> user=%<caun> op=%<cqhm> arg="%<cqup>" result=%<pssc> ref="%<{Referer}cqh>" agent="%<{user-agent}cqh>" cache=%<crc>
+          id=firewall time="%<cqtd> %<cqtt>" fw=%<phn> pri=6 proto=%<cqus> duration=%<ttmsf> sent=%<psql> rcvd=%<cqhl> src=%<chi> dst=%<shi> dstname=%<shn> op=%<cqhm> arg="%<cqup>" result=%<pssc> ref="%<{Referer}cqh>" agent="%<{user-agent}cqh>" cache=%<crc>
     # Squid Log Format with seconds resolution timestamp.
     # The following is the squid format but with a seconds-only timestamp
     # (cqts) instead of a seconds and milliseconds timestamp (cqtq).
     - name: squid_seconds_only_timestamp
-      format: '%<cqts> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+      format: '%<cqts> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<phr>/%<shn> %<psct>'
 
     # Squid Log Format.
     - name: squid
-      format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+      format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<phr>/%<shn> %<psct>'
 
     # Common Log Format.
     - name: common
-      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
+      format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
 
     # Extended Log Format.
     - name: 'extended'
-      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts>'
+      format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts>'
 
      # Extended2 Log Formats
     - name: "extended2"
-      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts> %<phr> %<cfsc> %<pfsc> %<crc>'
+      format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts> %<phr> %<cfsc> %<pfsc> %<crc>'
 
 logs:
     - filename: squid

@@ -297,29 +297,6 @@ LogAccessHttp::marshal_client_host_port(char *buf)
 }
 
 /*-------------------------------------------------------------------------
-  user authenticated to the proxy (RFC931)
-  -------------------------------------------------------------------------*/
-
-int
-LogAccessHttp::marshal_client_auth_user_name(char *buf)
-{
-  char *str = nullptr;
-  int len   = INK_MIN_ALIGN;
-
-  // Jira TS-40:
-  // NOTE: Authentication related code and modules were removed/disabled.
-  //       Uncomment code path below when re-added/enabled.
-  /*if (m_http_sm->t_state.auth_params.user_name) {
-    str = m_http_sm->t_state.auth_params.user_name;
-    len = LogAccess::strlen(str);
-    } */
-  if (buf) {
-    marshal_str(buf, str, len);
-  }
-  return len;
-}
-
-/*-------------------------------------------------------------------------
   Private utility function to validate m_client_req_unmapped_url_canon_str &
   m_client_req_unmapped_url_canon_len fields.
   -------------------------------------------------------------------------*/

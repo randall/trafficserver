@@ -363,10 +363,6 @@ Log::init_fields()
   global_field_list.add(field, false);
   ink_hash_table_insert(field_symbol_hash, "hiih", field);
   // interface ip end
-  field = new LogField("client_auth_user_name", "caun", LogField::STRING, &LogAccess::marshal_client_auth_user_name,
-                       (LogField::UnmarshalFunc)&LogAccess::unmarshal_str);
-  global_field_list.add(field, false);
-  ink_hash_table_insert(field_symbol_hash, "caun", field);
 
   field = new LogField("plugin_identity_id", "piid", LogField::sINT, &LogAccess::marshal_plugin_identity_id,
                        reinterpret_cast<LogField::UnmarshalFunc>(&LogAccess::unmarshal_int_to_str));

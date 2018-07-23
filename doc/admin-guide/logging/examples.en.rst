@@ -57,8 +57,7 @@ No. Field  Description
 === ====== ====================================================================
 1   chi    The IP address of the client's host machine.
 2   --     This hyphen (``-``) is always present in Netscape log entries.
-3   caun   The authenticated client username. A hyphen (``-``) means no
-           authentication was required.
+3   --     The authenticated client username. Not supported.
 4   cqtn   The date and time of the client request, enclosed in brackets.
 5   cqtx   The request line, enclosed in quotes.
 6   pssc   The proxy response status code (HTTP reply code).
@@ -72,7 +71,7 @@ following format object:
 
    formats:
    - name: common
-     format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
+     format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
 
 .. _admin-logging-examples-extended:
 
@@ -119,7 +118,7 @@ following format object:
 
    formats:
    - name: extended
-     format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts>'
+     format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts>'
 
 .. _admin-logging-examples-extended2:
 
@@ -158,7 +157,7 @@ following format object:
 
    formats:
    - name: extended2
-     format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts> %<phr> %<cfsc> %<pfsc> %<crc>'
+     format: '%<chi> - - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts> %<phr> %<cfsc> %<pfsc> %<crc>'
 
 .. _admin-logging-examples-squid:
 
@@ -197,11 +196,9 @@ No. Field    Description
              escape sequences. The escape sequence is a percentage sign
              followed by the ASCII code number of the replaced character in
              hex.
-8   caun     The username of the authenticated client. A hyphen (``-``)
-             means that no authentication was required.
-9   phr/shn  The proxy hierarchy route. The route |TS| used to retrieve the
+8   phr/shn  The proxy hierarchy route. The route |TS| used to retrieve the
              object.
-10  psct     The proxy response content type. The object content type taken
+9   psct     The proxy response content type. The object content type taken
              from the |TS| response header.
 === ======== ==================================================================
 
@@ -212,7 +209,7 @@ following format object:
 
    formats:
    - name: squid
-     format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+     format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<phr>/%<shn> %<psct>'
 
 Hourly Rotated Squid Proxy Logs
 ===============================
@@ -225,7 +222,7 @@ policy.
 
    formats:
    - name: squid
-     format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+     format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<phr>/%<shn> %<psct>'
 
    logs:
    - mode: ascii
@@ -261,7 +258,7 @@ of the event data.
 .. code:: yaml
 
    ourformat = format {
-     Format = '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
+     Format = '%<chi> - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
    }
 
    log.binary {
@@ -286,7 +283,7 @@ for them to a UNIX pipe that the alerting software can constantly read from.
 
    formats:
    - name: canaryformat
-     format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
+     format: '%<chi> - [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
 
    filters:
    - name: canaryfilter

@@ -123,24 +123,6 @@ Age header from an origin server response you would do::
 
     Format = '%<{Age}ssh>'
 
-.. _admin-logging-fields-auth:
-
-Authentication
-~~~~~~~~~~~~~~
-
-.. _caun:
-
-These log fields provide access to various details of a client or proxy's
-means of request authentication to their destination (whether it be the client
-request to a proxy server, or the proxy server's request to an origin).
-
-===== ============== ==========================================================
-Field Source         Description
-===== ============== ==========================================================
-caun  Client Request Authentication User name as a result of the RFC931/ident
-                     lookup for the client-provided name.
-===== ============== ==========================================================
-
 .. _admin-logging-fields-cache:
 
 Cache Details

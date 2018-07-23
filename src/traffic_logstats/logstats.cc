@@ -1279,7 +1279,7 @@ parse_log_buff(LogBufferHeader *buf_header, bool summary = false, bool aggregate
 
   // Validate the fieldlist
   field                                = fieldlist->first();
-  const std::string_view test_fields[] = {"cqtq", "ttms", "chi", "crc", "pssc", "psql", "cqhm", "cquc", "caun", "phr", "shn"};
+  const std::string_view test_fields[] = {"cqtq", "ttms", "chi", "crc", "pssc", "psql", "cqhm", "cquc", "phr", "shn"};
   for (auto i : test_fields) {
     if (i != field->symbol()) {
       cerr << "Error parsing log file - expected field: " << i << ", but read field: " << field->symbol() << endl;

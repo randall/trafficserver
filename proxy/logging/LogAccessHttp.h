@@ -57,7 +57,6 @@ public:
   int marshal_client_host_ip(char *) override;                // STR
   int marshal_host_interface_ip(char *) override;             // STR
   int marshal_client_host_port(char *) override;              // INT
-  int marshal_client_auth_user_name(char *) override;         // STR
   int marshal_client_req_text(char *) override;               // STR
   int marshal_client_req_http_method(char *) override;        // INT
   int marshal_client_req_url(char *) override;                // STR
