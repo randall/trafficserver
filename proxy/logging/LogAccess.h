@@ -234,6 +234,7 @@ public:
   // server -> proxy fields
   //
   inkcoreapi virtual int marshal_server_host_ip(char *);           // INT
+  inkcoreapi virtual int marshal_server_host_port(char *);         // INT
   inkcoreapi virtual int marshal_server_host_name(char *);         // STR
   inkcoreapi virtual int marshal_server_resp_status_code(char *);  // INT
   inkcoreapi virtual int marshal_server_resp_squid_len(char *);    // INT

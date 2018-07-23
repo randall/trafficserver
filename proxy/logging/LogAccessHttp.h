@@ -118,6 +118,7 @@ public:
   // server -> proxy fields
   //
   int marshal_server_host_ip(char *) override;           // INT
+  int marshal_server_host_port(char *) override;         // INT
   int marshal_server_host_name(char *) override;         // STR
   int marshal_server_resp_status_code(char *) override;  // INT
   int marshal_server_resp_header_len(char *) override;   // INT

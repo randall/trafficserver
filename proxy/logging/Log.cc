@@ -736,9 +736,13 @@ Log::init_fields()
 
   // server -> proxy fields
   field = new LogField("server_host_ip", "shi", LogField::IP, &LogAccess::marshal_server_host_ip, &LogAccess::unmarshal_ip_to_str);
-
   global_field_list.add(field, false);
   ink_hash_table_insert(field_symbol_hash, "shi", field);
+
+  field =
+    new LogField("server_host_port", "shp", LogField::sINT, &LogAccess::marshal_server_host_port, &LogAccess::unmarshal_int_to_str);
+  global_field_list.add(field, false);
+  ink_hash_table_insert(field_symbol_hash, "shp", field);
 
   field = new LogField("server_host_name", "shn", LogField::STRING, &LogAccess::marshal_server_host_name,
                        (LogField::UnmarshalFunc)&LogAccess::unmarshal_str);

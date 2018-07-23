@@ -1188,6 +1188,19 @@ LogAccessHttp::marshal_server_host_ip(char *buf)
   -------------------------------------------------------------------------*/
 
 int
+LogAccessHttp::marshal_server_host_port(char *buf)
+{
+  if (buf) {
+    uint16_t port = ntohs(m_http_sm->t_state.current.server->dst_addr.port());
+    marshal_int(buf, port);
+  }
+  return INK_MIN_ALIGN;
+}
+
+/*-------------------------------------------------------------------------
+  -------------------------------------------------------------------------*/
+
+int
 LogAccessHttp::marshal_server_host_name(char *buf)
 {
   char *str = nullptr;
