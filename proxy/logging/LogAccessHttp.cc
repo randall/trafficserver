@@ -1118,6 +1118,23 @@ LogAccessHttp::marshal_next_hop_port(char *buf)
   return INK_MIN_ALIGN;
 }
 
+int
+LogAccessHttp::marshal_next_hop_name(char *buf)
+{
+  char *str = nullptr;
+  int len   = INK_MIN_ALIGN;
+
+  if (m_http_sm->t_state.current.server) {
+    str = m_http_sm->t_state.current.server->name;
+    len = LogAccess::strlen(str);
+  }
+
+  if (buf) {
+    marshal_str(buf, str, len);
+  }
+  return len;
+}
+
 /*-------------------------------------------------------------------------
   -------------------------------------------------------------------------*/
 

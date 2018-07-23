@@ -449,6 +449,7 @@ Network Addresses, Ports, and Interfaces
 .. _shn:
 .. _nhi:
 .. _nhp:
+.. _nhn:
 
 The following log fields are used to log details of the network (IP) addresses,
 incoming/outgoing ports, and network interfaces used during transactions.
@@ -475,6 +476,7 @@ shi   Origin Server  IP address resolved via DNS by |TS| for the origin server.
 shn   Origin Server  Host name of the origin server.
 nhi   Origin Server  Destination IP address of next hop
 nhp   Origin Server  Destination port of next hop
+nhn   Origin Server  Destination hostname of next hop
 ===== ============== ==========================================================
 
 .. note::
