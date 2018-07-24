@@ -45,18 +45,15 @@ static const char modulePrefix[] = "[CacheControl]";
 
 #define TWEAK_CACHE_RESPONSES_TO_COOKIES "cache-responses-to-cookies"
 
-static const char *CC_directive_str[CC_NUM_TYPES] = {
-  "INVALID",
-  "REVALIDATE_AFTER",
-  "NEVER_CACHE",
-  "STANDARD_CACHE",
-  "IGNORE_NO_CACHE",
-  "IGNORE_CLIENT_NO_CACHE",
-  "IGNORE_SERVER_NO_CACHE",
-  "PIN_IN_CACHE",
-  "TTL_IN_CACHE"
-  // "CACHE_AUTH_CONTENT"
-};
+static const char *CC_directive_str[CC_NUM_TYPES] = {"INVALID",
+                                                     "REVALIDATE_AFTER",
+                                                     "NEVER_CACHE",
+                                                     "STANDARD_CACHE",
+                                                     "IGNORE_NO_CACHE",
+                                                     "IGNORE_CLIENT_NO_CACHE",
+                                                     "IGNORE_SERVER_NO_CACHE",
+                                                     "PIN_IN_CACHE",
+                                                     "TTL_IN_CACHE"};
 
 typedef ControlMatcher<CacheControlRecord, CacheControlResult> CC_table;
 

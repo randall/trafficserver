@@ -1694,9 +1694,6 @@ HttpTransact::OSDNSLookup(State *s)
     // 'AuthHttpAdapter' should do the rev-dns if needed, not here .
     TRANSACT_RETURN(SM_ACTION_DNS_REVERSE_LOOKUP, HttpTransact::StartAccessControl);
   } else {
-    //(s->state_machine->authAdapter).StartLookup (s);
-    // TRANSACT_RETURN(SM_ACTION_AUTH_LOOKUP, NULL);
-
     if (s->force_dns) {
       StartAccessControl(s); // If skip_dns is enabled and no ip based rules in cache.config and parent.config
       // Access Control is called after DNS response
@@ -6080,18 +6077,6 @@ HttpTransact::is_response_cacheable(State *s, HTTPHdr *request, HTTPHdr *respons
   }
   // else no indication by cache control header
   // continue to determine cacheability
-
-  // if client contains Authorization header,
-  // only cache if response has proper Cache-Control
-  // if (s->www_auth_content == CACHE_AUTH_FRESH) {
-  // response to the HEAD request
-  //  return false;
-  //} else if (s->www_auth_content == CACHE_AUTH_TRUE ||
-  //          (s->www_auth_content == CACHE_AUTH_NONE && request->presence(MIME_PRESENCE_AUTHORIZATION))) {
-  // if (!s->cache_control.cache_auth_content || response_code != HTTP_STATUS_OK || req_method != HTTP_WKSIDX_GET)
-  //  return false;
-  //}
-  // s->www_auth_content == CACHE_AUTH_STALE silently continues
 
   if (response->presence(MIME_PRESENCE_EXPIRES)) {
     TxnDebug("http_trans", "[is_response_cacheable] YES response w/ Expires");

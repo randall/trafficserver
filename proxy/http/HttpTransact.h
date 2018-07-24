@@ -389,7 +389,6 @@ public:
   enum StateMachineAction_t {
     SM_ACTION_UNDEFINED = 0,
 
-    // SM_ACTION_AUTH_LOOKUP,
     SM_ACTION_DNS_LOOKUP,
     SM_ACTION_DNS_REVERSE_LOOKUP,
 
@@ -479,13 +478,7 @@ public:
     RANGE_NOT_TRANSFORM_REQUESTED,
   };
 
-  enum CacheAuth_t {
-    CACHE_AUTH_NONE = 0,
-    // CACHE_AUTH_TRUE,
-    CACHE_AUTH_FRESH,
-    CACHE_AUTH_STALE,
-    CACHE_AUTH_SERVE
-  };
+  enum CacheAuth_t { CACHE_AUTH_NONE = 0, CACHE_AUTH_FRESH, CACHE_AUTH_STALE, CACHE_AUTH_SERVE };
 
   struct State;
   typedef void (*TransactFunc_t)(HttpTransact::State *);
@@ -755,8 +748,6 @@ public:
     char via_string[MAX_VIA_INDICES + 1];
 
     int64_t state_machine_id = 0;
-
-    // HttpAuthParams auth_params;
 
     // new ACL filtering result (calculated immediately after remap)
     bool client_connection_enabled = true;
@@ -1031,7 +1022,6 @@ public:
 
   static HostNameExpansionError_t try_to_expand_host_name(State *s);
 
-  static bool setup_auth_lookup(State *s);
   static bool will_this_request_self_loop(State *s);
   static bool is_request_likely_cacheable(State *s, HTTPHdr *request);
 
