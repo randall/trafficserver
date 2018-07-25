@@ -1213,8 +1213,6 @@ add_library(libtsconfig SHARED
         lib/tsconfig/IntrusivePtr.h
         lib/tsconfig/NumericType.h
         lib/tsconfig/test-tsconfig.cc
-        lib/tsconfig/TsBuilder.cc
-        lib/tsconfig/TsBuilder.h
         lib/tsconfig/TsConfigGrammar.c
         lib/tsconfig/TsConfigGrammar.h
         lib/tsconfig/TsConfigLexer.h

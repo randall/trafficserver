@@ -22,7 +22,6 @@
  */
 
 # include "TsValue.h"
-# include "TsBuilder.h"
 # include "ts/ink_defs.h"
 
 # include <TsErrataUtil.h>
@@ -362,30 +361,38 @@ Configuration::loadFromPath(char const* path) {
   Buffer buffer;
   FILE* in = fopen(path, "r");
 
-  if (in) {
-    struct stat info;
-    if (0 == fstat(_fileno(in), &info)) {
-      // Must reserve 2 bytes at the end for FLEX terminator.
-      buffer = zret.result().alloc(info.st_size + 2);
-      if (buffer._ptr) {
-        size_t n;
-        if (0 < (n = fread(buffer._ptr, sizeof(char), info.st_size, in))) {
-          buffer._size = n+2;
-          memset(buffer._ptr + n, 0, 2); // required by FLEX
-          zret = Builder(zret.result()).build(buffer);
-        } else {
-          msg::logf_errno(zret, msg::WARN, "failed to read %" PRIu64 " bytes from configuration file '%s'", info.st_size, path);
-        }
-      } else {
-        msg::logf_errno(zret, msg::WARN, "failed to allocate buffer for configuration file '%s' - needed %" PRIu64 " bytes.", path, info.st_size);
-      }
-    } else {
-      msg::logf_errno(zret, msg::WARN, "failed to determine file information on '%s'", path);
-    }
-    fclose(in);
-  } else {
+  if (!in) {
     msg::logf_errno(zret, msg::WARN, "failed to open configuration file '%s'", path);
+    return zret;
   }
+/*
+  struct stat info;
+  if (0 =! fstat(_fileno(in), &info)) {
+    msg::logf_errno(zret, msg::WARN, "failed to determine file information on '%s'", path);
+    goto done;
+  }
+
+  // Must reserve 2 bytes at the end for FLEX terminator.
+  buffer = zret.result().alloc(info.st_size + 2);
+  if (!buffer._ptr) {
+      msg::logf_errno(zret, msg::WARN, "failed to allocate buffer for configuration file '%s' - needed %" PRIu64 " bytes.", path, info.st_size);
+      goto done;
+  }
+
+  size_t n;
+  if (0 > (n = fread(buffer._ptr, sizeof(char), info.st_size, in))) {
+      msg::logf_errno(zret, msg::WARN, "failed to read %" PRIu64 " bytes from configuration file '%s'", info.st_size, path);
+      goto done;
+  }
+
+  buffer._size = n+2;
+  memset(buffer._ptr + n, 0, 2); // required by FLEX
+
+  zret = Builder(zret.result()).build(buffer);
+  */
+
+done:
+  fclose(in);
   return zret;
 }
 
