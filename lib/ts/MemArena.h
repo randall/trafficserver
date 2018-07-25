@@ -28,7 +28,7 @@
 #include <memory>
 #include <ts/MemSpan.h>
 #include <ts/Scalar.h>
-#include <tsconfig/IntrusivePtr.h>
+#include "IntrusivePtr.h"
 
 /// Apache Traffic Server commons.
 namespace ts

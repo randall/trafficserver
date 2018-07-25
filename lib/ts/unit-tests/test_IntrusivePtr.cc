@@ -23,7 +23,7 @@
 
 #include <string>
 #include <sstream>
-#include <tsconfig/IntrusivePtr.h>
+#include "ts/IntrusivePtr.h"
 #include <catch.hpp>
 
 struct Thing : public ts::IntrusivePtrCounter {
