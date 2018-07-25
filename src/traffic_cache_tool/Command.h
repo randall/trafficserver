@@ -26,7 +26,7 @@
 #include <string>
 #include <iostream>
 #include <memory.h>
-#include <tsconfig/Errata.h>
+#include <ts/Errata.h>
 
 #pragma once
 namespace ts

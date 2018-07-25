@@ -21,8 +21,8 @@
     limitations under the License.
  */
 
-# include "TsBuilder.h"
-# include "TsErrataUtil.h"
+# include "ts/TsBuilder.h"
+# include "ts/TsErrataUtil.h"
 # include "TsConfigLexer.h"
 # include "TsConfigGrammar.hpp"
 # include <cstdlib>
@@ -45,7 +45,7 @@ size_t unescape_string(char* text, size_t len) {
       if ('\\' != *src) { *dst++ = *src;
       } else if (++src < limit) { *dst++ = *src;
       } else { *dst++ = '\\'; // trailing backslash.
-    
+
 }
 }zret = dst - text;
   }
@@ -215,6 +215,7 @@ void Builder::literalValue(Token const& token) {
 }
     _name.set(nullptr,0); // used, so clear it.
 }
+
 void Builder::invalidToken(Token const&) { }
 
 }} // namespace ts::config

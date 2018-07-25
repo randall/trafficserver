@@ -1,6 +1,3 @@
-# if ! defined(TS_CONFIG_BUILDER_HEADER)
-# define TS_CONFIG_BUILDER_HEADER
-
 /** @file
 
     Header for handler for parsing events.
@@ -23,10 +20,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
  */
+#pragma once
 
-# include "TsValue.h"
-# include "TsConfigTypes.h"
-# include "TsConfigParseEvents.h"
+#include "TsValue.h"
+#include "TsConfigTypes.h"
+#include "TsConfigParseEvents.h"
 
 namespace ts { namespace config {
 
@@ -97,5 +95,3 @@ inline Builder::Builder() { this->init(); }
 inline Builder::Builder(Configuration const& config) : _config(config) { this->init(); }
 
 }} // namespace ts::config
-
-# endif // TS_CONFIG_BUILDER_HEADER

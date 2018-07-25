@@ -25,11 +25,12 @@
  */
 
 #include <cstring>
-#include <ts/TsBuffer.h>
-#include <tsconfig/NumericType.h>
-#include <tsconfig/IntrusivePtr.h>
-#include <tsconfig/Errata.h>
 #include <vector>
+
+#include "ts/TsBuffer.h"
+#include "ts/NumericType.h"
+#include "ts/IntrusivePtr.h"
+#include "ts/Errata.h"
 
 namespace ts { namespace config {
 

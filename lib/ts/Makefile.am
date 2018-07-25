@@ -61,6 +61,8 @@ libtsutil_la_SOURCES = \
 	BufferWriter.h \
 	BufferWriterForward.h \
 	BufferWriterFormat.cc \
+	TsBuilder.cc \
+	TsBuilder.h \
 	ConsistentHash.cc \
 	ConsistentHash.h \
 	ContFlags.cc \
@@ -71,6 +73,8 @@ libtsutil_la_SOURCES = \
 	Diags.cc \
 	Diags.h \
 	DynArray.h \
+	Errata.cc \
+	Errata.h \
 	EventNotify.cc \
 	EventNotify.h \
 	fastlz.c \
@@ -209,6 +213,8 @@ libtsutil_la_SOURCES = \
 	Tokenizer.h \
 	Trie.h \
 	TsBuffer.h \
+	TsValue.cc \
+	TsValue.h \
 	Version.cc \
 	X509HostnameValidator.cc \
 	X509HostnameValidator.h
@@ -280,7 +286,7 @@ test_tslib_SOURCES = \
 	unit-tests/test_Regex.cc \
 	unit-tests/test_Scalar.cc \
 	unit-tests/test_scoped_resource.cc \
-	unit-tests/test_TextView.cc 
+	unit-tests/test_TextView.cc
 
 CompileParseRules_SOURCES = CompileParseRules.cc
 

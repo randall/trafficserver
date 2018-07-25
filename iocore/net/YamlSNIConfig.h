@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 
-#include "tsconfig/Errata.h"
+#include "ts/Errata.h"
 
 constexpr char TS_fqdn[]                 = "fqdn";
 constexpr char TS_disable_H2[]           = "disable_h2";

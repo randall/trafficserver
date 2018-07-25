@@ -22,12 +22,13 @@
  */
 
 #pragma once
+
 #include <netinet/in.h>
 #include <iostream>
 #include <ts/I_Version.h>
 #include <ts/Scalar.h>
 #include <ts/Regex.h>
-#include <tsconfig/Errata.h>
+#include <ts/Errata.h>
 #include <ts/TextView.h>
 #include <ts/ink_file.h>
 #include <list>

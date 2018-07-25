@@ -23,7 +23,7 @@
 #pragma once
 
 #include <ts/TsBuffer.h>
-#include <tsconfig/Errata.h>
+#include "ts/Errata.h"
 #include <memory.h>
 #include "ts/ink_defs.h"
 #include "ts/ink_memory.h"

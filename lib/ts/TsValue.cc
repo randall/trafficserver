@@ -22,10 +22,9 @@
  */
 
 # include "TsValue.h"
-# include "TsBuilder.h"
+# include "ts/TsBuilder.h"
 # include "ts/ink_defs.h"
-
-# include <TsErrataUtil.h>
+# include "ts/TsErrataUtil.h"
 # include <sys/stat.h>
 # include <cstdio>
 # include <cstdlib>
