@@ -31,7 +31,6 @@
 #include "matcher.h"
 #include "value.h"
 #include "lulu.h"
-//#include <mdbm.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Condition declarations.
@@ -306,42 +305,6 @@ private:
 
   UrlQualifiers _url_qual;
   UrlType _type;
-};
-
-// DBM lookups
-class ConditionDBM : public Condition
-{
-  typedef Matchers<std::string> MatcherType;
-
-public:
-  ConditionDBM()
-    : //_dbm(NULL),
-      _file("")
-  {
-    _mutex = TSMutexCreate();
-    TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionDBM");
-  }
-
-  ~ConditionDBM() override
-  {
-    // if (_dbm) {
-    //   mdbm_close(_dbm);
-    //   _dbm = NULL;
-    // }
-  }
-
-  void initialize(Parser &p) override;
-  void append_value(std::string &s, const Resources &res) override;
-
-protected:
-  bool eval(const Resources &res) override;
-
-private:
-  DISALLOW_COPY_AND_ASSIGN(ConditionDBM);
-  // MDBM* _dbm;
-  std::string _file;
-  Value _key;
-  TSMutex _mutex;
 };
 
 class ConditionInternalTxn : public Condition

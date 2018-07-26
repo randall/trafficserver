@@ -119,8 +119,6 @@ condition_factory(const std::string &cond)
     c = new ConditionUrl(ConditionUrl::FROM);
   } else if (c_name == "TO-URL") {
     c = new ConditionUrl(ConditionUrl::TO);
-  } else if (c_name == "DBM") {
-    c = new ConditionDBM();
   } else if (c_name == "INTERNAL-TRANSACTION") {
     c = new ConditionInternalTxn();
   } else if (c_name == "INTERNAL-TXN") {
