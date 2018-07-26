@@ -1892,26 +1892,8 @@ main(int /* argc ATS_UNUSED */, const char **argv)
       udpNet.start(num_of_udp_threads, stacksize);
     }
 
-    // acc.init();
-    // if (auto_clear_authdb_flag)
-    // acc.clear_cache();
-    // acc.start();
-    // pmgmt initialization moved up, needed by RecProcessInit
-    // pmgmt->start();
-
     // Initialize Response Body Factory
     body_factory = new HttpBodyFactory;
-
-    // Start IP to userName cache processor used
-    // by RADIUS and FW1 plug-ins.
-    // ipToUserNameCacheProcessor.start();
-
-    // Initialize the system for SIMPLE support
-    //  Simple::init();
-
-    // Initialize the system for RAFT support
-    // All this is handled by plugin support code
-    //   Raft::init();
 
     // Continuation Statistics Dump
     if (show_statistics) {
