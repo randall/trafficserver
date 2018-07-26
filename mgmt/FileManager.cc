@@ -239,6 +239,7 @@ FileManager::rereadConfig()
       fileChanged(parentFileNeedChange[i]->getFileName(), true);
     }
   }
+
   // INKqa11910
   // need to first check that enable_customizations is enabled
   bool found;

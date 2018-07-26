@@ -236,7 +236,7 @@ CacheHostTable::config_callback(const char * /* name ATS_UNUSED */, RecDataT /* 
 
 int fstat_wrapper(int fd, struct stat *s);
 
-// int ControlMatcher::BuildTable() {
+// int ControlMatcher::BuildTable()
 //
 //    Reads the cache.config file and build the records array
 //      from it

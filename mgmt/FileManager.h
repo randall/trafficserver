@@ -82,13 +82,14 @@ class ExpandingArray;
 //
 //  rereadConfig() - Checks all managed files to see if they have been
 //       updated
+//
 //  addConfigFileGroup(char* data_str, int data_size) - update config file group infos
 class FileManager
 {
 public:
   FileManager();
   ~FileManager();
-  void addFile(const char *fileName, bool root_access_needed, Rollback *parentRollback = nullptr, unsigned flags = 0);
+  void addFile(const char *fileName, bool root_access_needed = false, Rollback *parentRollback = nullptr, unsigned flags = 0);
   bool getRollbackObj(const char *fileName, Rollback **rbPtr);
   void registerCallback(FileCallbackFunc func);
   void fileChanged(const char *fileName, bool incVersion);

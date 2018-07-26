@@ -21,25 +21,10 @@
   limitations under the License.
  */
 
-#include "ts/ink_platform.h"
 #include "MgmtUtils.h"
-#include "ts/Diags.h"
 #include "FileManager.h"
 
 extern FileManager *configFiles;
-
-/****************************************************************************
- *
- *  AddConfigFilesHere.cc - Structs for config files and
- *
- *
- ****************************************************************************/
-
-void
-testcall(char *foo, bool /* incVersion */)
-{
-  Debug("lm", "Received Callback that %s has changed", foo);
-}
 
 //
 // initializeRegistry()
@@ -61,19 +46,18 @@ initializeRegistry()
     ink_assert(!"Configuration Object Registry Initialized More than Once");
   }
 
-  configFiles->addFile("logging.yaml", false);
-  configFiles->addFile("storage.config", false);
-  configFiles->addFile("socks.config", false);
-  configFiles->addFile("records.config", false);
-  configFiles->addFile("cache.config", false);
-  configFiles->addFile("ip_allow.config", false);
-  configFiles->addFile("parent.config", false);
-  configFiles->addFile("remap.config", false);
-  configFiles->addFile("volume.config", false);
-  configFiles->addFile("hosting.config", false);
-  configFiles->addFile("plugin.config", false);
-  configFiles->addFile("splitdns.config", false);
-  configFiles->addFile("ssl_multicert.config", false);
-  configFiles->addFile(SSL_SERVER_NAME_CONFIG, false);
-  configFiles->registerCallback(testcall);
+  configFiles->addFile("logging.yaml");
+  configFiles->addFile("storage.config");
+  configFiles->addFile("socks.config");
+  configFiles->addFile("records.config");
+  configFiles->addFile("cache.config");
+  configFiles->addFile("ip_allow.config");
+  configFiles->addFile("parent.config");
+  configFiles->addFile("remap.config");
+  configFiles->addFile("volume.config");
+  configFiles->addFile("hosting.config");
+  configFiles->addFile("plugin.config");
+  configFiles->addFile("splitdns.config");
+  configFiles->addFile("ssl_multicert.config");
+  configFiles->addFile(SSL_SERVER_NAME_CONFIG);
 }

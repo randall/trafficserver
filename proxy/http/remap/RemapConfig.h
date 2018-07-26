@@ -23,8 +23,9 @@
 
 #pragma once
 
-#include "AclFiltering.h"
+#include <stdlib.h>
 
+class acl_filter_rule;
 class UrlRewrite;
 
 #define BUILD_TABLE_MAX_ARGS 2048

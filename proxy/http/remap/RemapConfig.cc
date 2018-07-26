@@ -22,6 +22,8 @@
  */
 
 #include "RemapConfig.h"
+
+#include "AclFiltering.h"
 #include "UrlRewrite.h"
 #include "ReverseProxy.h"
 #include "ts/I_Layout.h"
@@ -1414,6 +1416,7 @@ remap_parse_config_bti(const char *path, BUILD_TABLE_INFO *bti)
   } /* end of while(cur_line != nullptr) */
 
   IpAllow::enableAcceptCheck(bti->accept_check_p);
+  
   return true;
 }
 
