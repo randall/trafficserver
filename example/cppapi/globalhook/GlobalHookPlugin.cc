@@ -19,7 +19,6 @@
 #include <iostream>
 #include <atscppapi/GlobalPlugin.h>
 #include <atscppapi/PluginInit.h>
-//#include<../ts/Diags.h>
 
 using namespace atscppapi;
 using namespace std;

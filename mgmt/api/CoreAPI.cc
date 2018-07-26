@@ -40,7 +40,6 @@
 #include "ts/Diags.h"
 #include "ts/ink_hash_table.h"
 #include "ExpandingArray.h"
-//#include "I_AccCrypto.h"
 
 #include "CoreAPI.h"
 #include "CoreAPIShared.h"
