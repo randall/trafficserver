@@ -226,6 +226,13 @@ DiagsConfig::config_diags_norecords()
   if (diags->base_debug_tags) {
     diags->activate_taglist(diags->base_debug_tags, DiagsTagType_Debug);
     c.enabled[DiagsTagType_Debug] = true;
+
+    c.outputs[DL_Debug].to_stderr = true;
+
+    for (int i = 0; i < DiagsLevel_Count; i++) {
+      c.outputs[i].to_stderr   = true;
+    }
+  //  c.outputs[DL_Note].to_stderr = true;
   } else {
     c.enabled[DiagsTagType_Debug] = false;
   }
@@ -265,13 +272,12 @@ DiagsConfig::RegisterDiagConfig()
 }
 
 DiagsConfig::DiagsConfig(const char *prefix_string, const char *filename, const char *tags, const char *actions, bool use_records)
-  : diags_log(nullptr)
+  : callbacks_established(false),
+    diags_log(nullptr),
+    diags(nullptr)
 {
   char diags_logpath[PATH_NAME_MAX];
   ats_scoped_str logpath;
-
-  callbacks_established = false;
-  diags                 = nullptr;
 
   ////////////////////////////////////////////////////////////////////
   //  If we aren't using the manager records for configuation       //
@@ -287,7 +293,6 @@ DiagsConfig::DiagsConfig(const char *prefix_string, const char *filename, const 
 
   // Open the diagnostics log. If proxy.config.log.logfile_dir is set use that, otherwise fall
   // back to the configured log directory.
-
   logpath = RecConfigReadLogDir();
   if (access(logpath, W_OK | R_OK) == -1) {
     fprintf(stderr, "unable to access log directory '%s': %d, %s\n", (const char *)logpath, errno, strerror(errno));

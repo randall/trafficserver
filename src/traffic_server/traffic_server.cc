@@ -1549,8 +1549,10 @@ main(int /* argc ATS_UNUSED */, const char **argv)
   appVersionInfo.setup(PACKAGE_NAME, "traffic_server", PACKAGE_VERSION, __DATE__, __TIME__, BUILD_MACHINE, BUILD_PERSON, "");
 
   runroot_handler(argv);
+
   // Before accessing file system initialize Layout engine
   Layout::create();
+
   // Let's be clear on what exactly is starting up.
   printf("Traffic Server " PACKAGE_VERSION BUILD_NUMBER " " __DATE__ " " __TIME__ " " BUILD_MACHINE "\n");
   chdir_root(); // change directory to the install root of traffic server.
@@ -1984,7 +1986,6 @@ main(int /* argc ATS_UNUSED */, const char **argv)
 
 #if TS_HAS_TESTS
     TransformTest::run();
-    //  run_SimpleHttp();
     run_RegressionTest();
 #endif
 

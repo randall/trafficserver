@@ -270,7 +270,7 @@ ProcessManager::processSignalQueue()
   while (!queue_is_empty(mgmt_signal_queue)) {
     MgmtMessageHdr *mh = (MgmtMessageHdr *)dequeue(mgmt_signal_queue);
 
-    Debug("pmgmt", "signaling local manager with message ID %d", mh->msg_id);
+    Debug("pmgmt", "signaling local manager with message ID '%d'", mh->msg_id);
 
     if (require_lm) {
       int ret = mgmt_write_pipe(local_manager_sockfd, (char *)mh, sizeof(MgmtMessageHdr) + mh->data_len);

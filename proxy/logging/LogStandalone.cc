@@ -21,12 +21,6 @@
   limitations under the License.
  */
 
-/***************************************************************************
- LogStandalone.cc
-
-
- ***************************************************************************/
-
 #include "ts/ink_platform.h"
 #include "ts/ink_lockfile.h"
 #include "ts/ink_sys_control.h"
@@ -39,12 +33,9 @@
 
 #include "ProcessManager.h"
 #include "MgmtUtils.h"
-// Needs LibRecordsConfigInit()
 #include "RecordsConfig.h"
 
 #define LOG_FILENAME_SIZE 255
-
-class HttpBodyFactory;
 
 // globals the rest of the system depends on
 extern int fds_limit;
@@ -61,9 +52,7 @@ char error_tags[1024]    = "";
 char action_tags[1024]   = "";
 char command_string[512] = "";
 
-// Diags *diags = NULL;
 DiagsConfig *diagsConfig      = nullptr;
-HttpBodyFactory *body_factory = nullptr;
 AppVersionInfo appVersionInfo;
 
 /*-------------------------------------------------------------------------
@@ -131,10 +120,6 @@ initialize_process_manager()
                         RECP_NON_PERSISTENT);
   RecRegisterStatString(RECT_PROCESS, "proxy.process.version.server.build_person", appVersionInfo.BldPersonStr,
                         RECP_NON_PERSISTENT);
-  //    RecRegisterStatString(RECT_PROCESS,
-  //                         "proxy.process.version.server.build_compile_flags",
-  //                         appVersionInfo.BldCompileFlagsStr,
-  //                         RECP_NON_PERSISTENT);
 }
 
 /*-------------------------------------------------------------------------

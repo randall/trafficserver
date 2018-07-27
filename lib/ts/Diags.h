@@ -47,7 +47,6 @@
 
 class Diags;
 
-// extern int diags_on_for_plugins;
 enum DiagsTagType {
   DiagsTagType_Debug  = 0, // do not renumber --- used as array index
   DiagsTagType_Action = 1

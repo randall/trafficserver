@@ -645,6 +645,7 @@ LocalManager::sendMgmtMsgToProcesses(MgmtMessageHdr *mh)
 
     data_raw = (char *)mh + sizeof(MgmtMessageHdr);
     fname    = REC_readString(data_raw, &found);
+    ink_assert(found);
 
     RecT rec_type;
     if (RecGetRecordType(data_raw, &rec_type) == REC_ERR_OKAY && rec_type == RECT_CONFIG) {
@@ -652,7 +653,7 @@ LocalManager::sendMgmtMsgToProcesses(MgmtMessageHdr *mh)
     } else {
       mgmt_log("[LocalManager:sendMgmtMsgToProcesses] Unknown file change: '%s'\n", data_raw);
     }
-    ink_assert(found);
+
     if (!(fname && configFiles && configFiles->getRollbackObj(fname, &rb)) &&
         (strcmp(data_raw, "proxy.config.body_factory.template_sets_dir") != 0) &&
         (strcmp(data_raw, "proxy.config.ssl.server.ticket_key.filename") != 0)) {
