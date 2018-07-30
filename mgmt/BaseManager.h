@@ -78,7 +78,6 @@
  * MODULARIZATION: if you are adding new signals, please ensure to add
  *                 the corresponding signals in librecords/I_RecSignals.h
  *
- *
  ***********************************************************************/
 
 // Signal flows: traffic server -> traffic manager

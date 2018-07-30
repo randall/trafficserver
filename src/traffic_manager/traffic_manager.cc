@@ -720,7 +720,8 @@ main(int argc, const char **argv)
 
     // Update the derived metrics. ToDo: this runs once a second, that might be excessive, maybe it should be
     // done more like every config_update_interval_ms (proxy.config.config_update_interval_ms) ?
-    derived.Update();
+    // DO NOT MERGE
+   // derived.Update();
 
     if (lmgmt->mgmt_shutdown_outstanding != MGMT_PENDING_NONE) {
       Debug("lm", "pending shutdown %d", lmgmt->mgmt_shutdown_outstanding);

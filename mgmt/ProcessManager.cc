@@ -49,6 +49,7 @@ read_management_message(int sockfd, MgmtMessageHdr **msg)
 
   // We have a message, try to read the message header.
   ret = mgmt_read_pipe(sockfd, reinterpret_cast<char *>(&hdr), sizeof(MgmtMessageHdr));
+
   switch (ret) {
   case 0:
     // Received EOF.
@@ -247,6 +248,8 @@ ProcessManager::signalManager(int msg_id, const char *data_raw, int data_len)
   mh->data_len = data_len;
   memcpy((char *)mh + sizeof(MgmtMessageHdr), data_raw, data_len);
 
+  RecDebug(DL_Note, "enqueueing msg_id=%d len=%d data_len=%d", msg_id, sizeof(MgmtMessageHdr) + data_len,data_len);
+
   ink_release_assert(enqueue(mgmt_signal_queue, mh));
 
 #if HAVE_EVENTFD
@@ -256,7 +259,7 @@ ProcessManager::signalManager(int msg_id, const char *data_raw, int data_len)
   //
   // don't tigger if MGMT_EVENT_LIBRECORD because they happen all the time
   // and don't require a quick response. for MGMT_EVENT_LIBRECORD, rely on timeouts so
-  // traffic_server can spend more time doing other things/
+  // traffic_server can spend more time doing other things.
   uint64_t one = 1;
   if (wakeup_fd != ts::NO_FD && mh->msg_id != MGMT_SIGNAL_LIBRECORDS) {
     ATS_UNUSED_RETURN(write(wakeup_fd, &one, sizeof(uint64_t))); // trigger to stop polling
@@ -273,6 +276,8 @@ ProcessManager::processSignalQueue()
     Debug("pmgmt", "signaling local manager with message ID '%d'", mh->msg_id);
 
     if (require_lm) {
+      // mgmt_write_pipe(int fd, char *buf, int bytes_to_write)
+
       int ret = mgmt_write_pipe(local_manager_sockfd, (char *)mh, sizeof(MgmtMessageHdr) + mh->data_len);
       ats_free(mh);
 
@@ -371,6 +376,7 @@ ProcessManager::pollLMConnection()
 
     // wait for data on socket
     ready = mgmt_select(FD_SETSIZE, &fdlist, nullptr, nullptr, &timeout);
+    Debug("pmgmt", " ready %d", ready);
 
     switch (ready) {
     case 0:
@@ -387,9 +393,12 @@ ProcessManager::pollLMConnection()
       MgmtMessageHdr *msg;
 
       int ret = read_management_message(local_manager_sockfd, &msg);
+      Debug("pmgmt", " ret %d", ret);
+
       if (ret < 0) {
         return ret;
       }
+      Debug("pmgmt", " msg is null? %d", msg == nullptr);
 
       // No message, we are done polling. */
       if (msg == nullptr) {

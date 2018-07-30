@@ -68,7 +68,7 @@ send_set_message(RecRecord *record)
   rec_mutex_acquire(&(record->lock));
   m = RecMessageAlloc(RECG_SET);
   m = RecMessageMarshal_Realloc(m, record);
-  RecDebug(DL_Note, "[send] RECG_SET [%d bytes]", sizeof(RecMessageHdr) + m->o_write - m->o_start);
+  RecDebug(DL_Note, "[send] RECG_SET [%d bytes] name=%s", sizeof(RecMessageHdr) + m->o_write - m->o_start, record->name);
   RecMessageSend(m);
   RecMessageFree(m);
   rec_mutex_release(&(record->lock));
@@ -87,7 +87,7 @@ send_register_message(RecRecord *record)
   rec_mutex_acquire(&(record->lock));
   m = RecMessageAlloc(RECG_REGISTER);
   m = RecMessageMarshal_Realloc(m, record);
-  RecDebug(DL_Note, "[send] RECG_REGISTER [%d bytes]", sizeof(RecMessageHdr) + m->o_write - m->o_start);
+  RecDebug(DL_Note, "[send] RECG_REGISTER [%d bytes] name=%s", sizeof(RecMessageHdr) + m->o_write - m->o_start, record->name);
   RecMessageSend(m);
   RecMessageFree(m);
   rec_mutex_release(&(record->lock));
@@ -169,7 +169,7 @@ send_pull_message(RecMessageT msg_type)
     RecMessageFree(m);
     return REC_ERR_FAIL;
   }
-
+  RecDebug(DL_Note, "[send] o_start: %d o_write: %d o_end:  %d entries: %d alignment: %d", m->o_start, m->o_write, m->o_end, m->entries, m->alignment);
   RecMessageSend(m);
   RecMessageFree(m);
 
@@ -923,24 +923,6 @@ RecSetSyncRequired(char *name, bool lock)
       }
       rec_mutex_release(&(r1->lock));
       err = REC_ERR_OKAY;
-    } else {
-      // No point of doing the following because our peer will
-      // set the value with RecDataSet. However, since
-      // r2.name == r1->name, the sync_required bit will not be
-      // set.
-
-      /*
-         RecRecord r2;
-
-         RecRecordInit(&r2);
-         r2.rec_type  = r1->rec_type;
-         r2.name      = r1->name;
-         r2.data_type = r1->data_type;
-         r2.data      = r1->data_default;
-
-         err = send_set_message(&r2);
-         RecRecordFree(&r2);
-       */
     }
   }
 
