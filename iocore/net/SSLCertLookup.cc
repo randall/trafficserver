@@ -33,6 +33,8 @@
 #include "ts/Trie.h"
 #include "ts/TestBox.h"
 
+#include <vector>
+
 // Check if the ticket_key callback #define is available, and if so, enable session tickets.
 #ifdef SSL_CTX_set_tlsext_ticket_key_cb
 
@@ -99,16 +101,16 @@ public:
   /// cert context.
   /// @return @a idx
   int insert(const char *name, int idx);
-  SSLCertContext *lookup(const char *name) const;
+  SSLCertContext *lookup(const char *name);
   void printWildDomains() const;
   void freeWildDomains() const;
   unsigned
   count() const
   {
-    return this->ctx_store.length();
+    return this->ctx_store.size();
   }
   SSLCertContext *
-  get(unsigned i) const
+  get(unsigned i)
   {
     return &this->ctx_store[i];
   }
@@ -137,7 +139,7 @@ private:
   InkHashTable *hostnames;
   /// List for cleanup.
   /// Exactly one pointer to each SSL context is stored here.
-  Vec<SSLCertContext> ctx_store;
+  std::vector<SSLCertContext> ctx_store;
 
   /// Add a context to the clean up list.
   /// @return The index of the added context.
@@ -317,6 +319,7 @@ make_to_lower_case(const char *name, char *lower_case_name, int buf_len)
   lower_case_name[i] = '\0';
 }
 
+#if TS_HAS_TESTS
 static char *
 reverse_dns_name(const char *hostname, char (&reversed)[TS_MAX_HOST_NAME_LEN + 1])
 {
@@ -348,6 +351,7 @@ reverse_dns_name(const char *hostname, char (&reversed)[TS_MAX_HOST_NAME_LEN + 1
 
   return ptr;
 }
+#endif
 
 SSLContextStorage::SSLContextStorage() : wilddomains(-1), hostnames(ink_hash_table_create(InkHashTableKeyType_String)) {}
 
@@ -363,9 +367,11 @@ SSLContextStorage::~SSLContextStorage()
 {
   // First sort the array so we can efficiently detect duplicates
   // and avoid the double free
-  this->ctx_store.qsort(SSLCtxCompare);
+//  this->ctx_store.qsort(SSLCtxCompare);
+  std::sort(ctx_store.begin(), ctx_store.end(), SSLCtxCompare);
+
   SSL_CTX *last_ctx = nullptr;
-  for (unsigned i = 0; i < this->ctx_store.length(); ++i) {
+  for (unsigned i = 0; i < this->ctx_store.size(); ++i) {
     if (this->ctx_store[i].ctx != last_ctx) {
       last_ctx = this->ctx_store[i].ctx;
       this->ctx_store[i].release();
@@ -379,8 +385,8 @@ SSLContextStorage::~SSLContextStorage()
 int
 SSLContextStorage::store(SSLCertContext const &cc)
 {
-  int idx = this->ctx_store.length();
-  this->ctx_store.add(cc);
+  int idx = this->ctx_store.size();
+  this->ctx_store.push_back(cc);
   return idx;
 }
 
@@ -390,7 +396,7 @@ SSLContextStorage::insert(const char *name, SSLCertContext const &cc)
   int idx = this->store(cc);
   idx     = this->insert(name, idx);
   if (idx < 0) {
-    this->ctx_store.drop();
+    this->ctx_store.clear();
   }
   return idx;
 }
@@ -455,7 +461,7 @@ SSLContextStorage::freeWildDomains() const
 }
 
 SSLCertContext *
-SSLContextStorage::lookup(const char *name) const
+SSLContextStorage::lookup(const char *name)
 {
   InkHashTableValue value;
   // First look for an exact name match
