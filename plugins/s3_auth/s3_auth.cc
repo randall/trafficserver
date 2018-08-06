@@ -41,7 +41,7 @@
 #include <ts/remap.h>
 #include "tscore/ink_config.h"
 
-// Special snowflake here, only availbale when building inside the ATS source tree.
+// Special snowflake here, only available when building inside the ATS source tree.
 #include "tscore/ink_atomic.h"
 #include "aws_auth_v4.h"
 
@@ -137,7 +137,7 @@ loadRegionMap(StringMap &m, const String &filename)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Cache for the secrets file, to avoid reading / loding them repeatedly on
+// Cache for the secrets file, to avoid reading / loading them repeatedly on
 // a reload of remap.config. This gets cached for 60s (not configurable).
 //
 class S3Config;
@@ -433,7 +433,7 @@ S3Config::parse_config(const std::string &config_fname)
         continue;
       }
 
-      // Skip trailig white spaces
+      // Skip trailing white spaces
       pos2 = pos1;
       pos1 = pos2 + strlen(pos2) - 1;
       while ((pos1 > pos2) && isspace(*pos1)) {
@@ -615,7 +615,7 @@ S3Request::set_header(const char *header, int header_len, const char *val, int v
   return ret;
 }
 
-// dst poinsts to starting offset of dst buffer
+// dst points to starting offset of dst buffer
 // dst_len remaining space in buffer
 static size_t
 str_concat(char *dst, size_t dst_len, const char *src, size_t src_len)
@@ -871,7 +871,7 @@ event_handler(TSCont cont, TSEvent event, void *edata)
     }
 
     if (TS_HTTP_STATUS_OK == status) {
-      TSDebug(PLUGIN_NAME, "Succesfully signed the AWS S3 URL");
+      TSDebug(PLUGIN_NAME, "Successfully signed the AWS S3 URL");
     } else {
       TSDebug(PLUGIN_NAME, "Failed to sign the AWS S3 URL, status = %d", status);
       TSHttpTxnStatusSet(txnp, status);
@@ -1018,7 +1018,7 @@ TSRemapDoRemap(void *ih, TSHttpTxn txnp, TSRemapRequestInfo * /* rri */)
 
   if (s3) {
     TSAssert(s3->valid());
-    s3->acquire(); // Increasement ref-count
+    s3->acquire(); // Increase ref-count
     // Now schedule the continuation to update the URL when going to origin.
     // Note that in most cases, this is a No-Op, assuming you have reasonable
     // cache hit ratio. However, the scheduling is next to free (very cheap).

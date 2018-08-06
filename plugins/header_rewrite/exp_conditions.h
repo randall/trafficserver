@@ -16,27 +16,40 @@
   limitations under the License.
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Implement the classes for the various types of hash keys we support.
-//
 #pragma once
 
 #include <string>
 
-#include "tscore/ink_defs.h"
-#include "tscore/ink_platform.h"
+#include "condition.h"
+#include "matcher.h"
 
-#define TS_REMAP_PSEUDO_HOOK TS_HTTP_LAST_HOOK // Ugly, but use the "last hook" for remap instances.
+// %{proto}
+class ConditionProto : public Condition
+{
+public:
+  using MatcherType = Matchers<std::string>;
 
-std::string getIP(sockaddr const *s_sockaddr);
-char *getIP(sockaddr const *s_sockaddr, char res[INET6_ADDRSTRLEN]);
-uint16_t getPort(sockaddr const *s_sockaddr);
+  ConditionProto() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionProto"); }
+  void append_value(std::string &s, const Resources &res) override;
 
-extern const char PLUGIN_NAME[];
-extern const char PLUGIN_NAME_DBG[];
+protected:
+  bool eval(const Resources &res) override;
 
-// From google style guide: http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName &) = delete;     \
-  void operator=(const TypeName &) = delete
+private:
+  DISALLOW_COPY_AND_ASSIGN(ConditionProto);
+};
+
+class ConditionIP : public Condition
+{
+public:
+  using MatcherType = Matchers<std::string>;
+
+  ConditionIP() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionProto"); }
+  void append_value(std::string &s, const Resources &res) override;
+
+protected:
+  bool eval(const Resources &res) override;
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(ConditionIP);
+};

@@ -264,7 +264,7 @@ RawHashTable::getValueFromBinding(RawHashTable_Binding *binding)
 }
 
 /**
-  This function takes a hash table, initializes an interator data
+  This function takes a hash table, initializes an iterator data
   structure to point to the first binding in the hash table, and returns
   the first binding, or NULL if there are none.
 

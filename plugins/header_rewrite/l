@@ -1,0 +1,945 @@
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   1) /** @file
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   2) 
+579ce0f703 (Leif Hedstrom  2011-09-15 15:44:35 +0000   3)   This file implements the LogConfig object.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   4) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   5)   @section license License
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   6) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   7)   Licensed to the Apache Software Foundation (ASF) under one
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   8)   or more contributor license agreements.  See the NOTICE file
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000   9)   distributed with this work for additional information
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  10)   regarding copyright ownership.  The ASF licenses this file
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  11)   to you under the Apache License, Version 2.0 (the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  12)   "License"); you may not use this file except in compliance
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  13)   with the License.  You may obtain a copy of the License at
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  14) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  15)       http://www.apache.org/licenses/LICENSE-2.0
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  16) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  17)   Unless required by applicable law or agreed to in writing, software
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  18)   distributed under the License is distributed on an "AS IS" BASIS,
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  19)   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  20)   See the License for the specific language governing permissions and
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  21)   limitations under the License.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  22)  */
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  23) 
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  24) #include "tscore/ink_platform.h"
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  25) #include "tscore/I_Layout.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  26) 
+2ea87aa533 (Mladen Turk    2010-05-23 14:03:49 +0000  27) #ifdef HAVE_SYS_PARAM_H
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  28) #include <sys/param.h>
+58a5eb3437 (Paul Querna    2009-11-27 10:16:25 +0000  29) #endif
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  30) 
+18670a3a35 (James Peach    2016-11-03 20:29:24 -0700  31) #include <memory>
+18670a3a35 (James Peach    2016-11-03 20:29:24 -0700  32) 
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  33) #include "tscore/ink_platform.h"
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  34) #include "tscore/ink_file.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  35) 
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  36) #include "tscore/List.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  37) 
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700  38) #include "Log.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  39) #include "LogField.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  40) #include "LogFilter.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  41) #include "LogFormat.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  42) #include "LogFile.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  43) #include "LogBuffer.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  44) #include "LogHost.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  45) #include "LogObject.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  46) #include "LogConfig.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  47) #include "LogUtils.h"
+079a40277a (Susan Hinrichs 2018-08-30 16:34:59 +0000  48) #include "tscore/SimpleTokenizer.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  49) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  50) #include "LogCollationAccept.h"
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  51) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100  52) #include "YamlLogConfig.h"
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100  53) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  54) #define DISK_IS_CONFIG_FULL_MESSAGE                    \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  55)   "Access logging to local log directory suspended - " \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  56)   "configured space allocation exhausted."
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  57) #define DISK_IS_ACTUAL_FULL_MESSAGE                    \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  58)   "Access logging to local log directory suspended - " \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  59)   "no more space on the logging partition."
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  60) #define DISK_IS_CONFIG_LOW_MESSAGE                     \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  61)   "Access logging to local log directory suspended - " \
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  62)   "configured space allocation almost exhausted."
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  63) #define DISK_IS_ACTUAL_LOW_MESSAGE "Access logging to local log directory suspended - partition space is low."
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  64) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600  65) #define PARTITION_HEADROOM_MB 10
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  66) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  67) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  68) LogConfig::setup_default_values()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  69) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  70)   const unsigned int bufSize = 512;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  71)   char name[bufSize];
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  72)   if (!gethostname(name, bufSize)) {
+1d4a31a19a (Igor Galić     2011-09-18 23:35:59 +0000  73)     ink_strlcpy(name, "unknown_host_name", sizeof(name));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  74)   }
+51a214fa27 (Leif Hedstrom  2011-09-07 22:47:10 +0000  75)   hostname = ats_strdup(name);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  76) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  77)   log_buffer_size              = (int)(10 * LOG_KILOBYTE);
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  78)   max_secs_per_buffer          = 5;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  79)   max_space_mb_for_logs        = 100;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  80)   max_space_mb_for_orphan_logs = 25;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  81)   max_space_mb_headroom        = 10;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  82)   logfile_perm                 = 0644;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  83)   logfile_dir                  = ats_strdup(".");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  84) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  85)   collation_mode             = Log::NO_COLLATION;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  86)   collation_host             = ats_strdup("none");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  87)   collation_port             = 0;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  88)   collation_host_tagged      = false;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  89)   collation_preproc_threads  = 1;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  90)   collation_secret           = ats_strdup("foobar");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  91)   collation_retry_sec        = 0;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  92)   collation_max_send_buffers = 0;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000  93) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  94)   rolling_enabled          = Log::NO_ROLLING;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  95)   rolling_interval_sec     = 86400; // 24 hours
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  96)   rolling_offset_hr        = 0;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  97)   rolling_size_mb          = 10;
+41ec4d18eb (Leif Hedstrom  2013-04-20 16:59:15 -0600  98)   auto_delete_rolled_files = true;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600  99)   roll_log_files_now       = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 100) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 101)   sampling_frequency   = 1;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 102)   file_stat_frequency  = 16;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 103)   space_used_frequency = 900;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 104) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 105)   use_orphan_log_space_value = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 106) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 107)   ascii_buffer_size = 4 * 9216;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 108)   max_line_size     = 9216; // size of pipe buffer for SunOS 5.6
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 109) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 110) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 111) void *
+cf21050a90 (Leif Hedstrom  2013-07-12 19:10:45 -0600 112) LogConfig::reconfigure_mgmt_variables(void * /* token ATS_UNUSED */, char * /* data_raw ATS_UNUSED */,
+cf21050a90 (Leif Hedstrom  2013-07-12 19:10:45 -0600 113)                                       int /* data_len ATS_UNUSED */)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 114) {
+ecea94131b (James Peach    2014-10-29 11:19:38 -0700 115)   Note("received log reconfiguration event, rolling now");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 116)   Log::config->roll_log_files_now = true;
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 117)   return nullptr;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 118) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 119) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 120) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 121) LogConfig::read_configuration_variables()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 122) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 123)   int val;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 124)   char *ptr;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 125) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 126)   val = (int)REC_ConfigReadInteger("proxy.config.log.log_buffer_size");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 127)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 128)     log_buffer_size = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 129)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 130) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 131)   val = (int)REC_ConfigReadInteger("proxy.config.log.max_secs_per_buffer");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 132)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 133)     max_secs_per_buffer = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 134)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 135) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 136)   val = (int)REC_ConfigReadInteger("proxy.config.log.max_space_mb_for_logs");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 137)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 138)     max_space_mb_for_logs = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 139)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 140) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 141)   val = (int)REC_ConfigReadInteger("proxy.config.log.max_space_mb_for_orphan_logs");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 142)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 143)     max_space_mb_for_orphan_logs = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 144)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 145) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 146)   val = (int)REC_ConfigReadInteger("proxy.config.log.max_space_mb_headroom");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 147)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 148)     max_space_mb_headroom = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 149)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 150) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 151)   ptr                     = REC_ConfigReadString("proxy.config.log.logfile_perm");
+5cf0ae9015 (Daniel Xu      2015-07-13 16:07:30 -0700 152)   int logfile_perm_parsed = ink_fileperm_parse(ptr);
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 153)   if (logfile_perm_parsed != -1) {
+5cf0ae9015 (Daniel Xu      2015-07-13 16:07:30 -0700 154)     logfile_perm = logfile_perm_parsed;
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 155)   }
+5cf0ae9015 (Daniel Xu      2015-07-13 16:07:30 -0700 156)   ats_free(ptr);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 157) 
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 158)   ptr = REC_ConfigReadString("proxy.config.log.hostname");
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 159)   if (ptr != nullptr) {
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 160)     ats_free(hostname);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 161)     hostname = ptr;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 162)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 163) 
+a1162d8368 (James Peach    2013-12-03 13:25:11 -0800 164)   ats_free(logfile_dir);
+27cec04b9b (Xavier Chi     2017-08-08 15:15:45 -0500 165)   logfile_dir = ats_stringdup(RecConfigReadLogDir());
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 166) 
+88f5176894 (James Peach    2013-11-27 15:51:49 -0800 167)   if (access(logfile_dir, R_OK | W_OK | X_OK) == -1) {
+88f5176894 (James Peach    2013-11-27 15:51:49 -0800 168)     // Try 'system_root_dir/var/log/trafficserver' directory
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 169)     fprintf(stderr, "unable to access log directory '%s': %d, %s\n", logfile_dir, errno, strerror(errno));
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 170)     fprintf(stderr, "please set 'proxy.config.log.logfile_dir'\n");
+da4aa85d08 (James Peach    2016-05-13 10:44:03 -0700 171)     ::exit(1);
+88f5176894 (James Peach    2013-11-27 15:51:49 -0800 172)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 173) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 174)   // COLLATION
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 175)   val = (int)REC_ConfigReadInteger("proxy.local.log.collation_mode");
+468058a255 (Mladen Turk    2010-05-13 07:09:39 +0000 176)   // do not restrict value so that error message is logged if
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 177)   // collation_mode is out of range
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 178)   collation_mode = val;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 179) 
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 180)   ptr = REC_ConfigReadString("proxy.config.log.collation_host");
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 181)   if (ptr != nullptr) {
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 182)     ats_free(collation_host);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 183)     collation_host = ptr;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 184)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 185) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 186)   val = (int)REC_ConfigReadInteger("proxy.config.log.collation_port");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 187)   if (val >= 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 188)     collation_port = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 189)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 190) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 191)   val                   = (int)REC_ConfigReadInteger("proxy.config.log.collation_host_tagged");
+41ec4d18eb (Leif Hedstrom  2013-04-20 16:59:15 -0600 192)   collation_host_tagged = (val > 0);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 193) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 194)   val = (int)REC_ConfigReadInteger("proxy.config.log.collation_preproc_threads");
+8a11128818 (Yunkai Zhang   2013-08-11 16:42:32 +0800 195)   if (val > 0 && val <= 128) {
+8a11128818 (Yunkai Zhang   2013-08-11 16:42:32 +0800 196)     collation_preproc_threads = val;
+8a11128818 (Yunkai Zhang   2013-08-11 16:42:32 +0800 197)   }
+8a11128818 (Yunkai Zhang   2013-08-11 16:42:32 +0800 198) 
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 199)   ptr = REC_ConfigReadString("proxy.config.log.collation_secret");
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 200)   if (ptr != nullptr) {
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 201)     ats_free(collation_secret);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 202)     collation_secret = ptr;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 203)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 204) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 205)   val = (int)REC_ConfigReadInteger("proxy.config.log.collation_retry_sec");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 206)   if (val >= 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 207)     collation_retry_sec = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 208)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 209) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 210)   val = (int)REC_ConfigReadInteger("proxy.config.log.collation_max_send_buffers");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 211)   if (val >= 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 212)     collation_max_send_buffers = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 213)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 214) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 215)   // ROLLING
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 216) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 217)   // we don't check for valid values of rolling_enabled, rolling_interval_sec,
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 218)   // rolling_offset_hr, or rolling_size_mb because the LogObject takes care of this
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 219)   //
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 220)   rolling_interval_sec = (int)REC_ConfigReadInteger("proxy.config.log.rolling_interval_sec");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 221)   rolling_offset_hr    = (int)REC_ConfigReadInteger("proxy.config.log.rolling_offset_hr");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 222)   rolling_size_mb      = (int)REC_ConfigReadInteger("proxy.config.log.rolling_size_mb");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 223) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 224)   val = (int)REC_ConfigReadInteger("proxy.config.log.rolling_enabled");
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 225)   if (LogRollingEnabledIsValid(val)) {
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 226)     rolling_enabled = (Log::RollingEnabledValues)val;
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 227)   } else {
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 228)     Warning("invalid value '%d' for '%s', disabling log rolling", val, "proxy.config.log.rolling_enabled");
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 229)     rolling_enabled = Log::NO_ROLLING;
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 230)   }
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 231) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 232)   val                      = (int)REC_ConfigReadInteger("proxy.config.log.auto_delete_rolled_files");
+41ec4d18eb (Leif Hedstrom  2013-04-20 16:59:15 -0600 233)   auto_delete_rolled_files = (val > 0);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 234) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 235)   // PERFORMANCE
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 236)   val = (int)REC_ConfigReadInteger("proxy.config.log.sampling_frequency");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 237)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 238)     sampling_frequency = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 239)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 240) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 241)   val = (int)REC_ConfigReadInteger("proxy.config.log.file_stat_frequency");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 242)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 243)     file_stat_frequency = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 244)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 245) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 246)   val = (int)REC_ConfigReadInteger("proxy.config.log.space_used_frequency");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 247)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 248)     space_used_frequency = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 249)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 250) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 251)   // ASCII BUFFER
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 252)   val = (int)REC_ConfigReadInteger("proxy.config.log.ascii_buffer_size");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 253)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 254)     ascii_buffer_size = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 255)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 256) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 257)   val = (int)REC_ConfigReadInteger("proxy.config.log.max_line_size");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 258)   if (val > 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 259)     max_line_size = val;
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 260)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 261) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 262) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 263) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 264)   LogConfig::LogConfig
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 265) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 266)   Read the logging configuration variables from the config file and
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 267)   initialize the LogConfig member variables.  Assign some meaningful
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 268)   default value if we get garbage back from the config file.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 269)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 270) 
+bf34e291c8 (Leif Hedstrom  2011-01-07 00:36:08 +0000 271) // TODO: Is UINT_MAX here really correct?
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 272) LogConfig::LogConfig()
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 273)   : initialized(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 274)     reconfiguration_needed(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 275)     logging_space_exhausted(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 276)     m_space_used(0),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 277)     m_partition_space_left((int64_t)UINT_MAX),
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 278)     m_log_collation_accept(nullptr),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 279)     m_disk_full(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 280)     m_disk_low(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 281)     m_partition_full(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 282)     m_partition_low(false),
+c32379b6ca (Phil Sorber    2016-05-06 16:00:03 -0600 283)     m_log_directory_inaccessible(false)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 284) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 285)   // Setup the default values for all LogConfig public variables so that
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 286)   // a LogConfig object is valid upon return from the constructor even
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 287)   // if no configuration file is read
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 288)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 289)   setup_default_values();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 290) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 291) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 292) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 293)   LogConfig::~LogConfig
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 294) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 295)   Delete all config variable strings.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 296)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 297) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 298) LogConfig::~LogConfig()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 299) {
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 300)   // we don't delete the log collation accept because it may be transferred
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 301)   // to another LogConfig object
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 302)   //
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 303)   //    delete m_log_collation_accept;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 304) 
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 305)   ats_free(hostname);
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 306)   ats_free(logfile_dir);
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 307)   ats_free(collation_host);
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 308)   ats_free(collation_secret);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 309) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 310) 
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 311) /*-------------------------------------------------------------------------
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 312)   LogConfig::setup_collation
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 313)   -------------------------------------------------------------------------*/
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 314) 
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 315) void
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 316) LogConfig::setup_collation(LogConfig *prev_config)
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 317) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 318)   // Set-up the collation status, but only if collation is enabled and
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 319)   // there are valid entries for the collation host and port.
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 320)   //
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 321)   if (collation_mode < Log::NO_COLLATION || collation_mode >= Log::N_COLLATION_MODES) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 322)     Note("Invalid value %d for proxy.local.log.collation_mode"
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 323)          " configuration variable (valid range is from %d to %d)\n"
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 324)          "Log collation disabled",
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 325)          collation_mode, Log::NO_COLLATION, Log::N_COLLATION_MODES - 1);
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 326)   } else if (collation_mode == Log::NO_COLLATION) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 327)     // if the previous configuration had a collation accept, delete it
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 328)     //
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 329)     if (prev_config && prev_config->m_log_collation_accept) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 330)       delete prev_config->m_log_collation_accept;
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 331)       prev_config->m_log_collation_accept = nullptr;
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 332)     }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 333)   } else {
+26b30870d6 (Leif Hedstrom  2018-07-31 13:41:58 -0600 334)     Warning("Log collation is deprecated as of ATS v8.0.0!");
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 335)     if (!collation_port) {
+c4b5e554d8 (James Peach    2014-01-24 15:00:52 -0800 336)       Note("Cannot activate log collation, %d is an invalid collation port", collation_port);
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 337)     } else if (collation_mode > Log::COLLATION_HOST && strcmp(collation_host, "none") == 0) {
+c4b5e554d8 (James Peach    2014-01-24 15:00:52 -0800 338)       Note("Cannot activate log collation, \"%s\" is an invalid collation host", collation_host);
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 339)     } else {
+edb3e35bc8 (James Peach    2014-04-25 14:28:46 -0700 340)       if (collation_mode == Log::COLLATION_HOST) {
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 341)         ink_assert(m_log_collation_accept == nullptr);
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 342) 
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 343)         if (prev_config && prev_config->m_log_collation_accept) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 344)           if (prev_config->collation_port == collation_port) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 345)             m_log_collation_accept = prev_config->m_log_collation_accept;
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 346)           } else {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 347)             delete prev_config->m_log_collation_accept;
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 348)           }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 349)         }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 350) 
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 351)         if (!m_log_collation_accept) {
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 352)           Log::collation_port    = collation_port;
+7353f6690f (Leif Hedstrom  2014-05-22 12:52:58 -0600 353)           m_log_collation_accept = new LogCollationAccept(collation_port);
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 354)         }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 355)         Debug("log", "I am a collation host listening on port %d.", collation_port);
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 356)       } else {
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 357)         Debug("log",
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 358)               "I am a collation client (%d)."
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 359)               " My collation host is %s:%d",
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 360)               collation_mode, collation_host, collation_port);
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 361)       }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 362) 
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 363)       Debug("log", "using iocore log collation");
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 364)       if (collation_host_tagged) {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 365)         LogFormat::turn_tagging_on();
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 366)       } else {
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 367)         LogFormat::turn_tagging_off();
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 368)       }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 369)     }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 370)   }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 371) }
+9e741ae26f (Zhao Yongming  2011-09-08 10:26:00 +0000 372) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 373) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 374)   LogConfig::init
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 375)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 376) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 377) void
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 378) LogConfig::init(LogConfig *prev_config)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 379) {
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 380)   LogObject *errlog = nullptr;
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 381) 
+dc6e42c63d (Leif Hedstrom  2013-04-01 15:05:07 -0600 382)   ink_assert(!initialized);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 383) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 384)   setup_collation(prev_config);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 385) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 386)   update_space_used();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 387) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 388)   // create log objects
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 389)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 390)   if (Log::transaction_logging_enabled()) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 391)     setup_log_objects();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 392)   }
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 393) 
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 394)   // ----------------------------------------------------------------------
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 395)   // Construct a new error log object candidate.
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 396)   if (Log::error_logging_enabled()) {
+18670a3a35 (James Peach    2016-11-03 20:29:24 -0700 397)     std::unique_ptr<LogFormat> fmt(MakeTextLogFormat("error"));
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 398) 
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 399)     Debug("log", "creating predefined error log object");
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 400) 
+18670a3a35 (James Peach    2016-11-03 20:29:24 -0700 401)     errlog = new LogObject(fmt.get(), logfile_dir, "error.log", LOG_FILE_ASCII, nullptr, (Log::RollingEnabledValues)rolling_enabled,
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 402)                            collation_preproc_threads, rolling_interval_sec, rolling_offset_hr, rolling_size_mb);
+18670a3a35 (James Peach    2016-11-03 20:29:24 -0700 403) 
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 404)     log_object_manager.manage_object(errlog);
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 405)     errlog->set_fmt_timestamps();
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 406)   } else {
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 407)     Log::error_log = nullptr;
+792a75b1aa (Phil Sorber    2015-07-30 18:54:14 -0600 408)   }
+9236bb738d (Phil Sorber    2015-06-16 12:13:24 -0600 409) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 410)   if (prev_config) {
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 411)     // Transfer objects from previous configuration.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 412)     transfer_objects(prev_config);
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 413) 
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 414)     // After transferring objects, we are going to keep either the new error log or the old one. Figure out
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 415)     // which one we are keeping and make that the global ...
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 416)     if (Log::error_log) {
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 417)       errlog = this->log_object_manager.find_by_format_name(Log::error_log->m_format->name());
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 418)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 419)   }
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 420) 
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 421)   ink_atomic_swap(&Log::error_log, errlog);
+538eba5c07 (James Peach    2013-10-02 11:12:00 -0700 422) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 423)   // determine if we should use the orphan log space value or not
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 424)   // we use it if all objects are collation clients, or if some are and
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 425)   // the specified space for collation is larger than that for local files
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 426)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 427)   size_t num_collation_clients = log_object_manager.get_num_collation_clients();
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 428)   use_orphan_log_space_value   = (num_collation_clients == 0 ? false :
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 429)                                                              (log_object_manager.get_num_objects() == num_collation_clients ?
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 430)                                                                 true :
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 431)                                                                 max_space_mb_for_orphan_logs > max_space_mb_for_logs));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 432) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 433)   initialized = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 434) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 435) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 436) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 437)   LogConfig::display
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 438) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 439)   Dump the values for the current LogConfig object.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 440)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 441) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 442) void
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 443) LogConfig::display(FILE *fd)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 444) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 445)   fprintf(fd, "-----------------------------\n");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 446)   fprintf(fd, "--- Logging Configuration ---\n");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 447)   fprintf(fd, "-----------------------------\n");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 448)   fprintf(fd, "Config variables:\n");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 449)   fprintf(fd, "   log_buffer_size = %d\n", log_buffer_size);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 450)   fprintf(fd, "   max_secs_per_buffer = %d\n", max_secs_per_buffer);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 451)   fprintf(fd, "   max_space_mb_for_logs = %d\n", max_space_mb_for_logs);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 452)   fprintf(fd, "   max_space_mb_for_orphan_logs = %d\n", max_space_mb_for_orphan_logs);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 453)   fprintf(fd, "   use_orphan_log_space_value = %d\n", use_orphan_log_space_value);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 454)   fprintf(fd, "   max_space_mb_headroom = %d\n", max_space_mb_headroom);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 455)   fprintf(fd, "   hostname = %s\n", hostname);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 456)   fprintf(fd, "   logfile_dir = %s\n", logfile_dir);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 457)   fprintf(fd, "   logfile_perm = 0%o\n", logfile_perm);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 458)   fprintf(fd, "   collation_mode = %d\n", collation_mode);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 459)   fprintf(fd, "   collation_host = %s\n", collation_host);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 460)   fprintf(fd, "   collation_port = %d\n", collation_port);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 461)   fprintf(fd, "   collation_host_tagged = %d\n", collation_host_tagged);
+8a11128818 (Yunkai Zhang   2013-08-11 16:42:32 +0800 462)   fprintf(fd, "   collation_preproc_threads = %d\n", collation_preproc_threads);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 463)   fprintf(fd, "   collation_secret = %s\n", collation_secret);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 464)   fprintf(fd, "   rolling_enabled = %d\n", rolling_enabled);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 465)   fprintf(fd, "   rolling_interval_sec = %d\n", rolling_interval_sec);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 466)   fprintf(fd, "   rolling_offset_hr = %d\n", rolling_offset_hr);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 467)   fprintf(fd, "   rolling_size_mb = %d\n", rolling_size_mb);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 468)   fprintf(fd, "   auto_delete_rolled_files = %d\n", auto_delete_rolled_files);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 469)   fprintf(fd, "   sampling_frequency = %d\n", sampling_frequency);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 470)   fprintf(fd, "   file_stat_frequency = %d\n", file_stat_frequency);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 471)   fprintf(fd, "   space_used_frequency = %d\n", space_used_frequency);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 472) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 473)   fprintf(fd, "\n");
+bd1e9ef542 (Bryan Call     2009-11-11 03:54:42 +0000 474)   fprintf(fd, "************ Log Objects (%u objects) ************\n", (unsigned int)log_object_manager.get_num_objects());
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 475)   log_object_manager.display(fd);
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 476) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 477)   fprintf(fd, "************ Filter List (%u filters) ************\n", filter_list.count());
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 478)   filter_list.display(fd);
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 479) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 480)   fprintf(fd, "************ Format List (%u formats) ************\n", format_list.count());
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 481)   format_list.display(fd);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 482) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 483) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 484) //-----------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 485) // setup_log_objects
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 486) //
+6d37b7c888 (Phil Sorber    2015-07-30 19:17:43 -0600 487) // Construct: All custom objects.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 488) //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 489) // Upon return from this function:
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 490) // - global_object_list has the aforementioned objects
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 491) // - global_filter_list has all custom filters
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 492) //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 493) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 494) LogConfig::setup_log_objects()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 495) {
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 496)   Debug("log", "creating objects...");
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 497) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 498)   filter_list.clear();
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 499) 
+1029ce6b9f (Randall Meyer  2018-06-19 12:51:14 -0700 500)   // Evaluate logging.yaml to construct the custom log objects.
+36505e7bc9 (James Peach    2016-08-15 09:06:11 -0700 501)   evaluate_config();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 502) 
+36505e7bc9 (James Peach    2016-08-15 09:06:11 -0700 503)   // Open local pipes so readers can see them.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 504)   log_object_manager.open_local_pipes();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 505) 
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 506)   if (is_debug_tag_set("log")) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 507)     log_object_manager.display();
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 508)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 509) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 510) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 511) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 512)   LogConfig::reconfigure
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 513) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 514)   This is the manager callback for any logging config variable change.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 515)   Since we want to access the config variables to build a new config
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 516)   object, but can't from this function (big lock technology in the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 517)   manager), we'll just set a flag and call the real reconfiguration
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 518)   function from the logging thread.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 519)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 520) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 521) int
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 522) LogConfig::reconfigure(const char * /* name ATS_UNUSED */, RecDataT /* data_type ATS_UNUSED */, RecData /* data ATS_UNUSED */,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 523)                        void * /* cookie ATS_UNUSED */)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 524) {
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 525)   Debug("log-config", "Reconfiguration request accepted");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 526)   Log::config->reconfiguration_needed = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 527)   return 0;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 528) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 529) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 530) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 531)   LogConfig::register_config_callbacks
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 532) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 533)   This static function is called by Log::init to register the config update
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 534)   function for each of the logging configuration variables.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 535)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 536) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 537) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 538) LogConfig::register_config_callbacks()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 539) {
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 540)   static const char *names[] = {
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 541)     "proxy.config.log.log_buffer_size",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 542)     "proxy.config.log.max_secs_per_buffer",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 543)     "proxy.config.log.max_space_mb_for_logs",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 544)     "proxy.config.log.max_space_mb_for_orphan_logs",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 545)     "proxy.config.log.max_space_mb_headroom",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 546)     "proxy.config.log.logfile_perm",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 547)     "proxy.config.log.hostname",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 548)     "proxy.config.log.logfile_dir",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 549)     "proxy.local.log.collation_mode",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 550)     "proxy.config.log.collation_host",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 551)     "proxy.config.log.collation_port",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 552)     "proxy.config.log.collation_host_tagged",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 553)     "proxy.config.log.collation_secret",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 554)     "proxy.config.log.collation_retry_sec",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 555)     "proxy.config.log.collation_max_send_buffers",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 556)     "proxy.config.log.rolling_enabled",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 557)     "proxy.config.log.rolling_interval_sec",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 558)     "proxy.config.log.rolling_offset_hr",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 559)     "proxy.config.log.rolling_size_mb",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 560)     "proxy.config.log.auto_delete_rolled_files",
+424d6abbb4 (James Peach    2016-09-06 12:11:45 -0700 561)     "proxy.config.log.config.filename",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 562)     "proxy.config.log.sampling_frequency",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 563)     "proxy.config.log.file_stat_frequency",
+a5cddca181 (Leif Hedstrom  2016-04-17 18:11:17 -0600 564)     "proxy.config.log.space_used_frequency",
+70305eba39 (James Peach    2013-09-25 16:24:44 -0700 565)   };
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 566) 
+70305eba39 (James Peach    2013-09-25 16:24:44 -0700 567)   for (unsigned i = 0; i < countof(names); ++i) {
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 568)     REC_RegisterConfigUpdateFunc(names[i], &LogConfig::reconfigure, nullptr);
+70305eba39 (James Peach    2013-09-25 16:24:44 -0700 569)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 570) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 571) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 572) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 573)   LogConfig::register_stat_callbacks
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 574) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 575)   This static function is called by Log::init to register the stat update
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 576)   function for each of the logging stats variables.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 577)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 578) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 579) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 580) LogConfig::register_stat_callbacks()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 581) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 582)   //
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 583)   // events
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 584)   //
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 585)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_error_ok", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 586)                      (int)log_stat_event_log_error_ok_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 587)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_error_skip", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 588)                      (int)log_stat_event_log_error_skip_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 589)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_error_aggr", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 590)                      (int)log_stat_event_log_error_aggr_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 591)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_error_full", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 592)                      (int)log_stat_event_log_error_full_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 593)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_error_fail", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 594)                      (int)log_stat_event_log_error_fail_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 595)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_access_ok", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 596)                      (int)log_stat_event_log_access_ok_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 597)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_access_skip", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 598)                      (int)log_stat_event_log_access_skip_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 599)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_access_aggr", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 600)                      (int)log_stat_event_log_access_aggr_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 601)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_access_full", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 602)                      (int)log_stat_event_log_access_full_stat, RecRawStatSyncCount);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 603)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.event_log_access_fail", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 604)                      (int)log_stat_event_log_access_fail_stat, RecRawStatSyncCount);
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 605)   //
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 606)   // number vs bytes of logs
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 607)   //
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 608)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.num_sent_to_network", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 609)                      (int)log_stat_num_sent_to_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 610)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.num_lost_before_sent_to_network", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 611)                      (int)log_stat_num_lost_before_sent_to_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 612)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.num_received_from_network", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 613)                      (int)log_stat_num_received_from_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 614)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.num_flush_to_disk", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 615)                      (int)log_stat_num_flush_to_disk_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 616)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.num_lost_before_flush_to_disk", RECD_COUNTER, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 617)                      (int)log_stat_num_lost_before_flush_to_disk_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 618)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_lost_before_preproc", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 619)                      (int)log_stat_bytes_lost_before_preproc_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 620)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_sent_to_network", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 621)                      (int)log_stat_bytes_sent_to_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 622)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_lost_before_sent_to_network", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 623)                      (int)log_stat_bytes_lost_before_sent_to_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 624)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_received_from_network", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 625)                      (int)log_stat_bytes_received_from_network_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 626)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_flush_to_disk", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 627)                      (int)log_stat_bytes_flush_to_disk_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 628)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_lost_before_flush_to_disk", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 629)                      (int)log_stat_bytes_lost_before_flush_to_disk_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 630)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_written_to_disk", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 631)                      (int)log_stat_bytes_written_to_disk_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 632)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.bytes_lost_before_written_to_disk", RECD_INT, RECP_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 633)                      (int)log_stat_bytes_lost_before_written_to_disk_stat, RecRawStatSyncSum);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 634)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 635)   // I/O
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 636)   //
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 637)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.log_files_open", RECD_COUNTER, RECP_NON_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 638)                      (int)log_stat_log_files_open_stat, RecRawStatSyncSum);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 639)   RecRegisterRawStat(log_rsb, RECT_PROCESS, "proxy.process.log.log_files_space_used", RECD_INT, RECP_NON_PERSISTENT,
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 640)                      (int)log_stat_log_files_space_used_stat, RecRawStatSyncSum);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 641) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 642) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 643) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 644)   LogConfig::register_mgmt_callbacks
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 645) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 646)   This static function is called by Log::init to register the mgmt callback
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 647)   function for each of the logging mgmt messages.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 648)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 649) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 650) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 651) LogConfig::register_mgmt_callbacks()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 652) {
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 653)   RecRegisterManagerCb(REC_EVENT_ROLL_LOG_FILES, &LogConfig::reconfigure_mgmt_variables, nullptr);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 654) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 655) 
+468058a255 (Mladen Turk    2010-05-13 07:09:39 +0000 656) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 657)   LogConfig::space_to_write
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 658) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 659)   This function returns true if there is enough disk space to write the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 660)   given number of bytes, false otherwise.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 661)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 662) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 663) bool
+ba699f81fe (James Peach    2016-07-10 21:02:48 -0700 664) LogConfig::space_to_write(int64_t bytes_to_write) const
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 665) {
+a43c68c9a5 (Leif Hedstrom  2011-03-18 19:04:53 +0000 666)   int64_t config_space, partition_headroom;
+a43c68c9a5 (Leif Hedstrom  2011-03-18 19:04:53 +0000 667)   int64_t logical_space_used, physical_space_left;
+a43c68c9a5 (Leif Hedstrom  2011-03-18 19:04:53 +0000 668)   bool space;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 669) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 670)   config_space       = (int64_t)get_max_space_mb() * LOG_MEGABYTE;
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 671)   partition_headroom = (int64_t)PARTITION_HEADROOM_MB * LOG_MEGABYTE;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 672) 
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 673)   logical_space_used  = m_space_used + bytes_to_write;
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 674)   physical_space_left = m_partition_space_left - (int64_t)bytes_to_write;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 675) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 676)   space = ((logical_space_used < config_space) && (physical_space_left > partition_headroom));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 677) 
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 678)   Debug("logspace",
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 679)         "logical space used %" PRId64 ", configured space %" PRId64 ", physical space left %" PRId64 ", partition headroom %" PRId64
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 680)         ", space %s available",
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 681)         logical_space_used, config_space, physical_space_left, partition_headroom, space ? "is" : "is not");
+929296988b (James Peach    2014-04-29 14:54:27 -0700 682) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 683)   return space;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 684) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 685) 
+468058a255 (Mladen Turk    2010-05-13 07:09:39 +0000 686) /*-------------------------------------------------------------------------
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 687)   LogConfig::update_space_used
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 688) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 689)   Update the m_space_used variable by reading the logging dir and counting
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 690)   the total bytes being occupied by files.  If we've used too much space
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 691)   (space_used > max_space - headroom) then start deleting some files (if
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 692)   auto_delete_rolled_files is set) to make room. Finally, update the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 693)   space_used stat.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 694) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 695)   This routine will only be executed SINGLE-THREADED, either by the main
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 696)   thread when a LogConfig is initialized, or by the event thread during the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 697)   periodic space check.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 698)   -------------------------------------------------------------------------*/
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 699) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 700) static int
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 701) delete_candidate_compare(const LogDeleteCandidate *a, const LogDeleteCandidate *b)
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 702) {
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 703)   return ((int)(a->mtime - b->mtime));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 704) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 705) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 706) void
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 707) LogConfig::update_space_used()
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 708) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 709)   // no need to update space used if log directory is inaccessible
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 710)   //
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 711)   if (m_log_directory_inaccessible) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 712)     return;
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 713)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 714) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 715)   static const int MAX_CANDIDATES = 128;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 716)   LogDeleteCandidate candidates[MAX_CANDIDATES];
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 717)   int i, victim, candidate_count;
+4fb3b6eb32 (Leif Hedstrom  2010-12-15 01:15:09 +0000 718)   int64_t total_space_used, partition_space_left;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 719)   char path[MAXPATHLEN];
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 720)   int sret;
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 721)   struct dirent *entry;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 722)   struct stat sbuf;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 723)   DIR *ld;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 724) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 725)   // check if logging directory has been specified
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 726)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 727)   if (!logfile_dir) {
+0f647d07f4 (Bryan Call     2010-04-27 19:12:22 +0000 728)     const char *msg = "Logging directory not specified";
+9b3bae3644 (James Peach    2011-12-17 17:54:51 -0800 729)     Error("%s", msg);
+2741764634 (James Peach    2013-09-25 14:04:41 -0700 730)     LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, "%s", msg);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 731)     m_log_directory_inaccessible = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 732)     return;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 733)   }
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 734) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 735)   // check if logging directory exists and is searchable readable & writable
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 736)   int err;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 737)   do {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 738)     err = access(logfile_dir, R_OK | W_OK | X_OK);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 739)   } while ((err < 0) && (errno == EINTR));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 740) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 741)   if (err < 0) {
+0f647d07f4 (Bryan Call     2010-04-27 19:12:22 +0000 742)     const char *msg = "Error accessing logging directory %s: %s.";
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 743)     Error(msg, logfile_dir, strerror(errno));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 744)     LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, msg, logfile_dir, strerror(errno));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 745)     m_log_directory_inaccessible = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 746)     return;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 747)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 748) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 749)   ld = ::opendir(logfile_dir);
+ced4da1327 (James Peach    2016-10-14 10:56:16 -0700 750)   if (ld == nullptr) {
+7319eb1613 (James Peach    2014-04-29 09:10:34 -0700 751)     const char *msg = "Error opening logging directory %s to perform a space check: %s.";
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 752)     Error(msg, logfile_dir, strerror(errno));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 753)     LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, msg, logfile_dir, strerror(errno));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 754)     m_log_directory_inaccessible = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 755)     return;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 756)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 757) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 758)   total_space_used = 0LL;
+736e33a99a (Bryan Call     2016-07-12 17:29:55 -0700 759)   candidate_count  = 0;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 760) 
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 761)   while ((entry = readdir(ld))) {
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 762)     snprintf(path, MAXPATHLEN, "%s/%s", logfile_dir, entry->d_name);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 763) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 764)     sret = ::stat(path, &sbuf);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 765)     if (sret != -1 && S_ISREG(sbuf.st_mode)) {
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 766)       total_space_used += (int64_t)sbuf.st_size;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 767) 
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 768)       if (auto_delete_rolled_files && LogFile::rolled_logfile(entry->d_name) && candidate_count < MAX_CANDIDATES) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 769)         //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 770)         // then add this entry to the candidate list
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 771)         //
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 772)         candidates[candidate_count].name  = ats_strdup(path);
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 773)         candidates[candidate_count].size  = (int64_t)sbuf.st_size;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 774)         candidates[candidate_count].mtime = sbuf.st_mtime;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 775)         candidate_count++;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 776)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 777)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 778)   }
+25b16f7632 (James Peach    2016-11-02 21:30:47 -0700 779) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 780)   ::closedir(ld);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 781) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 782)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 783)   // Now check the partition to see if there is enough *actual* space.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 784)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 785)   partition_space_left = m_partition_space_left;
+f760dac42f (James Peach    2013-09-24 21:40:31 -0700 786) 
+a5345da86f (George Paul    2010-02-24 18:48:42 +0000 787)   struct statvfs fs;
+f760dac42f (James Peach    2013-09-24 21:40:31 -0700 788) 
+f760dac42f (James Peach    2013-09-24 21:40:31 -0700 789)   if (::statvfs(logfile_dir, &fs) >= 0) {
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 790)     partition_space_left = (int64_t)fs.f_bavail * (int64_t)fs.f_bsize;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 791)   }
+a5345da86f (George Paul    2010-02-24 18:48:42 +0000 792) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 793)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 794)   // Update the config variables for space used/left
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 795)   //
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 796)   m_space_used           = total_space_used;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 797)   m_partition_space_left = partition_space_left;
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 798)   RecSetRawStatSum(log_rsb, log_stat_log_files_space_used_stat, m_space_used);
+9d2acd0a52 (Yunkai Zhang   2013-08-26 14:56:25 +0800 799)   RecSetRawStatCount(log_rsb, log_stat_log_files_space_used_stat, 1);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 800) 
+4fb3b6eb32 (Leif Hedstrom  2010-12-15 01:15:09 +0000 801)   Debug("logspace", "%" PRId64 " bytes being used for logs", m_space_used);
+4952315501 (James Peach    2013-09-24 15:08:49 -0700 802)   Debug("logspace", "%" PRId64 " bytes left on partition", m_partition_space_left);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 803) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 804)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 805)   // Now that we have an accurate picture of the amount of space being
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 806)   // used by logging, we can see if we're running low on space.  If so,
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 807)   // we might consider deleting some files that are stored in the
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 808)   // candidate array.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 809)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 810)   // To delete oldest files first, we'll sort our candidate array by
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 811)   // timestamps, making the oldest files first in the array (thus first
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 812)   // selected).
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 813)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 814) 
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 815)   int64_t max_space = (int64_t)get_max_space_mb() * LOG_MEGABYTE;
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 816)   int64_t headroom  = (int64_t)max_space_mb_headroom * LOG_MEGABYTE;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 817) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 818)   if (candidate_count > 0 && !space_to_write(headroom)) {
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 819)     Debug("logspace", "headroom reached, trying to clear space ...");
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 820)     Debug("logspace", "sorting %d delete candidates ...", candidate_count);
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 821)     qsort(candidates, candidate_count, sizeof(LogDeleteCandidate), (int (*)(const void *, const void *))delete_candidate_compare);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 822) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 823)     for (victim = 0; victim < candidate_count; victim++) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 824)       if (space_to_write(headroom + log_buffer_size)) {
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 825)         Debug("logspace", "low water mark reached; stop deleting");
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 826)         break;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 827)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 828) 
+0828ecc680 (Leif Hedstrom  2010-11-24 16:18:44 +0000 829)       Debug("logspace", "auto-deleting %s", candidates[victim].name);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 830) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 831)       if (unlink(candidates[victim].name) < 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 832)         Note("Traffic Server was Unable to auto-delete rolled "
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 833)              "logfile %s: %s.",
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 834)              candidates[victim].name, strerror(errno));
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 835)       } else {
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 836)         Debug("logspace",
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 837)               "The rolled logfile, %s, was auto-deleted; "
+c29e291662 (Leif Hedstrom  2018-04-25 12:06:52 -0600 838)               "%" PRId64 " bytes were reclaimed.",
+6547794435 (Leif Hedstrom  2015-03-21 14:51:04 -0600 839)               candidates[victim].name, candidates[victim].size);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 840)         m_space_used -= candidates[victim].size;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 841)         m_partition_space_left += candidates[victim].size;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 842)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 843)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 844)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 845)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 846)   // Clean up the candidate array
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 847)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 848)   for (i = 0; i < candidate_count; i++) {
+ddb82a56fb (Leif Hedstrom  2011-09-07 21:46:03 +0000 849)     ats_free(candidates[i].name);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 850)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 851) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 852)   //
+468058a255 (Mladen Turk    2010-05-13 07:09:39 +0000 853)   // Now that we've updated the m_space_used value, see if we need to
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 854)   // issue any alarms or warnings about space
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 855)   //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 856) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 857)   if (!space_to_write(headroom)) {
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 858)     if (!logging_space_exhausted) {
+6aa87ff56f (Yunkai Zhang   2013-09-27 14:47:45 +0800 859)       Note("Logging space exhausted, any logs writing to local disk will be dropped!");
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 860)     }
+6aa87ff56f (Yunkai Zhang   2013-09-27 14:47:45 +0800 861) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 862)     logging_space_exhausted = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 863)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 864)     // Despite our best efforts, we still can't write to the disk.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 865)     // Find out why and set/clear warnings.
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 866)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 867)     // First, are we out of space based on configuration?
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 868)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 869)     if (m_space_used >= max_space) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 870)       if (!m_disk_full) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 871)         m_disk_full = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 872)         LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, DISK_IS_CONFIG_FULL_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 873)         Warning(DISK_IS_CONFIG_FULL_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 874)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 875)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 876)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 877)     // How about out of actual space on the partition?
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 878)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 879)     else if (m_partition_space_left <= 0) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 880)       if (!m_partition_full) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 881)         m_partition_full = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 882)         LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, DISK_IS_ACTUAL_FULL_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 883)         Warning(DISK_IS_ACTUAL_FULL_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 884)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 885)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 886)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 887)     // How about being within the headroom limit?
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 888)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 889)     else if (m_space_used + headroom >= max_space) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 890)       if (!m_disk_low) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 891)         m_disk_low = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 892)         LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, DISK_IS_CONFIG_LOW_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 893)         Warning(DISK_IS_CONFIG_LOW_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 894)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 895)     } else {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 896)       if (!m_partition_low) {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 897)         m_partition_low = true;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 898)         LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, DISK_IS_ACTUAL_LOW_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 899)         Warning(DISK_IS_ACTUAL_LOW_MESSAGE);
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 900)       }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 901)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 902)   } else {
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 903)     //
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 904)     // We have enough space to log again; clear any previous messages
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 905)     //
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 906)     if (logging_space_exhausted) {
+6aa87ff56f (Yunkai Zhang   2013-09-27 14:47:45 +0800 907)       Note("Logging space is no longer exhausted.");
+c10495e5db (James Peach    2016-06-29 11:55:49 -0700 908)     }
+6aa87ff56f (Yunkai Zhang   2013-09-27 14:47:45 +0800 909) 
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 910)     logging_space_exhausted = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 911)     if (m_disk_full || m_partition_full) {
+7319eb1613 (James Peach    2014-04-29 09:10:34 -0700 912)       Note("Logging disk is no longer full; access logging to local log directory resumed.");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 913)       m_disk_full      = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 914)       m_partition_full = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 915)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 916)     if (m_disk_low || m_partition_low) {
+7319eb1613 (James Peach    2014-04-29 09:10:34 -0700 917)       Note("Logging disk is no longer low; access logging to local log directory resumed.");
+d6906e2a59 (Leif Hedstrom  2016-06-19 21:05:34 -0600 918)       m_disk_low      = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 919)       m_partition_low = false;
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 920)     }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 921)   }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 922) }
+a1651345d1 (Andrew Hsu     2009-10-29 23:01:48 +0000 923) 
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 924) bool
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 925) LogConfig::evaluate_config()
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 926) {
+1029ce6b9f (Randall Meyer  2018-06-19 12:51:14 -0700 927)   ats_scoped_str path(RecConfigReadConfigPath("proxy.config.log.config.filename", "logging.yaml"));
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 928)   struct stat sbuf;
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 929)   if (stat(path.get(), &sbuf) == -1 && errno == ENOENT) {
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 930)     Warning("logging configuration '%s' doesn't exist", path.get());
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 931)     return false;
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 932)   }
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 933) 
+1029ce6b9f (Randall Meyer  2018-06-19 12:51:14 -0700 934)   Note("loading logging.yaml");
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 935)   YamlLogConfig y(this);
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 936) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 937)   bool zret = y.parse(path.get());
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 938)   if (zret) {
+1029ce6b9f (Randall Meyer  2018-06-19 12:51:14 -0700 939)     Note("logging.yaml done reloading!");
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 940)   } else {
+1029ce6b9f (Randall Meyer  2018-06-19 12:51:14 -0700 941)     Note("failed to reload logging.yaml");
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 942)   }
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 943) 
+aa908d1ee7 (Randall Meyer  2018-05-07 13:26:06 +0100 944)   return zret;
+ffa5b35c2c (James Peach    2016-07-29 15:22:11 +1000 945) }

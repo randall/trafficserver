@@ -40,7 +40,7 @@
 static BgFetchConfig *gConfig;
 
 ///////////////////////////////////////////////////////////////////////////
-// Hold the global ackground fetch state. This is currently shared across all
+// Hold the global background fetch state. This is currently shared across all
 // configurations, as a singleton. ToDo: Would it ever make sense to do this
 // per remap rule? Probably not.
 typedef std::unordered_map<std::string, bool> OutstandingRequests;
@@ -214,7 +214,7 @@ private:
 // This needs the txnp temporarily, so it can copy the pristine request
 // URL. The txnp is not used once initialize() returns.
 //
-// Upon succesful completion, the struct should be ready to start a
+// Upon successful completion, the struct should be ready to start a
 // background fetch.
 bool
 BgFetchData::initialize(TSMBuffer request, TSMLoc req_hdr, TSHttpTxn txnp)
@@ -625,7 +625,7 @@ TSRemapNewInstance(int argc, char *argv[], void **ih, char * /* errbuf */, int /
 
   config->acquire(); // Inc refcount
 
-  // Parse the optional rules, wihch becomes a linked list of BgFetchRule's.
+  // Parse the optional rules, which becomes a linked list of BgFetchRule's.
   if (argc > 2) {
     TSDebug(PLUGIN_NAME, "config file %s", argv[2]);
     config->readConfig(argv[2]);

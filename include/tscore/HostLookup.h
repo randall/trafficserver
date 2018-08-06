@@ -23,7 +23,7 @@
 
 /*****************************************************************************
  *
- *  HostLookup.h - Interface to genernal purpose matcher
+ *  HostLookup.h - Interface to general purpose matcher
  *
  *
  ****************************************************************************/
@@ -32,7 +32,7 @@
 
 #include "DynArray.h"
 
-// HostLookup  constantss
+// HostLookup  constants
 const int HOST_TABLE_DEPTH = 3; // Controls the max number of levels in the logical tree
 const int HOST_ARRAY_MAX   = 8; // Sets the fixed array size
 
@@ -126,6 +126,6 @@ private:
   HostBranch *root;         // The top of the search tree
   HostLeaf *leaf_array;     // array of all leaves in tree
   int array_len;            // the length of the arrays
-  int num_el;               // the numbe of itmems in the tree
+  int num_el;               // the numbe of items in the tree
   const char *matcher_name; // Used for Debug/Warning/Error messages
 };

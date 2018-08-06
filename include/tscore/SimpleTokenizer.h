@@ -128,7 +128,7 @@ public:
   {
   }
 
-  // NOTE: The input strring 's' is overwritten for mode OVERWRITE_INPUT_STRING.
+  // NOTE: The input string 's' is overwritten for mode OVERWRITE_INPUT_STRING.
   SimpleTokenizer(const char *s, char delimiter = ' ', unsigned mode = 0, char escape = '\\')
     : _data(nullptr), _delimiter(delimiter), _mode(mode), _escape(escape)
   {

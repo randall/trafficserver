@@ -179,7 +179,7 @@ struct RouterId {
   );
 
   uint32_t m_addr;    ///< Identifying router IP address.
-  uint32_t m_recv_id; ///< Recieve ID (sequence #).
+  uint32_t m_recv_id; ///< Receive ID (sequence #).
 };
 
 /** Sect 5.7.1: Router Identity Element.
@@ -485,7 +485,7 @@ public:
   ValueElt &operator[](int idx ///< Index of target element.
   );
   //@}
-  /// Calcuate the size of an element with @a n values.
+  /// Calculate the size of an element with @a n values.
   static size_t calcSize(uint32_t n ///< Number of values.
   );
   /// Get the size (length) of this element.
@@ -1029,7 +1029,7 @@ public:
   static void setDefaultOption(Option opt ///< Type of security.
   );
 
-  /// Set messsage local security key.
+  /// Set message local security key.
   self &setKey(const char *key ///< Shared key.
   );
 
@@ -1066,7 +1066,7 @@ public:
   struct raw_t : public super::raw_t, public ServiceGroup {
   };
 
-  ServiceComp(); ///< Default constructor, no member intialization.
+  ServiceComp(); ///< Default constructor, no member initialization.
 
   /// @name Accessors
   //@{
@@ -1635,7 +1635,7 @@ public:
     RouterAssignListElt m_routers; ///< Routers.
   };
 
-  /// Force virtual desctructor.
+  /// Force virtual destructor.
   virtual ~AltAssignComp() {}
   /// @name Accessors
   //@{
@@ -1690,7 +1690,7 @@ public:
   uint32_t getCacheCount() const;
   //@}
 
-  /// Force virtual desctructor.
+  /// Force virtual destructor.
   virtual ~AltHashAssignComp() {}
   /// Fill out the component from an @c Assignment.
   virtual self &fill(MsgBuffer &buffer,               ///< Target storage.
@@ -1723,7 +1723,7 @@ public:
   typedef AltMaskAssignComp self; ///< Self reference type.
   typedef AltAssignComp super;    ///< Parent type.
 
-  /// Force virtual desctructor.
+  /// Force virtual destructor.
   virtual ~AltMaskAssignComp() {}
   /// Fill out the component from an @c Assignment.
   virtual self &fill(MsgBuffer &buffer,               ///< Target storage.
@@ -1774,7 +1774,7 @@ public:
   //@}
 
   /// Write basic serialization data.
-  /// Elements must be filled in seperately and after invoking this method.
+  /// Elements must be filled in separately and after invoking this method.
   self &fill(MsgBuffer &buffer, ///< Component storage.
              cmd_t cmd,         ///< Command type.
              uint32_t data      ///< Command data.
@@ -1860,7 +1860,7 @@ public:
              uint32_t routerAddr, ///< Router identifying address.
              uint32_t toAddr,     ///< Destination address.
              uint32_t cacheAddr,  ///< Cache identifying address.
-             uint32_t recvId      ///< Recieve ID.
+             uint32_t recvId      ///< Receive ID.
   );
 
   /// Validate an existing structure.
@@ -2020,7 +2020,7 @@ public:
   size_t getCount() const;
 
   /// Validate security option.
-  /// @note This presumes a sublcass has already successfully parsed.
+  /// @note This presumes a subclass has already successfully parsed.
   bool validateSecurity() const;
 
   // Common starting components for all messages.
@@ -2072,7 +2072,7 @@ public:
   typedef ISeeYouMsg self; ///< Self reference type.
 
   /// Fill out message structure.
-  /// Router ID and view data must be filled in seperately.
+  /// Router ID and view data must be filled in separately.
   void fill(detail::router::GroupData const &group, ///< Service groupc context.
             SecurityOption sec_opt,                 ///< Security option.
             detail::Assignment &assign,             ///< Cache assignment data.
@@ -2212,7 +2212,7 @@ public:
   /// @return 0 for success, -errno on error.
   virtual int housekeeping() = 0;
 
-  /// Recieve and process a message.
+  /// Receive and process a message.
   /// @return 0 for success, -ERRNO on system error.
   virtual ts::Rv<int> handleMessage();
 
@@ -2381,7 +2381,7 @@ namespace detail
       RouterBag::iterator findRouter(uint32_t addr ///< IP address of cache.
       );
 
-      /// Set an intial router for a service group.
+      /// Set an initial router for a service group.
       self &seedRouter(uint32_t addr ///< IP address for router.
       );
       /// Remove a seed router.
@@ -2466,7 +2466,7 @@ public:
                                         ServiceGroup::Result *result = 0 ///< [out] Result for service creation.
   );
 
-  /** Set an intial router for a service group.
+  /** Set an initial router for a service group.
       This is needed to bootstrap the protocol.
       If the router is already seeded, this call is silently ignored.
   */

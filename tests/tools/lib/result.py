@@ -62,7 +62,7 @@ class Result(object):
         global ignoredFields
         # print("RECEIVED")
         # print(received_dict)
-        # print("RECIEVED CACHE CONTROL")
+        # print("RECEIVED CACHE CONTROL")
         # print(received_dict['Cache-Control'.lower()])
         # print("EXPECTED")
         # print(expected_dict)

@@ -1997,7 +1997,7 @@ protected:
   typedef Vec<Bucket, DefaultAlloc, 0> Array; ///< Bucket array.
 
   size_t m_count;                     ///< # of elements stored in the table.
-  ExpansionPolicy m_expansion_policy; ///< When to exand the table.
+  ExpansionPolicy m_expansion_policy; ///< When to expand the table.
   size_t m_expansion_limit;           ///< Limit value for expansion.
   Array m_array;                      ///< Bucket storage.
   /// Make available to nested classes statically.

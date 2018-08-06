@@ -40,14 +40,14 @@ public:
 };
 
 // UnionFind supports fast unify and finding of
-// 'representitive elements'.
+// 'representative elements'.
 // Elements are numbered from 0 to N-1.
 class UnionFind : public Vec<int>
 {
 public:
   // set number of elements, initialized to singletons, may be called repeatedly to increase size
   void size(int n);
-  // return representitive element
+  // return representative element
   int find(int n);
   // unify the sets containing the two elements
   void unify(int n, int m);

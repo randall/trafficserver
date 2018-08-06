@@ -539,7 +539,7 @@ TSPluginInit(int argc, const char *argv[])
   std::string installDir = TSInstallDirGet();
   LOG_DIR                = installDir + "/" + LOG_DIR + "/";
 
-  /// Commandline options
+  /// Command line options
   static const struct option longopts[] = {
     {"logdir", required_argument, nullptr, 'l'}, {"sample", required_argument, nullptr, 's'}, {nullptr, no_argument, nullptr, 0}};
   int opt = 0;

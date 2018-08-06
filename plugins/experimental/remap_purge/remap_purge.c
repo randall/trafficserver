@@ -105,7 +105,7 @@ delete_purge_instance(PurgeInstance *purge)
   }
 }
 
-/* This is where we start the PURGE events, setting up the transactino to fail,
+/* This is where we start the PURGE events, setting up the transaction to fail,
    and bump the generation ID, and finally save the state. */
 static int
 on_http_cache_lookup_complete(TSHttpTxn txnp, TSCont contp, PurgeInstance *purge)

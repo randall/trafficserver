@@ -40,7 +40,7 @@ using namespace std;
 using namespace Gzip;
 
 // FIXME: custom dictionaries would be nice. configurable/content-type?
-// a gprs device might benefit from a higher compression ratio, whereas a desktop w. high bandwith
+// a GPRS device might benefit from a higher compression ratio, whereas a desktop w. high bandwith
 // might be served better with little or no compression at all
 // FIXME: look into compressing from the task thread pool
 // FIXME: make normalizing accept encoding configurable
@@ -135,7 +135,7 @@ data_destroy(Data *data)
 {
   TSReleaseAssert(data);
 
-  // deflateEnd returnvalue ignore is intentional
+  // deflateEnd return value ignore is intentional
   // it would spew log on every client abort
   deflateEnd(&data->zstrm);
 
@@ -432,7 +432,7 @@ compress_transform_one(Data *data, TSIOBufferReader upstream_reader, int amount)
           (data->compression_algorithms & (ALGORITHM_GZIP | ALGORITHM_DEFLATE))) {
       gzip_transform_one(data, upstream_buffer, upstream_length);
     } else {
-      warning("No compression supported. Shoudn't come here.");
+      warning("No compression supported. Shouldn't come here.");
     }
 
     TSIOBufferReaderConsume(upstream_reader, upstream_length);
@@ -972,7 +972,7 @@ load_global_configuration(TSCont contp)
 
   debug("config swapped, old config %p", oldconfig);
 
-  // First, if there was a previous configuration, clean that one out. This avois the
+  // First, if there was a previous configuration, clean that one out. This avoids the
   // small race condition tht exist between doing a find() and calling hold() on a
   // HostConfig object.
   if (prev_config) {

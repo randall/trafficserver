@@ -393,7 +393,7 @@ ink_hash_table_dump_strings(InkHashTable *ht_ptr)
   void ink_hash_table_replace_string(InkHashTable *ht_ptr,
                                      char *string_key, char *string_value)
 
-  This conveninece routine is intended for hash tables with keys of type
+  This convenience routine is intended for hash tables with keys of type
   InkHashTableKeyType_String, and values being dynamically allocated strings.
   This routine binds <string_key> to a copy of <string_value>, and any
   previous bound value is deallocated.

@@ -905,7 +905,7 @@ ConditionGeo::get_geo_int(const sockaddr *addr) const
   int v       = 4;
 
   switch (_geo_qual) {
-  // Country Databse
+  // Country Database
   case GEO_QUAL_COUNTRY_ISO:
     switch (addr->sa_family) {
     case AF_INET:
@@ -970,7 +970,7 @@ ConditionGeo::get_geo_int(const sockaddr *addr) const
 
 #else
 
-// No Geo library avaiable, these are just stubs.
+// No Geo library available, these are just stubs.
 
 const char *
 ConditionGeo::get_geo_string(const sockaddr *addr) const

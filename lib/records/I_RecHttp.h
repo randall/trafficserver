@@ -145,7 +145,7 @@ const char *RecNormalizeProtoTag(const char *tag);
     string names we can just compare their indices in this table.
 
     @internal To simplify the implementation we limit the maximum
-    number of strings to 32. That will be sufficient for the forseeable
+    number of strings to 32. That will be sufficient for the foreseeable
     future. We can come back to this if it ever becomes a problem.
 
     @internal Because we have so few strings we just use a linear search.
