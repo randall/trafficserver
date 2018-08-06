@@ -99,7 +99,7 @@ public:
 
   /** Construct explicitly with a pointer and size.
       If @a n is negative it is treated as 0.
-      @internal Overload for convience, otherwise get "narrow conversion" errors.
+      @internal Overload for convenience, otherwise get "narrow conversion" errors.
    */
   constexpr TextView(const char *ptr, ///< Pointer to buffer.
                      int n            ///< Size of buffer.
@@ -116,7 +116,7 @@ public:
 
       Construct directly from an array of characters. All elements of the array are
       included in the view unless the last element is nul, in which case it is elided.
-      If this is inapropriate then a constructor with an explicit size should be used.
+      If this is inappropriate then a constructor with an explicit size should be used.
 
       @code
         TextView a("A literal string");

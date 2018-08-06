@@ -134,7 +134,7 @@ RecErrT RecRegisterRawStatUpdateFunc(const char *name, RecRawStatBlock *rsb, int
 //-------------------------------------------------------------------------
 
 // WARNING!  Avoid deadlocks by calling the following set/get calls
-// with the appropiate locking conventions.  If you're calling these
+// with the appropriate locking conventions.  If you're calling these
 // functions from a configuration update callback (RecConfigUpdateCb),
 // be sure to set 'lock' to 'false' as the hash-table rwlock has
 // already been taken out for the callback.
@@ -287,7 +287,7 @@ char *REC_ConfigReadString(const char *name);
 RecFloat REC_ConfigReadFloat(const char *name);
 RecCounter REC_ConfigReadCounter(const char *name);
 
-// MGMT2 Marco's -- converting lmgmt->record_data->readXXX
+// MGMT2 macro's -- converting lmgmt->record_data->readXXX
 RecInt REC_readInteger(const char *name, bool *found, bool lock = true);
 RecFloat REC_readFloat(char *name, bool *found, bool lock = true);
 RecCounter REC_readCounter(char *name, bool *found, bool lock = true);
