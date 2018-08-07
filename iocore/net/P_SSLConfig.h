@@ -42,7 +42,7 @@ struct ssl_ticket_key_block;
 //
 // struct SSLConfigParams
 //
-// configuration parameters as they apear in the global
+// configuration parameters as they appear in the global
 // configuration file.
 /////////////////////////////////////////////////////////////
 

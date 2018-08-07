@@ -36,7 +36,7 @@ NetVConnection::get_remote_addr()
 TS_INLINE IpEndpoint const &
 NetVConnection::get_remote_endpoint()
 {
-  get_remote_addr(); // Make sure the vallue is filled in
+  get_remote_addr(); // Make sure the value is filled in
   return remote_addr;
 }
 

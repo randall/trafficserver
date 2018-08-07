@@ -1,6 +1,6 @@
 /** @file
 
-  Contination.cc
+  Continuation.cc
 
   @section license License
 

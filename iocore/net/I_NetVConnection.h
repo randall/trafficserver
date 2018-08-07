@@ -341,7 +341,7 @@ public:
       </tr>
       <tr>
         <td>c->handleEvent(VC_EVENT_ERROR, vio)</td>
-        <td>signified that error occured during write.</td>
+        <td>signified that error occurred during write.</td>
       </tr>
     </table>
 
@@ -351,7 +351,7 @@ public:
     when it is destroyed.
 
     @param c continuation to be called back after (partial) write
-    @param nbytes no of bytes to write, if unknown msut be set to INT64_MAX
+    @param nbytes no of bytes to write, if unknown must be set to INT64_MAX
     @param buf source of data
     @param owner
     @return vio pointer
@@ -361,11 +361,11 @@ public:
 
   /**
     Closes the vconnection. A state machine MUST call do_io_close()
-    when it has finished with a VConenction. do_io_close() indicates
+    when it has finished with a VConnection. do_io_close() indicates
     that the VConnection can be deallocated. After a close has been
     called, the VConnection and underlying processor must NOT send
     any more events related to this VConnection to the state machine.
-    Likeswise, state machine must not access the VConnectuion or
+    Likewise, state machine must not access the VConnection or
     any returned VIOs after calling close. lerrno indicates whether
     a close is a normal close or an abort. The difference between
     a normal close and an abort depends on the underlying type of
@@ -384,7 +384,7 @@ public:
     IO_SHUTDOWN_READWRITE. Once a side of a VConnection is shutdown,
     no further I/O can be done on that side of the connections and
     the underlying processor MUST NOT send any further events
-    (INCLUDING TIMOUT EVENTS) to the state machine. The state machine
+    (INCLUDING TIMEOUT EVENTS) to the state machine. The state machine
     MUST NOT use any VIOs from a shutdown side of a connection.
     Even if both sides of a connection are shutdown, the state
     machine MUST still call do_io_close() when it wishes the
@@ -421,7 +421,7 @@ public:
 
   ////////////////////////////////////////////////////////////
   // Set the timeouts associated with this connection.      //
-  // active_timeout is for the total elasped time of        //
+  // active_timeout is for the total elapsed time of        //
   // the connection.                                        //
   // inactivity_timeout is the elapsed time from the time   //
   // a read or a write was scheduled during which the       //
@@ -444,7 +444,7 @@ public:
     that it does not keep any connections open for a really long
     time.
 
-    Timeout symantics:
+    Timeout semantics:
 
     Should a timeout occur, the state machine for the read side of
     the NetVConnection is signaled first assuming that a read has

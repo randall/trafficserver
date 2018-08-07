@@ -28,7 +28,7 @@
 #include "P_SSLConfig.h"
 #include "P_SSLUtils.h"
 
-// Maxiumum OCSP stapling response size.
+// Maximum OCSP stapling response size.
 // This should be the response for a single certificate and will typically include the responder certificate chain,
 // so 10K should be more than enough.
 #define MAX_STAPLING_DER 10240
@@ -89,7 +89,7 @@ stapling_get_issuer(SSL_CTX *ssl_ctx, X509 *x)
 
 #ifdef SSL_CTX_select_current_cert
   if (!SSL_CTX_select_current_cert(ssl_ctx, x)) {
-    Warning("OCSP: could not select current certifcate chain %p", x);
+    Warning("OCSP: could not select current certificate chain %p", x);
   }
 #endif
 

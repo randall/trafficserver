@@ -389,7 +389,7 @@ HostDBProcessor::start(int, size_t)
   statPagesManager.register_http("hostdb", register_ShowHostDB);
 
   //
-  // Register configuration callback, and establish configuation links
+  // Register configuration callback, and establish configuration links
   //
   REC_EstablishStaticConfigInt32(hostdb_ttl_mode, "proxy.config.hostdb.ttl_mode");
   REC_EstablishStaticConfigInt32(hostdb_disable_reverse_lookup, "proxy.config.cache.hostdb.disable_reverse_lookup");
@@ -977,7 +977,7 @@ HostDBProcessor::setby(const char *hostname, int len, sockaddr const *ip, HostDB
     }
     return;
   }
-  // Create a continuation to do a deaper probe in the background
+  // Create a continuation to do a deeper probe in the background
 
   HostDBContinuation *c = hostDBContAllocator.alloc();
   c->init(hash);
@@ -1000,7 +1000,7 @@ HostDBProcessor::setby_srv(const char *hostname, int len, const char *target, Ho
   hash.db_mark = HOSTDB_MARK_SRV;
   hash.refresh();
 
-  // Create a continuation to do a deaper probe in the background
+  // Create a continuation to do a deeper probe in the background
 
   HostDBContinuation *c = hostDBContAllocator.alloc();
   c->init(hash);
@@ -1626,7 +1626,7 @@ HostDBContinuation::probeEvent(int /* event ATS_UNUSED */, Event *e)
       reply_to_cont(action.continuation, r.get());
     }
 
-    // If it suceeds or it was a remote probe, we are done
+    // If it succeeds or it was a remote probe, we are done
     //
     if (r) {
       hostdb_cont_free(this);
@@ -1889,7 +1889,7 @@ struct ShowHostDB : public ShowCont {
     if (event == EVENT_INTERVAL) {
       HostDBInfo *r = reinterpret_cast<HostDBInfo *>(e);
       if (output_json && records_seen++ > 0) {
-        CHECK_SHOW(show(",")); // we need to seperate records
+        CHECK_SHOW(show(",")); // we need to separate records
       }
       showOne(r, false, event, e);
       if (r->round_robin) {
@@ -1911,7 +1911,7 @@ struct ShowHostDB : public ShowCont {
           for (int i = 0; i < rr_data->rrcount; i++) {
             showOne(&rr_data->info(i), true, event, e, rr_data);
             if (output_json) {
-              CHECK_SHOW(show("}")); // we need to seperate records
+              CHECK_SHOW(show("}")); // we need to separate records
               if (i < (rr_data->rrcount - 1))
                 CHECK_SHOW(show(","));
             }
@@ -2404,7 +2404,7 @@ struct HostDBRegressionContinuation : public Continuation {
       hostDBProcessor.getbyname_re(this, hostnames[i++], 0);
       return EVENT_CONT;
     } else {
-      rprintf(test, "HostDBTestRR: %d outstanding %d succcess %d failure\n", outstanding, success, failure);
+      rprintf(test, "HostDBTestRR: %d outstanding %d success %d failure\n", outstanding, success, failure);
       if (success == hosts) {
         *status = REGRESSION_TEST_PASSED;
       } else {

@@ -499,7 +499,7 @@ done:
 #ifdef SSL_TLSEXT_ERR_READ_AGAIN
     retval = SSL_TLSEXT_ERR_READ_AGAIN;
 #else
-    Error("Cannot pause SNI processsing with this version of openssl");
+    Error("Cannot pause SNI processing with this version of openssl");
     retval = SSL_TLSEXT_ERR_ALERT_FATAL;
 #endif
     break;
@@ -1402,7 +1402,7 @@ SSLCheckServerCertNow(X509 *cert, const char *certname)
 
   timeCmpValue = X509_cmp_current_time(X509_get_notBefore(cert));
   if (timeCmpValue == 0) {
-    // an error occured parsing the time, which we'll call a bogosity
+    // an error occurred parsing the time, which we'll call a bogosity
     Error("invalid certificate %s: unable to parse notBefore time", certname);
     return -3;
   } else if (timeCmpValue > 0) {
@@ -1413,7 +1413,7 @@ SSLCheckServerCertNow(X509 *cert, const char *certname)
 
   timeCmpValue = X509_cmp_current_time(X509_get_notAfter(cert));
   if (timeCmpValue == 0) {
-    // an error occured parsing the time, which we'll call a bogosity
+    // an error occurred parsing the time, which we'll call a bogosity
     Error("invalid certificate %s: unable to parse notAfter time", certname);
     return -3;
   } else if (timeCmpValue < 0) {

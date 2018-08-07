@@ -58,7 +58,7 @@ extern bool shutdown_event_system;
 
   The EThread class is the type of thread created and managed by
   the Event System. It is one of the available interfaces for
-  schedulling events in the event system (another two are the Event
+  scheduling events in the event system (another two are the Event
   and EventProcessor classes).
 
   In order to handle events, each EThread object has two event
@@ -75,7 +75,7 @@ extern bool shutdown_event_system;
 
   Scheduling Interface:
 
-  There are eight schedulling functions provided by EThread and
+  There are eight scheduling functions provided by EThread and
   they are a wrapper around their counterparts in EventProcessor.
 
   @see EventProcessor
@@ -123,7 +123,7 @@ public:
       continuation's handler. See the the EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return Reference to an Event object representing the schedulling
+    @return Reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -145,7 +145,7 @@ public:
       continuation's handler. See the EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -165,7 +165,7 @@ public:
       continuation's handler. See the EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -179,14 +179,14 @@ public:
     to occur every time 'aperiod' elapses. It is scheduled on this
     EThread.
 
-    @param c Continuation to call back everytime 'aperiod' elapses.
+    @param c Continuation to call back every time 'aperiod' elapses.
     @param aperiod Duration of the time period between callbacks.
     @param callback_event Event code to be passed back to the
       continuation's handler. See the Remarks section in the
       EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -204,7 +204,7 @@ public:
       continuation's handler. See the EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -225,7 +225,7 @@ public:
       continuation's handler. See the EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -246,7 +246,7 @@ public:
       EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */
@@ -259,14 +259,14 @@ public:
     Schedules the callback to the continuation 'c' to occur every
     time 'aperiod' elapses. It is scheduled on this EThread.
 
-    @param c Continuation to call back everytime 'aperiod' elapses.
+    @param c Continuation to call back every time 'aperiod' elapses.
     @param aperiod Duration of the time period between callbacks.
     @param callback_event Event code to be passed back to the
       continuation's handler. See the Remarks section in the
       EventProcessor class.
     @param cookie User-defined value or pointer to be passed back
       in the Event's object cookie field.
-    @return A reference to an Event object representing the schedulling
+    @return A reference to an Event object representing the scheduling
       of this callback.
 
   */

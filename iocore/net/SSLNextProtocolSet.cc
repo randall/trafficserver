@@ -78,7 +78,7 @@ fail:
   return false;
 }
 
-// copies th eprotocols but not the endpoints
+// copies the protocols but not the endpoints
 
 SSLNextProtocolSet *
 SSLNextProtocolSet::clone() const
