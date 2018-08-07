@@ -867,7 +867,7 @@ Span::updateHeader()
       zret.push(0, errno, "Failed to update span - ", strerror(errno));
     }
   } else {
-    std::cout << "Writing not enabled, no updates perfomed" << std::endl;
+    std::cout << "Writing not enabled, no updates performed" << std::endl;
   }
   return zret;
 }
@@ -977,7 +977,7 @@ Cache::build_stripe_hash_table()
     ttable[i] = VOL_HASH_EMPTY;
   }
 
-  // generate random numbers proportaion to allocation
+  // generate random numbers proportional to allocation
   rtable_pair *rtable = (rtable_pair *)ats_malloc(sizeof(rtable_pair) * rtable_size);
   int rindex          = 0;
   for (int i = 0; i < num_stripes; i++) {

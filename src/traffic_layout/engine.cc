@@ -118,7 +118,7 @@ path_handler(const std::string &path, bool run_flag, const std::string &command)
 {
   char cwd[PATH_MAX];
   if (getcwd(cwd, sizeof(cwd)) == nullptr) {
-    ink_fatal("unexcepted failure from getcwd() code=%d", errno);
+    ink_fatal("unexpected failure from getcwd() code=%d", errno);
   }
 
   if (run_flag) {

@@ -44,7 +44,7 @@ testcall(char *foo, bool /* incVersion */)
 //
 // initializeRegistry()
 //
-// Code to initialze of registry of objects that represent
+// Code to initialize of registry of objects that represent
 //   Web Editable configuration files
 //
 // thread-safe: NO!  - Should only be executed once from the main

@@ -3521,7 +3521,7 @@ TSMimeHdrFieldValueDateInsert(TSMBuffer bufp, TSMLoc hdr, TSMLoc field, time_t v
 
   char tmp[33];
   int len = mime_format_date(tmp, value);
-  // idx ignored, overwrite all exisiting values
+  // idx ignored, overwrite all existing values
   // (void)TSMimeFieldValueInsert(bufp, field_obj, tmp, len, idx);
   (void)TSMimeFieldValueSet(bufp, field, -1, tmp, len);
   return TS_SUCCESS;
@@ -4448,7 +4448,7 @@ TSContSchedule(TSCont contp, ink_hrtime timeout, TSThreadPool tp)
     action = reinterpret_cast<TSAction>(eventProcessor.schedule_in(i, HRTIME_MSECONDS(timeout), etype));
   }
 
-  /* This is a hack. SHould be handled in ink_types */
+  /* This is a hack. Should be handled in ink_types */
   action = (TSAction)((uintptr_t)action | 0x1);
   return action;
 }
@@ -7389,7 +7389,7 @@ TSMgmtConfigIntSet(const char *var_name, TSMgmtInt value)
 
   // tell manager to set the configuration; note that this is not
   // transactional (e.g. we return control to the plugin before the
-  // value is commited to disk by the manager)
+  // value is committed to disk by the manager)
   RecSignalManager(MGMT_SIGNAL_PLUGIN_SET_CONFIG, buffer);
 
   return TS_SUCCESS;

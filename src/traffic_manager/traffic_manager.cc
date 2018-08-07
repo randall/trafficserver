@@ -142,7 +142,7 @@ rotateLogs()
     if (kill(tspid, SIGUSR2) != 0) {
       mgmt_log("Could not send SIGUSR2 to TS: %s", strerror(errno));
     } else {
-      mgmt_log("Succesfully sent SIGUSR2 to TS!");
+      mgmt_log("Successfully sent SIGUSR2 to TS!");
     }
   }
 }
@@ -308,7 +308,7 @@ initSignalHandlers()
 
   // Block the delivery of any signals we are not catching
   //
-  //  except for SIGALARM since we use it
+  //  except for SIGALRM since we use it
   //    to break out of deadlock on semaphore
   //    we share with the proxy
   //
