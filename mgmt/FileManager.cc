@@ -128,7 +128,7 @@ FileManager::addFileHelper(const char *fileName, bool root_access_needed, Rollba
 //  Sets rbPtr to the rollback object associated
 //    with the passed in fileName.
 //
-//  If there is no binding, falseis returned
+//  If there is no binding, false is returned
 //
 bool
 FileManager::getRollbackObj(const char *fileName, Rollback **rbPtr)
@@ -160,7 +160,7 @@ FileManager::fileChanged(const char *fileName, bool incVersion)
 
   for (cb = cblist.head; cb != nullptr; cb = cb->link.next) {
     // Dup the string for each callback to be
-    //  defensive incase it modified when it is not supposed to be
+    //  defensive in case it modified when it is not supposed to be
     filenameCopy = ats_strdup(fileName);
     (*cb->func)(filenameCopy, incVersion);
     ats_free(filenameCopy);
@@ -170,7 +170,7 @@ FileManager::fileChanged(const char *fileName, bool incVersion)
 
 // void FileManger::rereadConfig()
 //
-//   Interates through the list of managed files and
+//   Iterates through the list of managed files and
 //     calls Rollback::checkForUserUpdate on them
 //
 //   although it is tempting, DO NOT CALL FROM SIGNAL HANDLERS

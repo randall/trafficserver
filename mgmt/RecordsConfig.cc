@@ -1233,7 +1233,7 @@ static const RecordElement RecordsConfig[] =
   ,
 
   // Interim configuration setting for obeying keepalive requests on internal
-  // (PLuginVC) sessions. See TS-4960 and friends.
+  // (PluginVC) sessions. See TS-4960 and friends.
   {RECT_LOCAL, "proxy.config.http.keepalive_internal_vc", RECD_INT, "0", RECU_DYNAMIC, RR_NULL, RECC_INT, "[0-1]", RECA_NULL},
 
   //##############################################################################

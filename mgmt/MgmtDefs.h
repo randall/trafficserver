@@ -55,7 +55,7 @@ typedef void *(*MgmtCallback)(void *opaque_cb_data, char *data_raw, int data_len
 //-------------------------------------------------------------------------
 // API conversion functions.
 //-------------------------------------------------------------------------
-/** Conversion functions to and from an aribrary type and Management types.
+/** Conversion functions to and from an arbitrary type and Management types.
  *
  * A type that wants to support conversion in the TS API should create a static instance of this
  * class and fill in the appropriate members. The TS API set/get functions can then check for a
