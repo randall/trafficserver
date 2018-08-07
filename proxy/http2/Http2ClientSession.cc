@@ -161,7 +161,7 @@ Http2ClientSession::new_connection(NetVConnection *new_vc, MIOBuffer *iobuf, IOB
   HTTP2_INCREMENT_THREAD_DYN_STAT(HTTP2_STAT_CURRENT_CLIENT_SESSION_COUNT, new_vc->mutex->thread_holding);
   HTTP2_INCREMENT_THREAD_DYN_STAT(HTTP2_STAT_TOTAL_CLIENT_CONNECTION_COUNT, new_vc->mutex->thread_holding);
 
-  // HTTP/2 for the backdoor connections? Let's not deal woth that yet.
+  // HTTP/2 for the backdoor connections? Let's not deal with that yet.
   ink_release_assert(backdoor == false);
 
   // Unique client session identifier.
@@ -407,7 +407,7 @@ Http2ClientSession::state_read_connection_preface(int event, void *edata)
 
     // XXX start the write VIO ...
 
-    // If we have unconsumed data, start tranferring frames now.
+    // If we have unconsumed data, start transferring frames now.
     if (this->sm_reader->is_read_avail_more_than(0)) {
       return this->handleEvent(VC_EVENT_READ_READY, vio);
     }

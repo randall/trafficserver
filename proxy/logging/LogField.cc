@@ -474,7 +474,7 @@ LogField::updateField(LogAccess *lad, char *buf, int len)
 /*-------------------------------------------------------------------------
   LogField::marshal
 
-  This routine will marshsal the given field into the buffer provided.
+  This routine will marshal the given field into the buffer provided.
   -------------------------------------------------------------------------*/
 unsigned
 LogField::marshal(LogAccess *lad, char *buf)
@@ -594,7 +594,7 @@ LogField::display(FILE *fd)
   LogField::operator==
 
   This operator does only care of the name and m_symbol, may need
-  do check on others layter.
+  do check on others later.
   -------------------------------------------------------------------------*/
 bool
 LogField::operator==(LogField &rhs)

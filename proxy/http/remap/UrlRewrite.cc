@@ -129,7 +129,7 @@ UrlRewrite::SetReverseFlag(int flag)
 }
 
 /**
-  Allocaites via new, and adds a mapping like this map /ink/rh
+  Allocates via new, and adds a mapping like this map /ink/rh
   http://{backdoor}/ink/rh
 
   These {backdoor} things are then rewritten in a request-hdr hook.  (In the
@@ -162,7 +162,7 @@ UrlRewrite::_destroyTable(InkHashTable *h_table)
   InkHashTableIteratorState ht_iter;
   UrlMappingPathIndex *item;
 
-  if (h_table != nullptr) { // Iterate over the hash tabel freeing up the all the url_mappings
+  if (h_table != nullptr) { // Iterate over the hash table freeing up the all the url_mappings
     //   contained with in
     for (ht_entry = ink_hash_table_iterator_first(h_table, &ht_iter); ht_entry != nullptr;) {
       item = (UrlMappingPathIndex *)ink_hash_table_entry_value(h_table, ht_entry);
@@ -478,7 +478,7 @@ UrlRewrite::PerformACLFiltering(HttpTransact::State *s, url_mapping *map)
 
 /**
    Determines if a redirect is to occur and if so, figures out what the
-   redirect is. This was plaguiarized from UrlRewrite::Remap. redirect_url
+   redirect is. This was plagiarized from UrlRewrite::Remap. redirect_url
    ought to point to the new, mapped URL when the function exits.
 */
 mapping_type

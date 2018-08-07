@@ -357,7 +357,7 @@ private:
 
 // void HttpTunnel::abort_cache_write_finish_others
 //
-//    Abort all downstream cache writes and finsish
+//    Abort all downstream cache writes and finish
 //      all other local consumers
 //
 inline void

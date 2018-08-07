@@ -297,7 +297,7 @@ LogFilterString::operator==(LogFilterString &rhs)
   LogFilterString::wipe_this_entry
 
   For strings, we need to marshal the given string into a buffer so that we
-  can compare it with the filter value.  Most strings are snall, so we'll
+  can compare it with the filter value.  Most strings are small, so we'll
   only allocate space dynamically if the marshal_len is very large (eg,
   URL).
 
@@ -368,7 +368,7 @@ LogFilterString::wipe_this_entry(LogAccess *lad)
   LogFilterString::toss_this_entry
 
   For strings, we need to marshal the given string into a buffer so that we
-  can compare it with the filter value.  Most strings are snall, so we'll
+  can compare it with the filter value.  Most strings are small, so we'll
   only allocate space dynamically if the marshal_len is very large (eg,
   URL).
 

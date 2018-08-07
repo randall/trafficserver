@@ -155,7 +155,7 @@ LogSock::listen(int accept_port, int family)
     }
   }
   //
-  // establish the listen queue for incomming connections
+  // establish the listen queue for incoming connections
   //
   if ((ret = safe_listen(accept_sd, m_max_connections)) < 0) {
     Warning("Could not establish listen queue: %s", strerror(errno));
@@ -363,7 +363,7 @@ LogSock::pending_data(int *cid, int timeout_msec, bool include_connects)
 /**
   LogSock::pending_any
 
-  Check for incomming data on any of the INCOMING sockets.
+  Check for incoming data on any of the INCOMING sockets.
 */
 bool
 LogSock::pending_any(int *cid, int timeout_msec)
@@ -380,7 +380,7 @@ LogSock::pending_any(int *cid, int timeout_msec)
 /*-------------------------------------------------------------------------
   LogSock::pending_message_any
 
-  Check for an incomming message on any of the INCOMING sockets, aside from
+  Check for an incoming message on any of the INCOMING sockets, aside from
   the socket reserved for accepting new connections.
   -------------------------------------------------------------------------*/
 
@@ -395,7 +395,7 @@ LogSock::pending_message_any(int *cid, int timeout_msec)
 /**
   LogSock::pending_message_on
 
-  Check for incomming data on the specified socket.
+  Check for incoming data on the specified socket.
 */
 bool
 LogSock::pending_message_on(int cid, int timeout_msec)
@@ -424,7 +424,7 @@ LogSock::pending_connect(int timeout_msec)
   LogSock::close
 
   Close one (cid specified) or all (no argument) sockets, except for the
-  incomming connection socket.
+  incoming connection socket.
 */
 void
 LogSock::close(int cid)

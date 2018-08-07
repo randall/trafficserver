@@ -23,7 +23,7 @@
 
 /*****************************************************************************
  *
- *  CacheControl.cc - Implementation to Cache Control systtem
+ *  CacheControl.cc - Implementation to Cache Control system
  *
  *
  ****************************************************************************/
@@ -144,7 +144,7 @@ initCacheControl()
 //
 //  Called when the cache.conf file changes.  Since it called
 //   infrequently, we do the load of new file as blocking I/O and
-//   lock aquire is also blocking
+//   lock acquire is also blocking
 //
 void
 reloadCacheControl()

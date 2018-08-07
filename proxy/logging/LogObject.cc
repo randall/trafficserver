@@ -319,7 +319,7 @@ LogObject::add_loghost(LogHost *host, bool copy)
   Debug("log", "added log host %p to object %p for target %s:%d", host, this, host->name(), host->port());
 }
 
-// we conpute the object signature from the fieldlist_str and the printf_str
+// we compute the object signature from the fieldlist_str and the printf_str
 // of the LogFormat rather than from the format_str because the format_str
 // is not part of a LogBuffer header
 //
@@ -409,7 +409,7 @@ LogObject::_checkout_write(size_t *write_offset, size_t bytes_needed)
 
     switch (result_code) {
     case LogBuffer::LB_OK:
-      // checkout succeded
+      // checkout succeeded
       retry = false;
       break;
 
@@ -842,7 +842,7 @@ TextLogObject::write(const char *format, ...)
 
   This routine will take a format string and va_list and write it as a
   single entry (line) in the text file.  If timestamps are on, then the
-  entry will be preceeded by a timestamp.
+  entry will be preceded by a timestamp.
 
   Returns ReturnCodeFlags.
   -------------------------------------------------------------------------*/

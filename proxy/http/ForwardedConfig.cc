@@ -35,7 +35,7 @@ namespace
 class BadOptionsErrMsg
 {
 public:
-  // Construct with referece to string that will contain error message.
+  // Construct with reference to string that will contain error message.
   //
   BadOptionsErrMsg(ts::FixedBufferWriter &err) : _err(err), _count(0) {}
 
@@ -93,7 +93,7 @@ private:
   int _count;
 };
 
-// Compare a TextView to a nul-termimated string, converting the TextView to lower case and ignoring whitespace in it.
+// Compare a TextView to a nul-terminated string, converting the TextView to lower case and ignoring whitespace in it.
 //
 bool
 eqIgnoreCaseWs(ts::TextView sv, const char *target)

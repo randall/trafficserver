@@ -161,7 +161,7 @@ HdrHeap::set_ronly_str_heap_end(int slot, const char *end)
 //
 //    Because the block may contain data at the front of it that
 //      we don't want (and will end up getting marshalled)
-//      use_start specificies where we start using the block (INKqa07409)
+//      use_start specifies where we start using the block (INKqa07409)
 //
 int
 HdrHeap::attach_block(IOBufferBlock *b, const char *use_start)

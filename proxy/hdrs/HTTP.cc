@@ -2093,7 +2093,7 @@ HTTPInfo::unmarshal(char *buf, int len, RefCountObj *block_ref)
   int orig_len      = len;
 
   if (alt->m_magic == CACHE_ALT_MAGIC_ALIVE) {
-    // Already unmarshaled, must be a ram cache
+    // Already unmarshalled, must be a ram cache
     //  it
     ink_assert(alt->m_unmarshal_len > 0);
     ink_assert(alt->m_unmarshal_len <= len);
@@ -2168,7 +2168,7 @@ HTTPInfo::unmarshal(char *buf, int len, RefCountObj *block_ref)
 }
 
 // bool HTTPInfo::check_marshalled(char* buf, int len)
-//  Checks a marhshalled HTTPInfo buffer to make
+//  Checks a marshalled HTTPInfo buffer to make
 //    sure it's sane.  Returns true if sane, false otherwise
 //
 bool

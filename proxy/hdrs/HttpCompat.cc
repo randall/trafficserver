@@ -579,7 +579,7 @@ HttpCompat::match_accept_language(const char *lang_str, int lang_len, StrList *a
     }
 
     /////////////////////////////////////////////////////////////////////
-    // This algorithm is a bit wierd --- the resulting Q factor is     //
+    // This algorithm is a bit weird --- the resulting Q factor is     //
     // the Q value corresponding to the LONGEST range field that       //
     // matched, or if none matched, then the Q value of any asterisk.  //
     // Also, if the lang value is "", meaning that no Content-Language //
@@ -827,7 +827,7 @@ HttpCompat::determine_set_by_language(RawHashTable *table_of_sets, StrList *acpt
       // strange character sets for these people --- we'd rather //
       // use a more portable "default" set.  The index value we  //
       // get back isn't used, because it's a little hard to know //
-      // how to tradeoff language indices vs. charset indices.   //
+      // how to trade-off language indices vs. charset indices.   //
       // If someone cares, we could surely work charset indices  //
       // into the sorting computation below.                     //
       /////////////////////////////////////////////////////////////

@@ -75,7 +75,7 @@ struct dirent;
 struct LogCollationAccept;
 
 /*-------------------------------------------------------------------------
-  this object keeps the state of the logging configuraion variables.  upon
+  this object keeps the state of the logging configuration variables.  upon
   construction, the log configuration file is read and the logging
   variables are initialized.
 

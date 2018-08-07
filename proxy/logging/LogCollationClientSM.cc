@@ -120,7 +120,7 @@ LogCollationClientSM::client_handler(int event, void *data)
   case LOG_COLL_CLIENT_SEND:
     return client_send(event, (VIO *)data);
   default:
-    ink_assert(!"unexpcted state");
+    ink_assert(!"unexpected state");
     return EVENT_CONT;
   }
 }
@@ -442,7 +442,7 @@ LogCollationClientSM::client_idle(int event, void * /* data ATS_UNUSED */)
     return client_fail(LOG_COLL_EVENT_SWITCH, nullptr);
 
   default:
-    ink_assert(!"unexpcted state");
+    ink_assert(!"unexpected state");
     return EVENT_CONT;
   }
 }
@@ -542,7 +542,7 @@ LogCollationClientSM::client_open(int event, NetVConnection *net_vc)
     }
     m_host_vc->set_inactivity_timeout(HRTIME_SECONDS(timeout));
 
-    // setup a client reader just for detecting a host disconnnect
+    // setup a client reader just for detecting a host disconnect
     // (iocore should call back this function with and EOS/ERROR)
     m_abort_vio = m_host_vc->do_io_read(this, 1, m_abort_buffer);
 
@@ -696,7 +696,7 @@ LogCollationClientSM::flush_to_orphan()
 
   // if in middle of a write, flush buffer_in_iocore to orphan
   if (m_buffer_in_iocore != nullptr) {
-    Debug("log-coll", "[%d]client::flush_to_orphan - m_buffer_in_iocore to oprhan", m_id);
+    Debug("log-coll", "[%d]client::flush_to_orphan - m_buffer_in_iocore to orphan", m_id);
     // TODO: We currently don't try to make the log buffers handle little vs big endian. TS-1156.
     // m_buffer_in_iocore->convert_to_host_order();
     m_log_host->orphan_write_and_try_delete(m_buffer_in_iocore);

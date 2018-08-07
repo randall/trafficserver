@@ -47,7 +47,7 @@
 #define ROUND(x, l) (((x) + ((l)-1L)) & ~((l)-1L))
 
 // A many of the operations regarding read-only str
-//  heaps are hand unrolled in the code.  Chaning
+//  heaps are hand unrolled in the code.  Changing
 //  this value requires a full pass through HdrBuf.cc
 //  to fix the unrolled operations
 #define HDR_BUF_RONLY_HEAPS 3
@@ -203,7 +203,7 @@ public:
   void set_ronly_str_heap_end(int slot, const char *end);
 
   // Lock read only str heaps so that can't be moved around
-  //  by a heap consolidation.  Does NOT lock for Multi-Threaed
+  //  by a heap consolidation.  Does NOT lock for Multi-Thread
   //  access!
   void
   lock_ronly_str_heap(int i)
@@ -251,7 +251,7 @@ public:
   // Overflow block ptr
   //   Overflow blocks are necessary because we can
   //     run out of space in the header heap and the
-  //     heap is not rellocatable
+  //     heap is not relocatable
   //   Overflow blocks have the HdrHeap full structure
   //    header on them, although only first block can
   //    point to string heaps
@@ -448,7 +448,7 @@ public:
 
   HdrHeap *m_heap;
 
-  // In order to prevent gratitous refcounting,
+  // In order to prevent gratuitous refcounting,
   //  automatic C++ copies are disabled!
   HdrHeapSDKHandle(const HdrHeapSDKHandle &r) = delete;
   HdrHeapSDKHandle &operator=(const HdrHeapSDKHandle &r) = delete;
