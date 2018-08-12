@@ -75,7 +75,7 @@ main_handler(TSCont contp, TSEvent event, void *data)
   TxnSM *txn_sm                  = (TxnSM *)TSContDataGet(contp);
   TxnSMHandler q_current_handler = txn_sm->q_current_handler;
 
-  TSDebug(PLUGIN_NAME, "main_handler (contp %p event %d)", contp, event);
+  TSDebug(PLUGIN_NAME, "main_handler (contp %p event %d|%s)", contp, event, TSHttpEventNameLookup(event));
 
   /* handle common cases errors */
   if (event == TS_EVENT_ERROR) {
@@ -272,11 +272,11 @@ state_handle_cache_lookup(TSCont contp, TSEvent event, TSVConn vc)
 
   switch (event) {
   case TS_EVENT_CACHE_OPEN_READ:
-    TSDebug(PLUGIN_NAME, "cache hit!!!");
     /* Cache hit. */
+    TSDebug(PLUGIN_NAME, "cache hit!!!");
 
     /* Write log */
-    ret_val = TSTextLogObjectWrite(protocol_plugin_log, "%s %s %d \n", txn_sm->q_file_name, txn_sm->q_server_name, 1);
+    ret_val = TSTextLogObjectWrite(protocol_plugin_log, "%s %s %d", txn_sm->q_file_name, txn_sm->q_server_name, 1);
     if (ret_val != TS_SUCCESS) {
       TSError("[%s] Fail to write into log", PLUGIN_NAME);
     }
@@ -314,9 +314,9 @@ state_handle_cache_lookup(TSCont contp, TSEvent event, TSVConn vc)
   case TS_EVENT_CACHE_OPEN_READ_FAILED:
     /* Cache miss or error, open cache write_vc. */
     TSDebug(PLUGIN_NAME, "cache miss or error!!!");
-    /* Write log */
-    ret_val = TSTextLogObjectWrite(protocol_plugin_log, "%s %s %d \n", txn_sm->q_file_name, txn_sm->q_server_name, 0);
 
+    /* Write log */
+    ret_val = TSTextLogObjectWrite(protocol_plugin_log, "%s %s %d", txn_sm->q_file_name, txn_sm->q_server_name, 0);
     if (ret_val != TS_SUCCESS) {
       TSError("[%s] Fail to write into log", PLUGIN_NAME);
     }
@@ -484,6 +484,7 @@ state_dns_lookup(TSCont contp, TSEvent event, TSHostLookupResult host_info)
 
   /* Can't find the server IP. */
   if (event != TS_EVENT_HOST_LOOKUP || !host_info) {
+    TSDebug(PLUGIN_NAME, "failed to lookup");
     return prepare_to_die(contp);
   }
   txn_sm->q_pending_action = NULL;
@@ -529,6 +530,14 @@ state_connect_to_server(TSCont contp, TSEvent event, TSVConn vc)
   /* Actively write the request to the net_vc. */
   txn_sm->q_server_write_vio =
     TSVConnWrite(txn_sm->q_server_vc, contp, txn_sm->q_server_request_buffer_reader, strlen(txn_sm->q_client_request));
+
+  if (!txn_sm->q_server_write_vio) {
+      TSDebug(PLUGIN_NAME, "state_connect_to_server: fail to write");
+      TSError("[%s] Fail to write into log", PLUGIN_NAME);
+    return TS_ERROR;
+  }
+TSDebug(PLUGIN_NAME, "sup: %p", txn_sm->q_server_write_vio);
+
   return TS_SUCCESS;
 }
 

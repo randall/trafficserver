@@ -35,7 +35,7 @@ static int accept_port;
 static int server_port;
 
 /* Functions only seen in this file, should be static. */
-static void protocol_init(int accept_port, int server_port);
+static void protocol_init(int accept_port);
 static int accept_handler(TSCont contp, TSEvent event, void *edata);
 
 /* When the handle is called, the net_vc is returned. */
@@ -74,7 +74,7 @@ accept_handler(TSCont contp, TSEvent event, void *edata)
 }
 
 static void
-protocol_init(int accept_port, int server_port ATS_UNUSED)
+protocol_init(int accept_port)
 {
   TSCont contp;
   int ret_val;
@@ -86,7 +86,7 @@ protocol_init(int accept_port, int server_port ATS_UNUSED)
   }
 
   /* format of the log entries, for caching_status, 1 for HIT and 0 for MISS */
-  ret_val = TSTextLogObjectWrite(protocol_plugin_log, "timestamp filename servername caching_status\n\n");
+  ret_val = TSTextLogObjectWrite(protocol_plugin_log, "timestamp filename servername caching_status");
   if (ret_val != TS_SUCCESS) {
     TSError("[%s] Failed to write into log", PLUGIN_NAME);
   }
@@ -142,7 +142,8 @@ TSPluginInit(int argc, const char *argv[])
     }
   }
 
-  protocol_init(accept_port, server_port);
+  protocol_init(accept_port);
+  return;
 
 error:
   TSError("[%s] Plugin not initialized", PLUGIN_NAME);

@@ -1,5 +1,5 @@
 
-Protocol plugin example for SDK 3.0
+Protocol plugin example
 
 List of files
 -------------

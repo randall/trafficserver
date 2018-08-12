@@ -20,6 +20,6 @@
 #
 # build source list remove "non-source" file types.
 #
-find ../../../../../proxy -depth -type f -print | egrep "Makefile$|\.cpp$|\.cc$|\.c$|\.H$|\.h$|\.java$|\.config$|\.y$" > $1
+find ../../../proxy -depth -type f -print | egrep "Makefile$|\.cpp$|\.cc$|\.c$|\.H$|\.h$|\.java$|\.config$|\.y$" > $1
 
 echo "list created: " $1
