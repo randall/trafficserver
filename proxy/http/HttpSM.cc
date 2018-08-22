@@ -1704,14 +1704,16 @@ HttpSM::state_http_server_open(int event, void *data)
 {
   SMDebug("http_track", "entered inside state_http_server_open");
   STATE_ENTER(&HttpSM::state_http_server_open, event);
-  // TODO decide whether to uncomment after finish testing redirect
-  // ink_assert(server_entry == NULL);
-  pending_action                              = nullptr;
+  ink_release_assert(event == EVENT_INTERVAL || event == NET_EVENT_OPEN || event == NET_EVENT_OPEN_FAILED ||
+                     pending_action == nullptr);
+  if (event != NET_EVENT_OPEN) {
+    pending_action = nullptr;
+  }
   milestones[TS_MILESTONE_SERVER_CONNECT_END] = Thread::get_hrtime();
   HttpServerSession *session;
 
   switch (event) {
-  case NET_EVENT_OPEN:
+  case NET_EVENT_OPEN: {
     session = (TS_SERVER_SESSION_SHARING_POOL_THREAD == t_state.http_config_param->server_session_sharing_pool) ?
                 THREAD_ALLOC_INIT(httpServerSessionAllocator, mutex->thread_holding) :
                 httpServerSessionAllocator.alloc();
@@ -1731,7 +1733,12 @@ HttpSM::state_http_server_open(int event, void *data)
        printf("client fd is :%d , server fd is %d\n",vc->con.fd,
        server_vc->con.fd); */
     session->attach_hostname(t_state.current.server->name);
-    session->new_connection(static_cast<NetVConnection *>(data));
+    UnixNetVConnection *vc = static_cast<UnixNetVConnection *>(data);
+    ink_release_assert(pending_action == nullptr || pending_action == vc->get_action());
+    pending_action = nullptr;
+
+    session->new_connection(vc);
+
     session->state = HSS_ACTIVE;
 
     attach_server_session(session);
@@ -1742,6 +1749,29 @@ HttpSM::state_http_server_open(int event, void *data)
 
     } else {
       session->to_parent_proxy = false;
+    }
+    if (plugin_tunnel_type == HTTP_NO_PLUGIN_TUNNEL) {
+      SMDebug("http", "[%" PRId64 "] setting handler for TCP handshake", sm_id);
+      // Just want to get a write-ready event so we know that the TCP handshake is complete.
+      server_entry->vc_handler = &HttpSM::state_http_server_open;
+      server_entry->write_vio  = server_session->do_io_write(this, 1, server_session->get_reader());
+    } else { // in the case of an intercept plugin don't to the connect timeout change
+      SMDebug("http", "[%" PRId64 "] not setting handler for TCP handshake", sm_id);
+      handle_http_server_open();
+    }
+    return 0;
+  }
+  case VC_EVENT_WRITE_READY:
+  case VC_EVENT_WRITE_COMPLETE:
+    // Update the time out to the regular connection timeout.
+    SMDebug("http_ss", "[%" PRId64 "] TCP Handshake complete", sm_id);
+    server_entry->vc_handler = &HttpSM::state_send_server_request_header;
+
+    // Reset the timeout to the non-connect timeout
+    if (t_state.api_txn_no_activity_timeout_value != -1) {
+      server_session->get_netvc()->set_inactivity_timeout(HRTIME_MSECONDS(t_state.api_txn_no_activity_timeout_value));
+    } else {
+      server_session->get_netvc()->set_inactivity_timeout(HRTIME_SECONDS(t_state.txn_conf->transaction_no_activity_timeout_out));
     }
     handle_http_server_open();
     return 0;
@@ -1777,6 +1807,9 @@ HttpSM::state_http_server_open(int event, void *data)
       HTTP_INCREMENT_DYN_STAT(http_origin_connections_throttled_stat);
       send_origin_throttled_response();
     } else {
+      // Go ahead and release the failed server session.  Since it didn't receive a response, the release logic will
+      // see that it didn't get a valid response and it will close it rather than returning it to the server session pool
+      release_server_session();
       call_transact_and_set_next_state(HttpTransact::HandleResponse);
     }
     return 0;
@@ -2263,6 +2296,7 @@ HttpSM::state_hostdb_reverse_lookup(int event, void *data)
 int
 HttpSM::state_mark_os_down(int event, void *data)
 {
+  STATE_ENTER(&HttpSM::state_mark_os_down, event);
   HostDBInfo *mark_down = nullptr;
 
   if (event == EVENT_HOST_DB_LOOKUP && data) {
@@ -5372,7 +5406,7 @@ HttpSM::handle_http_server_open()
       (t_state.hdr_info.request_content_length > 0 || t_state.client_info.transfer_encoding == HttpTransact::CHUNKED_ENCODING) &&
       do_post_transform_open()) {
     do_setup_post_tunnel(HTTP_TRANSFORM_VC);
-  } else {
+  } else if (server_session != nullptr) {
     setup_server_send_request_api();
   }
 }
@@ -6832,7 +6866,10 @@ HttpSM::kill_this()
   //   then the value of kill_this_async_done has changed so
   //   we must check it again
   if (kill_this_async_done == true) {
-    ink_assert(pending_action == nullptr);
+    if (pending_action) {
+      pending_action->cancel();
+      pending_action = nullptr;
+    }
     if (t_state.http_config_param->enable_http_stats) {
       update_stats();
     }
