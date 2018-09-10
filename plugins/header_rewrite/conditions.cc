@@ -1406,33 +1406,34 @@ ConditionInbound::append_value(std::string &s, const Resources &res, NetworkSess
   }
 }
 
+ConditionStringLiteral::ConditionStringLiteral(const std::string &v) {
+    TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionStringLiteral");
+    if (v.substr(0, 1) != "+") {
+        _literal = v;
+    }
+}
+
 void
 ConditionStringLiteral::append_value(std::string &s, const Resources &res)
 {
   s += _literal;
   TSDebug(PLUGIN_NAME, "Appending '%s' to evaluation value -> %s", _literal.c_str(), s.c_str());
 }
-
+/*
 void
 ConditionStringLiteral::initialize(Parser &p)
 {
   Condition::initialize(p);
-  _literal = p.get_value();
+  // the op is the first argument
+  std::string op = p._tokens[0];
+  if (op.substr(0, 1) != "+") {
+      _literal = op;
+  }
 }
 
-
+*/
 bool
 ConditionStringLiteral::eval(const Resources &res)
 {
-   /*
-  std::string s;
-
-  append_value(s, res);
-  bool rval = static_cast<const Matchers<std::string> *>(_matcher)->test(s);
-
-  TSDebug(PLUGIN_NAME, "Evaluating %s(): %s - rval: %d", TAG, s.c_str(), rval);
-
-  return rval;
-  */
  return true;
 }

@@ -535,7 +535,6 @@ void
 OperatorAddHeader::initialize(Parser &p)
 {
   OperatorHeaders::initialize(p);
-
   _value.set_value(p.get_value());
 }
 
@@ -577,7 +576,6 @@ void
 OperatorSetHeader::initialize(Parser &p)
 {
   OperatorHeaders::initialize(p);
-
   _value.set_value(p.get_value());
 }
 
@@ -762,6 +760,7 @@ void
 OperatorSetCookie::initialize(Parser &p)
 {
   OperatorCookies::initialize(p);
+
   _value.set_value(p.get_value());
 }
 

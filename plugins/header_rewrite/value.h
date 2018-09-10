@@ -31,7 +31,6 @@
 #include "condition.h"
 #include "factory.h"
 #include "parser.h"
-#include "conditions.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Base class for all Values (this is also the interface).
@@ -48,31 +47,7 @@ public:
   }
 
   void
-  set_value(const std::string &val)
-  {
-    _value = val;
-    if (_value.substr(0, 2) == "%{") {
-      Parser parser(_value);
-
-      for (auto it = parser._tokens.begin(); it != parser._tokens.end(); it++) {
-        Parser tparser(*it);
-
-        auto tcond_val = condition_factory(tparser.get_op());
-        if (!tcond_val) {
-            tcond_val = new ConditionStringLiteral;
-        }
-        tcond_val->initialize(tparser);
-        _cond_vals.push_back(tcond_val);
-      }
-    } else if (_value.find("%<") != std::string::npos) { // It has a Variable to expand
-      _need_expander = true;                             // And this is clearly not an integer or float ...
-      // TODO: This is still not optimal, we should pre-parse the _value string here,
-      // and perhaps populate a per-Value VariableExpander that holds state.
-    } else {
-      _int_value   = strtol(_value.c_str(), nullptr, 10);
-      _float_value = strtod(_value.c_str(), nullptr);
-    }
-  }
+  set_value(const std::string &val);
 
   void
   append_value(std::string &s, const Resources &res) const

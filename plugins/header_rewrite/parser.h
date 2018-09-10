@@ -33,7 +33,7 @@
 class Parser
 {
 public:
-  explicit Parser(const std::string &line);
+  explicit Parser(const std::string &line, bool preserve_quotes = false);
 
   bool
   empty() const
@@ -86,4 +86,11 @@ private:
 
 public:
   std::vector<std::string> _tokens;
+  std::vector<std::string> _raw_tokens;
+};
+
+class LiteralParser : public Parser
+{
+public:
+  explicit LiteralParser(const std::string &line);
 };

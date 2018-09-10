@@ -30,11 +30,11 @@
 
 enum ParserState { PARSER_DEFAULT, PARSER_IN_QUOTE, PARSER_IN_REGEX };
 
-Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
+Parser::Parser(const std::string &original_line, bool preserve_quotes) : _cond(false), _empty(false)
 {
   std::string line        = original_line;
   ParserState state       = PARSER_DEFAULT;
-  bool extracting_token   = false;
+  bool extracting_token   = true;
   off_t cur_token_start   = 0;
   size_t cur_token_length = 0;
 
@@ -44,12 +44,14 @@ Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
         cur_token_length = i - cur_token_start;
         if (cur_token_length > 0) {
           _tokens.push_back(line.substr(cur_token_start, cur_token_length));
+          _raw_tokens.push_back(line.substr(cur_token_start, cur_token_length));
         }
         extracting_token = false;
         state            = PARSER_DEFAULT;
       } else if (!std::isspace(line[i])) {
         // we got a standalone =, > or <
         _tokens.push_back(std::string(1, line[i]));
+        _raw_tokens.push_back(std::string(1, line[i]));
       }
     } else if ((state != PARSER_IN_QUOTE) && (line[i] == '/')) {
       // Deal with regexes, nothing gets escaped / quoted in here
@@ -60,6 +62,7 @@ Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
       } else if ((state == PARSER_IN_REGEX) && extracting_token && (line[i - 1] != '\\')) {
         cur_token_length = i - cur_token_start + 1;
         _tokens.push_back(line.substr(cur_token_start, cur_token_length));
+        _raw_tokens.push_back(line.substr(cur_token_start, cur_token_length));
         state            = PARSER_DEFAULT;
         extracting_token = false;
       }
@@ -74,16 +77,18 @@ Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
       if ((state != PARSER_IN_QUOTE) && !extracting_token) {
         state            = PARSER_IN_QUOTE;
         extracting_token = true;
-        cur_token_start  = i + 1; // Eat the leading quote
+        cur_token_start  = i + 1; // eat the token
       } else if ((state == PARSER_IN_QUOTE) && extracting_token) {
         cur_token_length = i - cur_token_start;
         _tokens.push_back(line.substr(cur_token_start, cur_token_length));
+        _raw_tokens.push_back(line.substr(cur_token_start-1, i - cur_token_start + 2 ));
         state            = PARSER_DEFAULT;
         extracting_token = false;
       } else {
         // Malformed expression / operation, ignore ...
         TSError("[%s] malformed line \"%s\", ignoring", PLUGIN_NAME, line.c_str());
         _tokens.clear();
+        _raw_tokens.clear();
         _empty = true;
         return;
       }
@@ -97,6 +102,7 @@ Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
       if ((line[i] == '=') || (line[i] == '>') || (line[i] == '<')) {
         // These are always a seperate token
         _tokens.push_back(std::string(1, line[i]));
+        _raw_tokens.push_back(std::string(1, line[i]));
         continue;
       }
 
@@ -109,19 +115,25 @@ Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
     if (state != PARSER_IN_QUOTE) {
       /* we hit the end of the line while parsing a token, let's add it */
       _tokens.push_back(line.substr(cur_token_start));
+      _raw_tokens.push_back(line.substr(cur_token_start));
     } else {
       // unterminated quote, error case.
       TSError("[%s] malformed line, unterminated quotation: \"%s\", ignoring", PLUGIN_NAME, line.c_str());
       _tokens.clear();
+      _raw_tokens.clear();
       _empty = true;
       return;
     }
   }
 
-  if (_tokens.empty()) {
+  if (_raw_tokens.empty()) {
     _empty = true;
   } else {
-    preprocess(_tokens);
+      if (preserve_quotes) {
+    preprocess(_raw_tokens);
+      } else {
+        preprocess(_tokens);
+      }
   }
 }
 
@@ -239,4 +251,9 @@ Parser::cond_is_hook(TSHttpHookID &hook) const
   }
 
   return false;
+}
+
+LiteralParser::LiteralParser(const std::string &original_line):Parser(original_line) {
+    std::cout << "og: !" << original_line <<  "!" << std::endl;
+    _tokens.push_back(original_line);
 }

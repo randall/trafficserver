@@ -363,7 +363,7 @@ int
 test_randall()
 {
   int errors = 0;
-  ParserTest p(R"(set-header X-Miles "Some string literal" + %{HEADER:User-Agent} + " More Literal Strings")");
+  ParserTest p(R"(set-header X-Miles "  Some string literal" + %{HEADER:User-Agent} + " More Literal Strings")");
   for (auto x : p.getTokens()) {
     std::cout  << "!" << x << "!" << std::endl;
   }

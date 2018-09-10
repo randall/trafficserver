@@ -558,8 +558,8 @@ private:
 class ConditionStringLiteral : public Condition
 {
 public:
-  ConditionStringLiteral() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionStringLiteral"); }
-
+  explicit ConditionStringLiteral() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionStringLiteral"); };
+  ConditionStringLiteral(const std::string &v);
   void initialize(Parser &p) override;
   void append_value(std::string &s, const Resources & /* res ATS_UNUSED */) override;
 

@@ -19,10 +19,10 @@
 // Public interface for creating all values.
 //
 //
-#pragma once
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "ts/ts.h"
 
@@ -38,16 +38,24 @@ Value::set_value(const std::string &val)
 {
     _value = val;
     if (_value.substr(0, 2) == "%{") {
+      std::cout << "value: !"<<_value<<"!"<<std::endl;
       Parser parser(_value);
 
       for (auto it = parser._tokens.begin(); it != parser._tokens.end(); it++) {
+      std::cout << "itval: !"<<*it<<"!"<<std::endl;
         Parser tparser(*it);
 
         auto tcond_val = condition_factory(tparser.get_op());
-        if (!tcond_val) {
-            tcond_val = new ConditionStringLiteral;
+        if (tcond_val) {
+            tcond_val->initialize(tparser);
+        } else {
+           tcond_val = new ConditionStringLiteral(*it);
+//           tcond_val->initialize(*it);
+  //          std::cout << "lp: !"<<*it<<"!"<<std::endl;
+//            LiteralParser lparser(*it);
+//            tcond_val->initialize(lparser);
         }
-        tcond_val->initialize(tparser);
+//        tcond_val->initialize(tparser);
         _cond_vals.push_back(tcond_val);
       }
     } else if (_value.find("%<") != std::string::npos) { // It has a Variable to expand
