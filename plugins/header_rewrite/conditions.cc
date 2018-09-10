@@ -1419,6 +1419,7 @@ ConditionStringLiteral::append_value(std::string &s, const Resources &res)
   s += _literal;
   TSDebug(PLUGIN_NAME, "Appending '%s' to evaluation value -> %s", _literal.c_str(), s.c_str());
 }
+
 /*
 void
 ConditionStringLiteral::initialize(Parser &p)
@@ -1430,8 +1431,8 @@ ConditionStringLiteral::initialize(Parser &p)
       _literal = op;
   }
 }
-
 */
+
 bool
 ConditionStringLiteral::eval(const Resources &res)
 {
