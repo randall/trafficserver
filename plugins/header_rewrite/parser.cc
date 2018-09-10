@@ -34,7 +34,7 @@ Parser::Parser(const std::string &original_line, bool preserve_quotes) : _cond(f
 {
   std::string line        = original_line;
   ParserState state       = PARSER_DEFAULT;
-  bool extracting_token   = true;
+  bool extracting_token   = false;
   off_t cur_token_start   = 0;
   size_t cur_token_length = 0;
 

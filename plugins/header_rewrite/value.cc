@@ -37,7 +37,7 @@ void
 Value::set_value(const std::string &val)
 {
     _value = val;
-    if (_value.substr(0, 2) == "%{") {
+    if (_value.find("%{") != std::string::npos || _value.find("%<") != std::string::npos || _value.find("\"") != std::string::npos) {
       std::cout << "value: !"<<_value<<"!"<<std::endl;
       Parser parser(_value);
 
@@ -53,10 +53,10 @@ Value::set_value(const std::string &val)
         }
         _cond_vals.push_back(tcond_val);
       }
-    } else if (_value.find("%<") != std::string::npos) { // It has a Variable to expand
-      _need_expander = true;                             // And this is clearly not an integer or float ...
-      // TODO: This is still not optimal, we should pre-parse the _value string here,
-      // and perhaps populate a per-Value VariableExpander that holds state.
+//    } else if (_value.find("%<") != std::string::npos) { // It has a Variable to expand
+ //     _need_expander = true;                             // And this is clearly not an integer or float ...
+  //    // TODO: This is still not optimal, we should pre-parse the _value string here,
+   //   // and perhaps populate a per-Value VariableExpander that holds state.
     } else {
       _int_value   = strtol(_value.c_str(), nullptr, 10);
       _float_value = strtod(_value.c_str(), nullptr);
