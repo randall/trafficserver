@@ -88,9 +88,3 @@ public:
   std::vector<std::string> _tokens;
   std::vector<std::string> _raw_tokens;
 };
-
-class LiteralParser : public Parser
-{
-public:
-  explicit LiteralParser(const std::string &line);
-};

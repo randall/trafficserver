@@ -559,8 +559,8 @@ class ConditionStringLiteral : public Condition
 {
 public:
   explicit ConditionStringLiteral() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionStringLiteral"); };
- ConditionStringLiteral(const std::string &v);
-//  void initialize(Parser &p) override;
+  ConditionStringLiteral(const std::string &v);
+
   void append_value(std::string &s, const Resources & /* res ATS_UNUSED */) override;
 
 protected:

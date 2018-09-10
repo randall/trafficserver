@@ -126,13 +126,13 @@ Parser::Parser(const std::string &original_line, bool preserve_quotes) : _cond(f
     }
   }
 
-  if (_raw_tokens.empty()) {
+  if (_tokens.empty()) {
     _empty = true;
   } else {
       if (preserve_quotes) {
-    preprocess(_raw_tokens);
+          preprocess(_raw_tokens);
       } else {
-        preprocess(_tokens);
+          preprocess(_tokens);
       }
   }
 }
@@ -190,6 +190,7 @@ Parser::preprocess(std::vector<std::string> tokens)
       _val = "";
     }
   }
+
   // Possibly TODO
   // The last token might be the "flags" section
   if (tokens.size() > 0) {
@@ -251,9 +252,4 @@ Parser::cond_is_hook(TSHttpHookID &hook) const
   }
 
   return false;
-}
-
-LiteralParser::LiteralParser(const std::string &original_line):Parser(original_line) {
-    std::cout << "og: !" << original_line <<  "!" << std::endl;
-    _tokens.push_back(original_line);
 }
