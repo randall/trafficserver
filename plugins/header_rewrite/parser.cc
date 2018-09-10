@@ -158,12 +158,18 @@ Parser::preprocess(std::vector<std::string> tokens)
       return;
     }
   } else {
-    // Operator has no qualifiers, but could take an optional second argumetn
+    // Operator has no qualifiers, but could take an optional second argument
     _op = tokens[0];
     if (tokens.size() > 1) {
       _arg = tokens[1];
       if (tokens.size() > 2) {
-        _val = tokens[2];
+        auto it = (tokens.begin() + 2);
+        for (; it != tokens.end(); it++) {
+          _val = _val + *it;
+          if (std::next(it) != tokens.end()) {
+            _val = _val + " ";
+          }
+        }
       } else {
         _val = "";
       }
@@ -172,7 +178,7 @@ Parser::preprocess(std::vector<std::string> tokens)
       _val = "";
     }
   }
-
+  // Possibly TODO
   // The last token might be the "flags" section
   if (tokens.size() > 0) {
     std::string m = tokens[tokens.size() - 1];

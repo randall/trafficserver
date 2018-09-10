@@ -84,6 +84,6 @@ private:
   std::string _arg;
   std::string _val;
 
-protected:
+public:
   std::vector<std::string> _tokens;
 };

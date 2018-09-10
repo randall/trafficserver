@@ -360,6 +360,32 @@ test_parsing()
 }
 
 int
+test_randall()
+{
+  int errors = 0;
+  ParserTest p(R"(set-header X-Miles "Some string literal" + %{HEADER:User-Agent} + " More Literal Strings")");
+  for (auto x : p.getTokens()) {
+    std::cout  << "!" << x << "!" << std::endl;
+  }
+    std::cout  << "op:" <<  p.get_op() << std::endl;
+    std::cout  << "arg:" <<  p.get_arg() << std::endl;
+    std::cout  << "is_cond:" <<  p.is_cond() << std::endl;
+  CHECK_EQ(p.getTokens().size(), 7U);
+  CHECK_EQ(p.get_value(), "randalk")
+  END_TEST();
+
+/*
+  ParserTest p("set-header Randall-Says4 %{GEO:ASN-NAME} %{GEO:ASN-NAME}");
+
+  CHECK_EQ(p.getTokens().size(), 4U);
+  CHECK_EQ(p.get_value(), "randalk")
+
+  END_TEST();
+*/
+  return errors;
+}
+
+int
 test_processing()
 {
   int errors = 0;
@@ -424,12 +450,15 @@ test_processing()
 
   return errors;
 }
+
 int
 main()
 {
+  test_randall();
+  /*
   if (test_parsing() || test_processing()) {
     return 1;
   }
-
+ */
   return 0;
 }

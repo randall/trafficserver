@@ -553,3 +553,21 @@ protected:
 private:
   NetworkSessionQualifiers _net_qual = NET_QUAL_STACK;
 };
+
+
+class ConditionStringLiteral : public Condition
+{
+public:
+  ConditionStringLiteral() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionStringLiteral"); }
+
+  void initialize(Parser &p) override;
+  void append_value(std::string &s, const Resources & /* res ATS_UNUSED */) override;
+
+protected:
+  bool eval(const Resources & /* res ATS_UNUSED */) override;
+
+private:
+  std::string _literal;
+  DISALLOW_COPY_AND_ASSIGN(ConditionStringLiteral);
+};
+
