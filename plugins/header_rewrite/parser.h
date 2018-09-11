@@ -86,5 +86,4 @@ private:
 
 public:
   std::vector<std::string> _tokens;
-  std::vector<std::string> _raw_tokens;
 };
