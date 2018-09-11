@@ -571,3 +571,18 @@ private:
   DISALLOW_COPY_AND_ASSIGN(ConditionStringLiteral);
 };
 
+class ConditionExpandableString : public Condition
+{
+public:
+  explicit ConditionExpandableString() { TSDebug(PLUGIN_NAME_DBG, "Calling CTOR for ConditionExpandableString"); };
+  ConditionExpandableString(const std::string &v);
+
+  void append_value(std::string &s, const Resources &res) override;
+
+protected:
+  bool eval(const Resources &res) override;
+
+private:
+  std::string _value;
+  DISALLOW_COPY_AND_ASSIGN(ConditionExpandableString);
+};
