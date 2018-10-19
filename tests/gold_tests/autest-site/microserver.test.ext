@@ -109,7 +109,7 @@ def makeHeader(self, requestString, **kwargs):
     return headerStr
 
 
-def uServerUpAndRunning(serverHost, port, isSsl, isIPv6, request, clientcert='', clientkey=''):
+def uServerUpAndRunning(host, port, isSsl, isIPv6, request, clientcert='', clientkey=''):
     if isIPv6:
         plain_sock = socket.socket(socket.AF_INET6)
     else:
@@ -154,7 +154,6 @@ def uServerUpAndRunning(serverHost, port, isSsl, isIPv6, request, clientcert='',
 
 AddWhenFunction(uServerUpAndRunning)
 
-
 def MakeOriginServer(obj, name, port=None, s_port=None, ip='INADDR_LOOPBACK', delay=None, ssl=False, lookup_key=DEFAULT_LOOKUP_KEY, clientcert='', clientkey='', both=False, options={}):
     data_dir = os.path.join(obj.RunDirectory, name)
     p = obj.Processes.Process(name)
@@ -177,7 +176,7 @@ def MakeOriginServer(obj, name, port=None, s_port=None, ip='INADDR_LOOPBACK', de
         command += " --cert {0}".format(cert)
         command += " --s_port {0}".format(s_port)
 
-    # this might break if user specifies both both and ssl 
+    # this might break if user specifies both both and ssl
     if not ssl: # in both or HTTP only mode
         if not port:
             port = get_port(p, "Port")
