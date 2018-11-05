@@ -49,10 +49,12 @@ Parser::Parser(const std::string &original_line, bool tokens_only) : _cond(false
         if (cur_token_length > 0) {
           _tokens.push_back(line.substr(cur_token_start, cur_token_length));
           if (_tokens.size() == 1) {
-            // Special case for "conditional" values
             if (_tokens[0].substr(0, 2) == "%{" || _tokens[0] == "cond") {
               _cond = true;
             } else {
+              // If we're not a parsing a cond, preserve quotes for further processing by
+              // concatenation and other string expansions
+              // ToDo: maybe add concatenation processing for conditions
               preserve_quotes = true;
             }
           }
@@ -151,7 +153,10 @@ void
 Parser::preprocess(std::vector<std::string> tokens)
 {
   // Special case for "conditional" values
-  if (tokens[0] == "cond") {
+  if (tokens[0].substr(0, 2) == "%{") {
+    _cond = true;
+  } else if (tokens[0] == "cond") {
+    _cond = true;
     tokens.erase(tokens.begin());
   }
 
