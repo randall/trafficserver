@@ -30,21 +30,32 @@
 
 enum ParserState { PARSER_DEFAULT, PARSER_IN_QUOTE, PARSER_IN_REGEX };
 
-Parser::Parser(const std::string &original_line, bool preserve_quotes) : _cond(false), _empty(false)
+Parser::Parser(const std::string &original_line, bool XX) : _cond(false), _empty(false)
 {
   std::string line        = original_line;
   ParserState state       = PARSER_DEFAULT;
   bool extracting_token   = false;
+  bool preserve_quotes    = false;
   off_t cur_token_start   = 0;
   size_t cur_token_length = 0;
 
   for (size_t i = 0; i < line.size(); ++i) {
+    //    TSError("c: %c s: %d", line[i], state);
+
     if ((state == PARSER_DEFAULT) &&
         (std::isspace(line[i]) || ((line[i] == '=') || (line[i] == '>') || (line[i] == '<') || (line[i] == '+')))) {
       if (extracting_token) {
         cur_token_length = i - cur_token_start;
         if (cur_token_length > 0) {
           _tokens.push_back(line.substr(cur_token_start, cur_token_length));
+          if (_tokens.size() == 1) {
+            // Special case for "conditional" values
+            if (_tokens[0].substr(0, 2) == "%{" || _tokens[0] == "cond") {
+              _cond = true;
+            } else {
+              preserve_quotes = true;
+            }
+          }
         }
         extracting_token = false;
         state            = PARSER_DEFAULT;
@@ -70,13 +81,18 @@ Parser::Parser(const std::string &original_line, bool preserve_quotes) : _cond(f
         extracting_token = true;
         cur_token_start  = i;
       }
-      line.erase(i, 1);
+      if (!preserve_quotes) {
+        line.erase(i, 1);
+      }
     } else if ((state != PARSER_IN_REGEX) && (line[i] == '"')) {
       if ((state != PARSER_IN_QUOTE) && !extracting_token) {
         state            = PARSER_IN_QUOTE;
         extracting_token = true;
         cur_token_start  = i + 1; // Eat the leading quote
       } else if ((state == PARSER_IN_QUOTE) && extracting_token) {
+        if (preserve_quotes && line[i - 1] == '\\') {
+          continue;
+        }
         cur_token_length = i - cur_token_start;
         if (preserve_quotes) {
           _tokens.push_back(line.substr(cur_token_start - 1, i - cur_token_start + 2));
@@ -135,32 +151,28 @@ void
 Parser::preprocess(std::vector<std::string> tokens)
 {
   // Special case for "conditional" values
-  if (tokens[0].substr(0, 2) == "%{") {
-    _cond = true;
-  } else if (tokens[0] == "cond") {
-    _cond = true;
+  if (tokens[0] == "cond") {
     tokens.erase(tokens.begin());
   }
 
   // Is it a condition or operator?
   if (_cond) {
-    if ((tokens[0].substr(0, 2) == "%{") && (tokens[0][tokens[0].size() - 1] == '}')) {
-      std::string s = tokens[0].substr(2, tokens[0].size() - 3);
-
-      _op = s;
-      if (tokens.size() > 2 && (tokens[1][0] == '=' || tokens[1][0] == '>' || tokens[1][0] == '<')) {
-        // cond + [=<>] + argument
-        _arg = tokens[1] + tokens[2];
-      } else if (tokens.size() > 1) {
-        // This is for the regular expression, which for some reason has its own handling?? ToDo: Why ?
-        _arg = tokens[1];
-      } else {
-        // This would be for hook conditions, which has no argument.
-        _arg = "";
-      }
-    } else {
-      TSError("[%s] conditions must be embraced in %%{}", PLUGIN_NAME);
+    if ((tokens[0].substr(0, 2) != "%{") || (tokens[0][tokens[0].size() - 1] != '}')) {
+      TSError("[%s] conditions must be enclosed in %%{}", PLUGIN_NAME);
       return;
+    }
+    std::string s = tokens[0].substr(2, tokens[0].size() - 3);
+
+    _op = s;
+    if (tokens.size() > 2 && (tokens[1][0] == '=' || tokens[1][0] == '>' || tokens[1][0] == '<')) {
+      // cond + [=<>] + argument
+      _arg = tokens[1] + tokens[2];
+    } else if (tokens.size() > 1) {
+      // This is for the regular expression, which for some reason has its own handling?? ToDo: Why ?
+      _arg = tokens[1];
+    } else {
+      // This would be for hook conditions, which has no argument.
+      _arg = "";
     }
   } else {
     // Operator has no qualifiers, but could take an optional second argument
@@ -202,7 +214,7 @@ Parser::preprocess(std::vector<std::string> tokens)
         }
       } else {
         // Syntax error
-        TSError("[%s] mods have to be embraced in []", PLUGIN_NAME);
+        TSError("[%s] mods have to be enclosed in []", PLUGIN_NAME);
         return;
       }
     }
