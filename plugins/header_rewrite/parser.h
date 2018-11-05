@@ -33,7 +33,7 @@
 class Parser
 {
 public:
-  explicit Parser(const std::string &line, bool preserve_quotes = false);
+  explicit Parser(const std::string &line);
 
   bool
   empty() const

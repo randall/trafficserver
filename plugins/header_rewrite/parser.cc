@@ -30,7 +30,7 @@
 
 enum ParserState { PARSER_DEFAULT, PARSER_IN_QUOTE, PARSER_IN_REGEX };
 
-Parser::Parser(const std::string &original_line, bool tokens_only) : _cond(false), _empty(false)
+Parser::Parser(const std::string &original_line) : _cond(false), _empty(false)
 {
   std::string line        = original_line;
   ParserState state       = PARSER_DEFAULT;
@@ -40,8 +40,6 @@ Parser::Parser(const std::string &original_line, bool tokens_only) : _cond(false
   size_t cur_token_length = 0;
 
   for (size_t i = 0; i < line.size(); ++i) {
-    //    TSError("c: %c s: %d", line[i], state);
-
     if ((state == PARSER_DEFAULT) &&
         (std::isspace(line[i]) || ((line[i] == '=') || (line[i] == '>') || (line[i] == '<') || (line[i] == '+')))) {
       if (extracting_token) {

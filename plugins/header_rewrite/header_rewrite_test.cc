@@ -38,10 +38,7 @@ TSError(const char *fmt, ...)
 class ParserTest : public Parser
 {
 public:
-  ParserTest(const std::string &line, bool preserve_quotes = false) : Parser(line, preserve_quotes), res(true)
-  {
-    std::cout << "Finished parser test: " << line << std::endl;
-  }
+  ParserTest(const std::string &line) : Parser(line), res(true) { std::cout << "Finished parser test: " << line << std::endl; }
   std::vector<std::string>
   getTokens() const
   {
@@ -196,7 +193,7 @@ test_parsing()
 
   // Same test as above but preserving quotes
   {
-    ParserTest p(R"(cond %{CLIENT-HEADER:non_existent_header} =""          [AND])", true);
+    ParserTest p(R"(cond %{CLIENT-HEADER:non_existent_header} =""          [AND])");
 
     CHECK_EQ(p.getTokens().size(), 5UL);
     CHECK_EQ(p.getTokens()[0], "cond");
@@ -355,7 +352,7 @@ test_parsing()
 
   // test quote preservation
   {
-    ParserTest p(R"(add-header X-Party "let's party like it's " + %{NOW:YEAR} + "!")", true);
+    ParserTest p(R"(add-header X-Party "let's party like it's " + %{NOW:YEAR} + "!")");
 
     CHECK_EQ(p.getTokens().size(), 7UL);
     CHECK_EQ(p.getTokens()[0], "add-header");
@@ -385,7 +382,7 @@ test_parsing()
   }
 
   {
-    ParserTest p(R"(set-header Alt-Svc "quic=\":443\"; v=\"35\"")", true);
+    ParserTest p(R"(set-header Alt-Svc "quic=\":443\"; v=\"35\"")");
 
     CHECK_EQ(p.getTokens().size(), 3UL);
     CHECK_EQ(p.getTokens()[0], "set-header");

@@ -43,17 +43,11 @@ Value::set_value(const std::string &val)
 {
   _value = val;
 
-  TSDebug(PLUGIN_NAME_DBG, "set_value: |%s|", val.c_str());
   if (_value.find("%{") != std::string::npos || _value.find("%<") != std::string::npos || _value.find("\"") != std::string::npos) {
-    Parser parser(_value, true);
+    Parser parser(_value);
     auto tokens = parser.get_tokens();
-    if (tokens.empty()) {
-      TSDebug(PLUGIN_NAME_DBG, "No tokens extracted from '%s'", val.c_str());
-    }
-
     for (auto it = tokens.begin(); it != tokens.end(); it++) {
-      TSDebug(PLUGIN_NAME_DBG, "set_value!tokenit |%s|", (*it).c_str());
-      Parser tparser(*it, true);
+      Parser tparser(*it);
 
       Condition *tcond_val = nullptr;
       if ((*it).substr(0, 2) == "%<") {
