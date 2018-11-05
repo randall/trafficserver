@@ -30,7 +30,7 @@
 
 enum ParserState { PARSER_DEFAULT, PARSER_IN_QUOTE, PARSER_IN_REGEX };
 
-Parser::Parser(const std::string &original_line, bool XX) : _cond(false), _empty(false)
+Parser::Parser(const std::string &original_line, bool tokens_only) : _cond(false), _empty(false)
 {
   std::string line        = original_line;
   ParserState state       = PARSER_DEFAULT;
@@ -157,22 +157,23 @@ Parser::preprocess(std::vector<std::string> tokens)
 
   // Is it a condition or operator?
   if (_cond) {
-    if ((tokens[0].substr(0, 2) != "%{") || (tokens[0][tokens[0].size() - 1] != '}')) {
-      TSError("[%s] conditions must be enclosed in %%{}", PLUGIN_NAME);
-      return;
-    }
-    std::string s = tokens[0].substr(2, tokens[0].size() - 3);
+    if ((tokens[0].substr(0, 2) == "%{") && (tokens[0][tokens[0].size() - 1] == '}')) {
+      std::string s = tokens[0].substr(2, tokens[0].size() - 3);
 
-    _op = s;
-    if (tokens.size() > 2 && (tokens[1][0] == '=' || tokens[1][0] == '>' || tokens[1][0] == '<')) {
-      // cond + [=<>] + argument
-      _arg = tokens[1] + tokens[2];
-    } else if (tokens.size() > 1) {
-      // This is for the regular expression, which for some reason has its own handling?? ToDo: Why ?
-      _arg = tokens[1];
+      _op = s;
+      if (tokens.size() > 2 && (tokens[1][0] == '=' || tokens[1][0] == '>' || tokens[1][0] == '<')) {
+        // cond + [=<>] + argument
+        _arg = tokens[1] + tokens[2];
+      } else if (tokens.size() > 1) {
+        // This is for the regular expression, which for some reason has its own handling?? ToDo: Why ?
+        _arg = tokens[1];
+      } else {
+        // This would be for hook conditions, which has no argument.
+        _arg = "";
+      }
     } else {
-      // This would be for hook conditions, which has no argument.
-      _arg = "";
+      TSError("[%s] conditions must be embraced in %%{}", PLUGIN_NAME);
+      return;
     }
   } else {
     // Operator has no qualifiers, but could take an optional second argument

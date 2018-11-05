@@ -45,14 +45,15 @@ Value::set_value(const std::string &val)
 
   TSDebug(PLUGIN_NAME_DBG, "set_value: |%s|", val.c_str());
   if (_value.find("%{") != std::string::npos || _value.find("%<") != std::string::npos || _value.find("\"") != std::string::npos) {
-    Parser parser(_value);
+    Parser parser(_value, true);
     auto tokens = parser.get_tokens();
     if (tokens.empty()) {
-      TSDebug(PLUGIN_NAME_DBG, "No tokens for |%s|", val.c_str());
+      TSDebug(PLUGIN_NAME_DBG, "No tokens extracted from '%s'", val.c_str());
     }
+
     for (auto it = tokens.begin(); it != tokens.end(); it++) {
       TSDebug(PLUGIN_NAME_DBG, "set_value!tokenit |%s|", (*it).c_str());
-      Parser tparser(*it);
+      Parser tparser(*it, true);
 
       Condition *tcond_val = nullptr;
       if ((*it).substr(0, 2) == "%<") {
