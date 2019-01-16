@@ -66,8 +66,22 @@ verify_origin_server      Deprecated.  Use verify_server_policy and verify_serve
                           By default this is :ts:cv:`proxy.config.ssl.client.verify.server`.
 
 verify_client             One of the values :code:`NONE`, :code:`MODERATE`, or :code:`STRICT`.
+                          If ``NONE`` is specified, |TS| requests no certificate.  If ``MODERATE`` is specified
+                          |TS| will verify a certificate that is presented by the client, but it will not
+                          fail the TLS handshake if new certificate is presented.  If ``STRICT`` is specified
+                          the client must resent a certificate during the TLS handshake.
 
                           By default this is :ts:cv:`proxy.config.ssl.client.certification_level`.
+
+valid_tls_versions_in     This specifies the list of TLS protocols that will be offered to user agents during
+                          the TLS negotiaton.  This replaces the global settings in :ts:cv:`proxy.config.ssl.TSLv1`,
+                          :ts:cv:`proxy.config.ssl.TLSv1_1`, :ts:cv:`proxy.config.ssl.TLSv1_2`,
+                          and :ts:cv:`proxy.config.ssl.TLSv1_3`. The potential values are TLSv1, TLSv1_1, TLSv1_2, and
+                          TLSv1_3.  You must list all protocols that |TS| should offer to the client when using
+                          this key.  This key is only valid for openssl 1.1.0 and later. Older versions of openssl do not
+                          provide a hook early enough to update the SSL object.  It is a syntax error for |TS| built
+                          against earlier versions.
+
 
 client_cert               The file containing the client certificate to use for the outbound connection.
 
@@ -80,7 +94,7 @@ client_key                The file containing the client private key that corres
 
                           If this is relative it is relative to the path in
                           :ts:cv:`proxy.config.ssl.server.private_key.path`. If not set,
-                          |TS| tries to use a private key in client_cert.  Otherwise, 
+                          |TS| tries to use a private key in client_cert.  Otherwise,
                           :ts:cv:`proxy.config.ssl.client.private_key.filename` is used.
 
 
@@ -112,14 +126,14 @@ except there is always an upstream certificate. This is equivalent to setting
 
 ``verify_server_policy`` specifies how Traffic Server will enforce the server certificate verification.
 
-:code:`DISABLED` 
+:code:`DISABLED`
    Do not verify the upstream server certificate.
 
 :code:`PERMISSIVE`
    Do verification of the upstream certificate but do not enforce. If the verification fails the
    failure is logged in :file:`diags.log` but the connection is allowed.
 
-:code:`ENFORCED` 
+:code:`ENFORCED`
    Do verification of the upstream certificate. If verification fails, the failure is
    logged in :file:`diags.log` and the connection is denied.
 
