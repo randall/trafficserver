@@ -600,35 +600,6 @@ LogSock::check_connections()
 }
 
 /**
-  This routine will check to ensure that the client connecting is
-  authorized to use the log collation port.  To authorize, the client is
-  expected to send the logging secret string.
-*/
-bool
-LogSock::authorized_client(int cid, char *key)
-{
-  //
-  // Wait for up to 5 seconds for the client to authenticate
-  //
-  if (!pending_message_on(cid, 5000)) {
-    return false;
-  }
-  //
-  // Ok, the client has a pending message, so check to see if it matches
-  // the given key.
-  //
-  char buf[1024];
-  int size = this->read(cid, buf, 1024);
-  ink_assert(size >= 0 && size <= 1024);
-
-  if (strncmp(buf, key, size) == 0) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
  */
 char *
 LogSock::connected_host(int cid)

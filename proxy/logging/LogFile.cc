@@ -46,7 +46,6 @@
 #include "LogFormat.h"
 #include "LogBuffer.h"
 #include "LogFile.h"
-#include "LogHost.h"
 #include "LogObject.h"
 #include "LogUtils.h"
 #include "LogConfig.h"

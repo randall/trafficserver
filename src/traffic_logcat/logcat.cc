@@ -38,7 +38,6 @@
 #include "LogFilter.h"
 #include "LogFormat.h"
 #include "LogFile.h"
-#include "LogHost.h"
 #include "LogObject.h"
 #include "LogConfig.h"
 #include "LogBuffer.h"

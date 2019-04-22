@@ -44,7 +44,6 @@
 #include "LogFilter.h"
 #include "LogFormat.h"
 #include "LogFile.h"
-#include "LogHost.h"
 #include "LogObject.h"
 #include "LogConfig.h"
 #include "LogBuffer.h"
@@ -65,16 +64,8 @@ LogObject *Log::global_scrap_object = nullptr;
 Log::LoggingMode Log::logging_mode  = LOG_MODE_NONE;
 
 // Flush thread stuff
-EventNotify *Log::preproc_notify;
 EventNotify *Log::flush_notify;
 InkAtomicList *Log::flush_data_list;
-
-// Collate thread stuff
-EventNotify Log::collate_notify;
-ink_thread Log::collate_thread;
-int Log::collation_accept_file_descriptor;
-int Log::collation_preproc_threads;
-int Log::collation_port;
 
 // Log private objects
 int Log::init_status                  = 0;
@@ -179,17 +170,13 @@ struct PeriodicWakeup : Continuation {
   int
   wakeup(int /* event ATS_UNUSED */, Event * /* e ATS_UNUSED */)
   {
-    for (int i = 0; i < m_preproc_threads; i++) {
-      Log::preproc_notify[i].signal();
-    }
     for (int i = 0; i < m_flush_threads; i++) {
       Log::flush_notify[i].signal();
     }
     return EVENT_CONT;
   }
 
-  PeriodicWakeup(int preproc_threads, int flush_threads)
-    : Continuation(new_ProxyMutex()), m_preproc_threads(preproc_threads), m_flush_threads(flush_threads)
+  PeriodicWakeup(int flush_threads) : Continuation(new_ProxyMutex()), m_flush_threads(flush_threads)
   {
     SET_HANDLER((PeriodicWakeupHandler)&PeriodicWakeup::wakeup);
   }
@@ -227,7 +214,7 @@ Log::periodic_tasks(long time_now)
     // so that log objects are flushed
     //
     change_configuration();
-  } else if (logging_mode > LOG_MODE_NONE || config->collation_mode == Log::COLLATION_HOST || config->has_api_objects()) {
+  } else if (logging_mode > LOG_MODE_NONE || config->has_api_objects()) {
     Debug("log-periodic", "Performing periodic tasks");
     Debug("log-periodic", "Periodic task interval = %d", periodic_tasks_interval);
 
@@ -265,25 +252,6 @@ Log::periodic_tasks(long time_now)
   }
 }
 
-/*-------------------------------------------------------------------------
-  MAIN INTERFACE
-  -------------------------------------------------------------------------*/
-struct LoggingPreprocContinuation : public Continuation {
-  int m_idx;
-
-  int
-  mainEvent(int /* event ATS_UNUSED */, void * /* data ATS_UNUSED */)
-  {
-    Log::preproc_thread_main((void *)&m_idx);
-    return 0;
-  }
-
-  explicit LoggingPreprocContinuation(int idx) : Continuation(nullptr), m_idx(idx)
-  {
-    SET_HANDLER(&LoggingPreprocContinuation::mainEvent);
-  }
-};
-
 struct LoggingFlushContinuation : public Continuation {
   int m_idx;
 
@@ -298,17 +266,6 @@ struct LoggingFlushContinuation : public Continuation {
   {
     SET_HANDLER(&LoggingFlushContinuation::mainEvent);
   }
-};
-
-struct LoggingCollateContinuation : public Continuation {
-  int
-  mainEvent(int /* event ATS_UNUSED */, void * /* data ATS_UNUSED */)
-  {
-    Log::collate_thread_main(nullptr);
-    return 0;
-  }
-
-  LoggingCollateContinuation() : Continuation(nullptr) { SET_HANDLER(&LoggingCollateContinuation::mainEvent); }
 };
 
 /*-------------------------------------------------------------------------
@@ -935,9 +892,6 @@ Log::handle_periodic_tasks_int_change(const char * /* name ATS_UNUSED */, RecDat
 void
 Log::init(int flags)
 {
-  collation_preproc_threads        = 1;
-  collation_accept_file_descriptor = NO_FD;
-
   // store the configuration flags
   //
   config_flags = flags;
@@ -957,33 +911,27 @@ Log::init(int flags)
     LogConfig::register_stat_callbacks();
 
     config->read_configuration_variables();
-    collation_port            = config->collation_port;
-    collation_preproc_threads = config->collation_preproc_threads;
 
-    if (config_flags & STANDALONE_COLLATOR) {
-      logging_mode = LOG_MODE_TRANSACTIONS;
+    int val = (int)REC_ConfigReadInteger("proxy.config.log.logging_enabled");
+    if (val < LOG_MODE_NONE || val > LOG_MODE_FULL) {
+      logging_mode = LOG_MODE_FULL;
+      Warning("proxy.config.log.logging_enabled has an invalid "
+              "value, setting it to %d",
+              logging_mode);
     } else {
-      int val = (int)REC_ConfigReadInteger("proxy.config.log.logging_enabled");
-      if (val < LOG_MODE_NONE || val > LOG_MODE_FULL) {
-        logging_mode = LOG_MODE_FULL;
-        Warning("proxy.config.log.logging_enabled has an invalid "
-                "value, setting it to %d",
-                logging_mode);
-      } else {
-        logging_mode = (LoggingMode)val;
-      }
-      // periodic task interval are set on a per instance basis
-      MgmtInt pti = REC_ConfigReadInteger("proxy.config.log.periodic_tasks_interval");
-      if (pti <= 0) {
-        Error("proxy.config.log.periodic_tasks_interval = %" PRId64 " is invalid", pti);
-        Note("falling back to default periodic tasks interval = %d", PERIODIC_TASKS_INTERVAL_FALLBACK);
-        periodic_tasks_interval = PERIODIC_TASKS_INTERVAL_FALLBACK;
-      } else {
-        periodic_tasks_interval = static_cast<uint32_t>(pti);
-      }
-
-      REC_RegisterConfigUpdateFunc("proxy.config.log.periodic_tasks_interval", &Log::handle_periodic_tasks_int_change, nullptr);
+      logging_mode = (LoggingMode)val;
     }
+    // periodic task interval are set on a per instance basis
+    MgmtInt pti = REC_ConfigReadInteger("proxy.config.log.periodic_tasks_interval");
+    if (pti <= 0) {
+      Error("proxy.config.log.periodic_tasks_interval = %" PRId64 " is invalid", pti);
+      Note("falling back to default periodic tasks interval = %d", PERIODIC_TASKS_INTERVAL_FALLBACK);
+      periodic_tasks_interval = PERIODIC_TASKS_INTERVAL_FALLBACK;
+    } else {
+      periodic_tasks_interval = static_cast<uint32_t>(pti);
+    }
+
+    REC_RegisterConfigUpdateFunc("proxy.config.log.periodic_tasks_interval", &Log::handle_periodic_tasks_int_change, nullptr);
   }
 
   // if remote management is enabled, do all necessary initialization to
@@ -991,8 +939,6 @@ Log::init(int flags)
   //
   if (!(config_flags & NO_REMOTE_MANAGEMENT)) {
     REC_RegisterConfigUpdateFunc("proxy.config.log.logging_enabled", &Log::handle_logging_mode_change, nullptr);
-
-    REC_RegisterConfigUpdateFunc("proxy.local.log.collation_mode", &Log::handle_logging_mode_change, nullptr);
 
     // Clear any stat values that need to be reset on startup
     //
@@ -1003,9 +949,6 @@ Log::init(int flags)
   init_fields();
   if (!(config_flags & LOGCAT)) {
     Debug("log-config", "Log::init(): logging_mode = %d init status = %d", logging_mode, init_status);
-    if (config_flags & STANDALONE_COLLATOR) {
-      config->collation_mode = Log::COLLATION_HOST;
-    }
     config->init();
     init_when_enabled();
   }
@@ -1018,26 +961,24 @@ Log::init_when_enabled()
   ink_release_assert(config->initialized == true);
 
   if (!(init_status & FULLY_INITIALIZED)) {
-    if (!(config_flags & STANDALONE_COLLATOR)) {
-      // register callbacks
-      //
-      if (!(config_flags & NO_REMOTE_MANAGEMENT)) {
-        LogConfig::register_config_callbacks();
-      }
-
-      LogConfig::register_mgmt_callbacks();
+    // ???
+    // register callbacks
+    //
+    if (!(config_flags & NO_REMOTE_MANAGEMENT)) {
+      LogConfig::register_config_callbacks();
     }
+
+    LogConfig::register_mgmt_callbacks();
     // setup global scrap object
     //
     global_scrap_format = MakeTextLogFormat();
-    global_scrap_object =
-      new LogObject(global_scrap_format, Log::config->logfile_dir, "scrapfile.log", LOG_FILE_BINARY, nullptr,
-                    Log::config->rolling_enabled, Log::config->collation_preproc_threads, Log::config->rolling_interval_sec,
-                    Log::config->rolling_offset_hr, Log::config->rolling_size_mb);
+    global_scrap_object = new LogObject(global_scrap_format, Log::config->logfile_dir, "scrapfile.log", LOG_FILE_BINARY, nullptr,
+                                        Log::config->rolling_enabled, Log::config->rolling_interval_sec,
+                                        Log::config->rolling_offset_hr, Log::config->rolling_size_mb);
 
-    // create the flush thread and the collation thread
+    // create the flush thread
     create_threads();
-    eventProcessor.schedule_every(new PeriodicWakeup(collation_preproc_threads, 1), HRTIME_SECOND, ET_CALL);
+    eventProcessor.schedule_every(new PeriodicWakeup(1), HRTIME_SECOND, ET_CALL);
 
     init_status |= FULLY_INITIALIZED;
   }
@@ -1052,20 +993,9 @@ void
 Log::create_threads()
 {
   char desc[64];
-  preproc_notify = new EventNotify[collation_preproc_threads];
 
   size_t stacksize;
   REC_ReadConfigInteger(stacksize, "proxy.config.thread.default.stacksize");
-
-  // start the preproc threads
-  //
-  // no need for the conditional var since it will be relying on
-  // on the event system.
-  for (int i = 0; i < collation_preproc_threads; i++) {
-    Continuation *preproc_cont = new LoggingPreprocContinuation(i);
-    sprintf(desc, "[LOG_PREPROC %d]", i);
-    eventProcessor.spawn_thread(preproc_cont, desc, stacksize);
-  }
 
   // Now, only one flush thread is supported.
   // TODO: Enable multiple flush threads, such as
@@ -1237,53 +1167,6 @@ Log::trace_va(bool in, const sockaddr *peer_addr, uint16_t peer_port, const char
   Log::error("[End Trace]\n");
 }
 
-/*-------------------------------------------------------------------------
-  Log::preproc_thread_main
-
-  This function defines the functionality of the logging flush preprocess
-  thread, whose purpose is to consume full LogBuffer objects, do some prepare
-  work (such as convert to ascii), and then forward to flush thread.
-  -------------------------------------------------------------------------*/
-
-void *
-Log::preproc_thread_main(void *args)
-{
-  int idx = *(int *)args;
-
-  Debug("log-preproc", "log preproc thread is alive ...");
-
-  Log::preproc_notify[idx].lock();
-
-  while (true) {
-    if (TSSystemState::is_event_system_shut_down()) {
-      return nullptr;
-    }
-    LogConfig *current = static_cast<LogConfig *>(configProcessor.get(log_configid));
-
-    if (likely(current)) {
-      size_t buffers_preproced = current->log_object_manager.preproc_buffers(idx);
-
-      // config->increment_space_used(bytes_to_disk);
-      // TODO: the bytes_to_disk should be set to Log
-
-      Debug("log-preproc", "%zu buffers preprocessed from LogConfig %p (refcount=%d) this round", buffers_preproced, current,
-            current->refcount());
-
-      configProcessor.release(log_configid, current);
-    }
-
-    // wait for more work; a spurious wake-up is ok since we'll just
-    // check the queue and find there is nothing to do, then wait
-    // again.
-    //
-    Log::preproc_notify[idx].wait();
-  }
-
-  /* NOTREACHED */
-  Log::preproc_notify[idx].unlock();
-  return nullptr;
-}
-
 void *
 Log::flush_thread_main(void * /* args ATS_UNUSED */)
 {
@@ -1399,167 +1282,4 @@ Log::flush_thread_main(void * /* args ATS_UNUSED */)
   /* NOTREACHED */
   Log::flush_notify->unlock();
   return nullptr;
-}
-
-/*-------------------------------------------------------------------------
-  Log::collate_thread_main
-
-  This function defines the functionality of the log collation thread,
-  whose purpose is to collate log buffers from other nodes.
-  -------------------------------------------------------------------------*/
-
-void *
-Log::collate_thread_main(void * /* args ATS_UNUSED */)
-{
-  LogSock *sock;
-  LogBufferHeader *header;
-  LogFormat *format;
-  LogObject *obj;
-  int bytes_read;
-  int sock_id;
-  int new_client;
-
-  Debug("log-thread", "Log collation thread is alive ...");
-
-  Log::collate_notify.lock();
-
-  while (true) {
-    ink_assert(Log::config != nullptr);
-
-    // wait on the collation condition variable until we're sure that
-    // we're a collation host.  The while loop guards against spurious
-    // wake-ups.
-    //
-    while (!Log::config->am_collation_host()) {
-      Log::collate_notify.wait();
-    }
-
-    // Ok, at this point we know we're a log collation host, so get to
-    // work.  We still need to keep checking whether we're a collation
-    // host to account for a reconfiguration.
-    //
-    Debug("log-sock", "collation thread starting, creating LogSock");
-    sock = new LogSock(LogSock::LS_CONST_MAX_CONNS);
-    ink_assert(sock != nullptr);
-
-    if (sock->listen(Log::config->collation_port) != 0) {
-      LogUtils::manager_alarm(LogUtils::LOG_ALARM_ERROR, "Collation server error; could not listen on port %d",
-                              Log::config->collation_port);
-      Warning("Collation server error; could not listen on port %d", Log::config->collation_port);
-      delete sock;
-      //
-      // go to sleep ...
-      //
-      Log::collate_notify.wait();
-      continue;
-    }
-
-    while (true) {
-      if (!Log::config->am_collation_host()) {
-        break;
-      }
-
-      if (sock->pending_connect(0)) {
-        Debug("log-sock", "pending connection ...");
-        if ((new_client = sock->accept()) < 0) {
-          Debug("log-sock", "error accepting new collation client");
-        } else {
-          Debug("log-sock", "connection %d accepted", new_client);
-          if (!sock->authorized_client(new_client, Log::config->collation_secret)) {
-            Warning("Unauthorized client connecting to "
-                    "log collation port; connection refused.");
-            sock->close(new_client);
-          }
-        }
-      }
-
-      sock->check_connections();
-
-      if (!sock->pending_message_any(&sock_id, 0)) {
-        continue;
-      }
-
-      Debug("log-sock", "pending message ...");
-      header = static_cast<LogBufferHeader *>(sock->read_alloc(sock_id, &bytes_read));
-      if (!header) {
-        Debug("log-sock", "Error reading LogBuffer from collation client");
-        continue;
-      }
-
-      if (header->version != LOG_SEGMENT_VERSION) {
-        Note("Invalid LogBuffer received; invalid version - buffer = %u, current = %u", header->version, LOG_SEGMENT_VERSION);
-        delete[] header;
-        continue;
-      }
-
-      Debug("log-sock", "message accepted, size = %d", bytes_read);
-
-      obj = match_logobject(header);
-      if (!obj) {
-        Note("LogObject not found with fieldlist id; "
-             "writing LogBuffer to scrap file");
-        obj = global_scrap_object;
-      }
-
-      format = obj->m_format;
-      Debug("log-sock", "Using format '%s'", format->name());
-
-      delete[] header;
-    }
-
-    Debug("log", "no longer collation host, deleting LogSock");
-    delete sock;
-  }
-
-  /* NOTREACHED */
-  Log::collate_notify.unlock();
-  return nullptr;
-}
-
-/*-------------------------------------------------------------------------
-  Log::match_logobject
-
-  This routine matches the given buffer with the local list of LogObjects.
-  If a match cannot be found, then we'll try to construct a local LogObject
-  using the information provided in the header.  If all else fails, we
-  return NULL.
-  -------------------------------------------------------------------------*/
-
-LogObject *
-Log::match_logobject(LogBufferHeader *header)
-{
-  if (!header) {
-    return nullptr;
-  }
-
-  LogObject *obj;
-  obj = Log::config->log_object_manager.get_object_with_signature(header->log_object_signature);
-
-  if (!obj) {
-    // object does not exist yet, create it
-    //
-    LogFormat fmt("__collation_format__", header->fmt_fieldlist(), header->fmt_printf());
-
-    if (fmt.valid()) {
-      LogFileFormat file_format = (header->log_object_flags & LogObject::BINARY) ?
-                                    LOG_FILE_BINARY :
-                                    ((header->log_object_flags & LogObject::WRITES_TO_PIPE) ? LOG_FILE_PIPE : LOG_FILE_ASCII);
-
-      obj = new LogObject(&fmt, Log::config->logfile_dir, header->log_filename(), file_format, nullptr,
-                          (Log::RollingEnabledValues)Log::config->rolling_enabled, Log::config->collation_preproc_threads,
-                          Log::config->rolling_interval_sec, Log::config->rolling_offset_hr, Log::config->rolling_size_mb, true);
-
-      obj->set_remote_flag();
-
-      if (Log::config->log_object_manager.manage_object(obj)) {
-        // object manager can't solve filename conflicts
-        // delete the object and return NULL
-        //
-        delete obj;
-        obj = nullptr;
-      }
-    }
-  }
-
-  return obj;
 }
