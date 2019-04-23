@@ -47,7 +47,7 @@ struct Str {
   struct Str *prev = nullptr; // prev in list
 
   Str() {}
-  Str(char *s)
+  explicit Str(char *s)
   {
     str  = s;
     len  = strlen(s);
@@ -97,7 +97,7 @@ public:
   Str *tail;
 
 public:
-  StrList(bool do_copy_when_adding_string = true);
+  explicit StrList(bool do_copy_when_adding_string = true);
   ~StrList();
 
   Str *get_idx(int i);
@@ -178,10 +178,8 @@ inline StrList::~StrList()
 inline void *
 StrList::base_heap_alloc(int size)
 {
-  char *p;
-
   if (size <= (base_heap_size - base_heap_used)) {
-    p = &(base_heap[base_heap_used]);
+    char *p = &(base_heap[base_heap_used]);
     base_heap_used += size;
     return ((void *)p);
   } else {
@@ -202,12 +200,11 @@ StrList::alloc(int size)
 inline Str *
 StrList::new_cell(const char *s, int len_not_counting_nul)
 {
-  Str *cell;
   int l = len_not_counting_nul;
 
   // allocate a cell from the array or heap
   if ((cells_allocated < STRLIST_BASE_CELLS) && (!copy_when_adding_string)) {
-    cell      = &(base_cells[cells_allocated++]);
+    Str *cell = &(base_cells[cells_allocated++]);
     cell->str = s;
     cell->len = l;
     return (cell);
