@@ -204,11 +204,6 @@ public:
       if (nullptr != _token || _token_len > 0) {
         TSError("[%s] session token support with AWS auth v2 is not implemented, parameter ignored", PLUGIN_NAME);
       }
-    } else {
-      /* 4 == _version */
-      if (_virt_host_modified) {
-        TSError("[%s] virtual host not used with AWS auth v4, parameter ignored", PLUGIN_NAME);
-      }
     }
     return true;
   }
