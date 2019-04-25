@@ -563,7 +563,7 @@ LogUtils::file_is_writeable(const char *full_filename, off_t *size_bytes, bool *
     }
   }
 
-  // check for the current filesize limit
+  // check for the current file size limit
   //
   if (ret_val == 0) {
     struct rlimit limit_data;
@@ -658,7 +658,7 @@ marshalMimeHdr(MIMEHdr *hdr, char *buf)
   return int(INK_ALIGN_DEFAULT(bw.extent()));
 }
 
-// Unmarshaled/printable format is {{{tag1}:{value1}}{{tag2}:{value2}} ... }
+// Unmarshalled/printable format is {{{tag1}:{value1}}{{tag2}:{value2}} ... }
 //
 int
 unmarshalMimeHdr(char **buf, char *dest, int destLength)
@@ -711,7 +711,7 @@ unmarshalMimeHdr(char **buf, char *dest, int destLength)
 
     if ((pairSeparatorFallback > pairEndFallback) and ((pairSeparatorFallback + 7) <= destLength)) {
       // In the report, we can show the existence of the last partial tag/value pair, and maybe part of the value.  If we only
-      // show part of the value, we want to end it with an elipsis, to make it clear it's not complete.
+      // show part of the value, we want to end it with an ellipsis, to make it clear it's not complete.
 
       bw.reduce(destLength - FULL_ELLIPSES.size());
       bw << FULL_ELLIPSES;

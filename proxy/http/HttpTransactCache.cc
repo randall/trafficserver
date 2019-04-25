@@ -79,7 +79,7 @@ do_strings_match_strongly(const char *raw_tag_field, int raw_tag_field_len, cons
   if ((raw_tag_field_len >= 2) && (raw_tag_field[0] == 'W' && raw_tag_field[1] == '/')) {
     return false;
   }
-  // Find the unalterated tag
+  // Find the unadulterated tag
   etag_start = find_etag(raw_tag_field, raw_tag_field_len, &etag_length);
 
   // Rip the field list into a comma-separated field list
@@ -878,7 +878,7 @@ HttpTransactCache::calculate_quality_of_accept_encoding_match(MIMEField *accept_
   ///////////////////////////////////////////////////////////////////////
   // if no Accept-Encoding header, only match identity                 //
   //   The 1.1 spec says servers MAY assume that clients will accept   //
-  //   any encoding if no header is sent.  Unforntunately, this does   //
+  //   any encoding if no header is sent.  Unfortunately, this does   //
   //   not work 1.0 clients & is particularly thorny when the proxy    //
   //   created the encoding as the result of a transform.  Http 1.1   //
   //   purists would say that if proxy encodes something it's really   //

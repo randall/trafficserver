@@ -574,7 +574,7 @@ LogBuffer::to_ascii(LogEntryHeader *entry, LogFormatType type, char *buf, int bu
   // always be using the correct printf string and symbols for this
   // buffer since we get it from the buffer header.
   //
-  // We want to cache the unmarshaling "plans" so that we don't have to
+  // We want to cache the unmarshalling "plans" so that we don't have to
   // re-create them each time.  We can use the symbol string as a key to
   // these stored plans.
   //

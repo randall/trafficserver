@@ -180,7 +180,7 @@ diags_config_callback(const char * /* name ATS_UNUSED */, RecDataT /* data_type 
 //
 //      void Diags::parse_output_string(char *s, DiagsModeOutput *o)
 //
-//      This routine converts a diags outpur routing string <s> to the
+//      This routine converts a diags output routing string <s> to the
 //      internal DiagsModeOutput structure.  Currently there are 4 possible
 //      routing destinations:
 //              O  stdout
@@ -271,7 +271,7 @@ DiagsConfig::DiagsConfig(const char *prefix_string, const char *filename, const 
   ats_scoped_str logpath;
 
   ////////////////////////////////////////////////////////////////////
-  //  If we aren't using the manager records for configuation       //
+  //  If we aren't using the manager records for configuration       //
   //   just build the tables based on command line parameters and   //
   //   exit                                                         //
   ////////////////////////////////////////////////////////////////////

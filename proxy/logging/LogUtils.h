@@ -67,7 +67,7 @@ int file_is_writeable(const char *full_filename, off_t *size_bytes = nullptr, bo
 // would have been used.
 int marshalMimeHdr(MIMEHdr *hdr, char *buf);
 
-// Unmarshelled/printable format is {{{tag1}:{value1}}{{tag2}:{value2}} ... }
+// Unmarshalled/printable format is {{{tag1}:{value1}}{{tag2}:{value2}} ... }
 //
 // Returns -1 if data corruption is detected, otherwise the actual amount of data put into the 'dest' buffer.  '*buf' is advanced
 // to byte after the last byte consumed.

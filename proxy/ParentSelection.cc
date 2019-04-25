@@ -262,7 +262,7 @@ ParentConfig::startup()
   // Load the initial configuration
   reconfigure();
 
-  // Setup the callbacks for reconfiuration
+  // Setup the callbacks for reconfiguration
   //   parent table
   parentConfigUpdate->attach(file_var);
   //   default parent
@@ -830,7 +830,7 @@ ParentRecord::Print()
 
 // ParentRecord* createDefaultParent(char* val)
 //
-//  Atttemtps to allocate and init new ParentRecord
+//  Attempts to allocate and init new ParentRecord
 //    for a default parent
 //
 //  Returns a pointer to the new record on success

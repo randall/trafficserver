@@ -489,7 +489,7 @@ mime_hdr_set_accelerators_and_presence_bits(MIMEHdrImpl *mh, MIMEField *field)
   if (slot_id != MIME_SLOTID_NONE) {
     if (mh->m_first_fblock.contains(field)) {
       slot_num = (field - &(mh->m_first_fblock.m_field_slots[0]));
-      // constains() assure that the field is in the block, and the calculated
+      // constrains() assure that the field is in the block, and the calculated
       // slot_num will be between 0 and 15, which seem valid.
       // However, strangely, this function regards slot number 14 and 15 as
       // unknown for some reason that is not clear. It might be a bug.
@@ -2804,7 +2804,7 @@ mime_str_u16_set(HdrHeap *heap, const char *s_str, int s_len, const char **d_str
 {
   ink_assert(s_len >= 0 && s_len < UINT16_MAX);
   // INKqa08287 - keep track of free string space.
-  //  INVARIENT: passed in result pointers must be to
+  //  INVARIANT: passed in result pointers must be to
   //    either NULL or be valid ptr for a string already
   //    the string heaps
   heap->free_string(*d_str, *d_len);
@@ -3183,7 +3183,7 @@ mime_parse_int64(const char *buf, const char *end)
 
   This routine is a fast case parser for date strings that are guaranteed
   to be in the rfc822/rfc1123 format.  It uses integer binary searches to
-  convert daya and month names into integral indices.
+  convert day and month names into integral indices.
 
   This routine only supports rfc822/rfc1123 dates.  It must be called
   with NO leading whitespace, with a length >= 29 characters, and with

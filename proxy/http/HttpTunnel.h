@@ -254,7 +254,7 @@ class HttpTunnel : public Continuation
 
       The goal is to bound the amount of data buffered for a
       transaction flowing through the tunnel to (roughly) between the
-      @a high_water and @a low_water water marks. Due to the chunky nater of data
+      @a high_water and @a low_water water marks. Due to the chunky nature of data
       flow this always approximate.
   */
   struct FlowControl {
@@ -357,7 +357,7 @@ private:
 
 // void HttpTunnel::abort_cache_write_finish_others
 //
-//    Abort all downstream cache writes and finsish
+//    Abort all downstream cache writes and finish
 //      all other local consumers
 //
 inline void

@@ -689,7 +689,7 @@ struct OverridableHttpConfigParams {
 //
 // struct HttpConfigParams
 //
-// configuration parameters as they apear in the global
+// configuration parameters as they appear in the global
 // configuration file.
 /////////////////////////////////////////////////////////////
 struct HttpConfigParams : public ConfigInfo {

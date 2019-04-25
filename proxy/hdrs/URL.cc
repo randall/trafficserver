@@ -1485,7 +1485,7 @@ url_parse_http_no_path_component_breakdown(HdrHeap *heap, URLImpl *url, const ch
     }
 
     // A port if we're still in the host area and we found a ':' as
-    // the immediately preceeding character.
+    // the immediately preceding character.
     if (port >= base && ':' == *port) {
       port_len = host_end - port - 1; // must compute this first.
       host_end = port;                // then point at colon.

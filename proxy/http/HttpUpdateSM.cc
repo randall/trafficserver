@@ -81,7 +81,7 @@ HttpUpdateSM::start_scheduled_update(Continuation *cont, HTTPHdr *request)
 
   // We need to call state to add us to the http sm list
   //   but since we can terminate the state machine on this
-  //   stack, do this by calling througth the main handler
+  //   stack, do this by calling through the main handler
   //   so the sm will be properly terminated
   this->default_handler = &HttpUpdateSM::state_add_to_list;
   this->handleEvent(EVENT_NONE, nullptr);

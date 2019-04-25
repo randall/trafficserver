@@ -126,7 +126,7 @@ HttpServerSession::do_io_close(int alerrno)
   }
 
   if (debug_p)
-    w.print("[{}] session close: nevtc {:x}", con_id, server_vc);
+    w.print("[{}] session close: netvc {:x}", con_id, server_vc);
 
   HTTP_SUM_GLOBAL_DYN_STAT(http_current_server_connections_stat, -1); // Make sure to work on the global stat
   HTTP_SUM_DYN_STAT(http_transactions_per_server_con, transact_count);

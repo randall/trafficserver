@@ -269,7 +269,7 @@ private:
   // we need to enforce that the stream is not deleted until after the state machine has shutdown.  The reentrancy_count is
   // associated with the terminate_stream flag.  We need to make sure that we don't delete the stream object while we have stream
   // methods on the stack.  The reentrancy count is incremented as we enter the stream event handler.  As we leave the event
-  // handler we decrement the reentrancy count, and check to see if the teriminate_stream flag and destroy the object if that is the
+  // handler we decrement the reentrancy count, and check to see if the terminate_stream flag and destroy the object if that is the
   // case.
   // The same pattern is used with HttpSM for object clean up.
   //

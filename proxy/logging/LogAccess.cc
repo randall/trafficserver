@@ -896,7 +896,7 @@ LogAccess::unmarshal_ip(char **buf, IpEndpoint *dest)
 /*-------------------------------------------------------------------------
   LogAccess::unmarshal_ip_to_str
 
-  Retrieve the IP addresspointed at by the buffer and convert to a
+  Retrieve the IP address pointed at by the buffer and convert to a
   string in standard format. The string is written to @a dest and its
   length (not including nul) is returned. @a *buf is advanced.
   -------------------------------------------------------------------------*/
@@ -923,7 +923,7 @@ LogAccess::unmarshal_ip_to_str(char **buf, char *dest, int len)
   LogAccess::unmarshal_ip_to_hex
 
   Retrieve the int pointed at by the buffer and treat as an IP
-  address.  Convert to a string in byte oriented hexadeciaml and
+  address.  Convert to a string in byte oriented hexadecimal and
   return the string.  Advance the buffer pointer.
   -------------------------------------------------------------------------*/
 
@@ -1336,7 +1336,7 @@ LogAccess::validate_unmapped_url_path()
     // Use unmapped canonical URL as default
     m_client_req_unmapped_url_path_str = m_client_req_unmapped_url_canon_str;
     m_client_req_unmapped_url_path_len = m_client_req_unmapped_url_canon_len;
-    // Incase the code below fails, we prevent it from being used.
+    // In case the code below fails, we prevent it from being used.
     m_client_req_unmapped_url_host_str = INVALID_STR;
 
     if (m_client_req_unmapped_url_path_len >= 6) { // xxx:// - minimum schema size
@@ -2492,7 +2492,7 @@ LogAccess::marshal_file_size(char *buf)
         marshal_int(buf, ink_atoi64(pos + 1, len - (pos + 1 - str)));
       }
     } else {
-      // This is semi-broken when we serveq zero length objects. See TS-2213
+      // This is semi-broken when we serve zero length objects. See TS-2213
       if (m_http_sm->server_response_body_bytes > 0) {
         marshal_int(buf, m_http_sm->server_response_body_bytes);
       } else if (m_http_sm->cache_response_body_bytes > 0) {

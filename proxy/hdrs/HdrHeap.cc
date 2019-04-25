@@ -343,7 +343,7 @@ HdrHeap::demote_rw_str_heap()
 
 // void HdrHeap::coalesce_heaps()
 //
-//    Take existing stringheaps and combine them to free up
+//    Take existing string heaps and combine them to free up
 //      slots in the heap array
 //
 //  FIX ME: Should we combine a subset of the heaps
@@ -591,7 +591,7 @@ compute_checksum(void *buf, int len)
 // int HdrHeap::marshal(char* buf, int len)
 //
 //   Creates a marshalled representation of the contents
-//     of HdrHeap.  The marshalled representation is ususable
+//     of HdrHeap.  The marshalled representation is unusable
 //     as a read-only HdrHeap after an unmarshal operation which
 //     only swizzles offsets to pointer.  Special care needs to be
 //     taken not to mess up the alignment of objects in
@@ -991,7 +991,7 @@ HdrHeap::attach_str_heap(char const *h_start, int h_len, RefCountObj *h_ref_obj,
   return true;
 }
 
-// void HdrHeap::inhertit_string_heaps(const HdrHeap* inherit_from)
+// void HdrHeap::inherit_string_heaps(const HdrHeap* inherit_from)
 //
 //    Inherits all of inherit_from's string heaps as read-only
 //     string heaps
@@ -1044,7 +1044,7 @@ HdrHeap::inherit_string_heaps(const HdrHeap *inherit_from)
     // Coalesce can't know the inherited str size so we pass it
     //  it in so that it can allocate a new read-write string heap
     //  large enough (INKqa07513).
-    // INVARIENT: inherit_str_heaps can only be called after
+    // INVARIANT: inherit_str_heaps can only be called after
     //  all the objects the callee wants to inherit strings for
     //  are put into the heap
     coalesce_str_heaps(inherit_str_size);
@@ -1169,7 +1169,7 @@ REGRESSION_TEST(HdrHeap_Coalesce)(RegressionTest *t, int /* atype ATS_UNUSED */,
   *pstatus = REGRESSION_TEST_PASSED;
   /*
    * This test is designed to test numerous pieces of the HdrHeaps including allocations,
-   * demotion of rw heaps to ronly heaps, and finally the coalesce and evacuate behaviours.
+   * demotion of rw heaps to ronly heaps, and finally the coalesce and evacuate behaviors.
    */
 
   // The amount of space we will need to overflow the StrHdrHeap is HdrStrHeap::DEFAULT_SIZE - sizeof(HdrStrHeap)
@@ -1253,9 +1253,9 @@ REGRESSION_TEST(HdrHeap_Coalesce)(RegressionTest *t, int /* atype ATS_UNUSED */,
   tb.check(aliased_str_url->m_len_path == next_required_overflow_size,
            "Checking that the aliased string shows having proper length");
   tb.check(aliased_str_url->m_ptr_path != nullptr,
-           "Checking that the aliased string was properly moved during coalsece and evacuation");
+           "Checking that the aliased string was properly moved during coalesce and evacuation");
   tb.check(aliased_str_url->m_ptr_path != buf3,
-           "Checking that the aliased string was properly moved during coalsece and evacuation (not pointing at buf3)");
+           "Checking that the aliased string was properly moved during coalesce and evacuation (not pointing at buf3)");
 
   // Clean up
   heap->destroy();

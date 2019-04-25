@@ -63,12 +63,12 @@
  *       sized array and a constant time index (class charIndex).  The constant
  *       time index is only used to from the root domain to the first
  *       level partition (ie: .com). The fixed array is used for subsequent
- *       paritions until the fan out exceeds the arrays fixed size at which
+ *       partitions until the fan out exceeds the arrays fixed size at which
  *       time, the fixed array is converted to a hash table
  *
  *   ip table - supports ip ranges.  A single ip address is treated as
  *       a range with the same beginning and end address.  The table is
- *       is devided up into a fixed number of  levels, indexed 8 bit
+ *       is divided up into a fixed number of levels, indexed 8 bit
  *       boundaries, starting at the the high bit of the address.  Subsequent
  *       levels are allocated only when needed.
  *
@@ -158,7 +158,7 @@ public:
 };
 
 // Mixin class for shared info across all templates. This just wraps the
-// shared members such that we don't have to duplicate all these initialixers
+// shared members such that we don't have to duplicate all these initializers
 // etc. If someone wants to rewrite all this code to use setters and getters,
 // by all means, please do so. The plumbing is in place :).
 template <class Data> class BaseMatcher
@@ -197,7 +197,7 @@ public:
 private:
   std::unordered_map<std::string, int> url_ht;
   char **url_str = nullptr; // array of url strings
-  int *url_value = nullptr; // array of posion of url strings
+  int *url_value = nullptr; // array of position of url strings
 };
 
 template <class Data, class MatchResult> class RegexMatcher : protected BaseMatcher<Data>

@@ -242,7 +242,7 @@ public:
   void do_hostdb_update_if_necessary();
 
   // Called by transact. Decide if cached response supports Range and
-  // setup Range transfomration if so.
+  // setup Range transformation if so.
   // return true when the Range is unsatisfiable
   void do_range_setup_if_necessary();
 
@@ -314,8 +314,8 @@ public:
   bool debug_on           = false; // Transaction specific debug flag
   char *redirect_url    = nullptr; // url for force redirect (provide users a functionality to redirect to another url when needed)
   int redirect_url_len  = 0;
-  int redirection_tries = 0;    // To monitor number of redirections
-  int64_t transfered_bytes = 0; // Added to calculate POST data
+  int redirection_tries = 0;     // To monitor number of redirections
+  int64_t transferred_bytes = 0; // Added to calculate POST data
 
   // Tunneling request to plugin
   HttpPluginTunnel_t plugin_tunnel_type = HTTP_NO_PLUGIN_TUNNEL;

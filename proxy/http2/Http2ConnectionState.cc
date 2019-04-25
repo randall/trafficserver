@@ -284,7 +284,7 @@ rcv_headers_frame(Http2ConnectionState &cstate, const Http2Frame &frame)
     frame.reader()->memcpy(buf, HTTP2_PRIORITY_LEN, header_block_fragment_offset);
     if (!http2_parse_priority_parameter(make_iovec(buf, HTTP2_PRIORITY_LEN), params.priority)) {
       return Http2Error(Http2ErrorClass::HTTP2_ERROR_CLASS_CONNECTION, Http2ErrorCode::HTTP2_ERROR_PROTOCOL_ERROR,
-                        "recv headers prioirity parameters failed parse");
+                        "recv headers priority parameters failed parse");
     }
     // Protocol error if the stream depends on itself
     if (stream_id == params.priority.stream_dependency) {
@@ -1018,7 +1018,7 @@ Http2ConnectionState::main_event_handler(int event, void *edata)
       if (lock.is_locked()) {
         this->ua_session->free();
         // After the free, the Http2ConnectionState object is also freed.
-        // The Http2ConnectionState object is allocted within the Http2ClientSession object
+        // The Http2ConnectionState object is allocated within the Http2ClientSession object
       }
     }
   }

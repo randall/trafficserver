@@ -155,7 +155,7 @@ HostMatcher<Data, MatchResult>::Match(RequestData *rdata, MatchResult *result)
   Data *data_ptr;
   bool r;
 
-  // Check to see if there is any work to do before makeing
+  // Check to see if there is any work to do before making
   //   the string copy
   if (num_el <= 0) {
     return;
@@ -329,7 +329,7 @@ UrlMatcher<Data, MatchResult>::NewEntry(matcher_line *line_info)
 //
 // void UrlMatcher<Data,MatchResult>::Match(RD* rdata, MatchResult* result)
 //
-//   Coduncts a linear search through the regex array and
+//   Conducts a linear search through the regex array and
 //     updates arg result for each regex that matches arg URL
 //
 template <class Data, class MatchResult>
@@ -476,7 +476,7 @@ RegexMatcher<Data, MatchResult>::NewEntry(matcher_line *line_info)
 //
 // void RegexMatcher<Data,MatchResult>::Match(RequestData* rdata, MatchResult* result)
 //
-//   Coduncts a linear search through the regex array and
+//   Conducts a linear search through the regex array and
 //     updates arg result for each regex that matches arg URL
 //
 template <class Data, class MatchResult>
@@ -510,7 +510,7 @@ RegexMatcher<Data, MatchResult>::Match(RequestData *rdata, MatchResult *result)
       Debug("matcher", "%s Matched %s with regex at line %d", matcher_name, url_str, data_array[i].line_num);
       data_array[i].UpdateMatch(result, rdata);
     } else if (r < -1) {
-      // An error has occured
+      // An error has occurred
       Warning("Error [%d] matching regex at line %d.", r, data_array[i].line_num);
     } // else it's -1 which means no match was found.
   }
@@ -559,7 +559,7 @@ HostRegexMatcher<Data, MatchResult>::Match(RequestData *rdata, MatchResult *resu
             this->data_array[i].line_num);
       this->data_array[i].UpdateMatch(result, rdata);
     } else {
-      // An error has occured
+      // An error has occurred
       Warning("error matching regex at line %d", this->data_array[i].line_num);
     }
   }
@@ -956,7 +956,7 @@ ControlMatcher<Data, MatchResult>::BuildTable()
  *  We have to explicitly instantiate the templates so that
  *   everything works on with dec ccx, sun CC, and g++
  *
- *  Details on the different comipilers:
+ *  Details on the different compilers:
  *
  *  dec ccx: Does not seem to instantiate anything automatically
  *         so it needs all templates manually instantiated
@@ -964,7 +964,7 @@ ControlMatcher<Data, MatchResult>::BuildTable()
  *  sun CC: Automatic instantiation works but since we make
  *         use of the templates in other files, instantiation
  *         only occurs when those files are compiled, breaking
- *         the dependency system.  Explict instantiation
+ *         the dependency system.  Explicit instantiation
  *         in this file causes the templates to be reinstantiated
  *         when this file changes.
  *
@@ -974,7 +974,7 @@ ControlMatcher<Data, MatchResult>::BuildTable()
  *
  *  g++: Requires instantiation to occur in the same file as the
  *         the implementation.  Instantiating ControlMatcher
- *         automatically instatiatiates the other templates since
+ *         automatically instantiates the other templates since
  *         ControlMatcher makes use of them
  *
  ****************************************************************/

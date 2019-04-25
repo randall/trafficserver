@@ -109,7 +109,7 @@ LogFormat::id_from_name(const char *name)
     CryptoHash hash;
     CryptoContext().hash_immediate(hash, name, static_cast<int>(strlen(name)));
 #if defined(linux)
-    /* Mask most signficant bit so that return value of this function
+    /* Mask most significant bit so that return value of this function
      * is not sign extended to be a negative number.
      * This problem is only known to occur on Linux which
      * is a 32-bit OS.
@@ -333,7 +333,7 @@ LogFormat::format_from_specification(char *spec, char **file_name, char **file_h
   format_name = token;
 
   //
-  // Next should be the printf-stlye format symbol string
+  // Next should be the printf-style format symbol string
   //
   token = tok.getNext();
   if (token == nullptr) {

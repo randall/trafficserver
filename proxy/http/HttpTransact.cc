@@ -184,7 +184,7 @@ HttpTransact::is_server_negative_cached(State *s)
     return true;
   } else {
     // Make sure some nasty clock skew has not happened
-    //  Use the server timeout to set an upperbound as to how far in the
+    //  Use the server timeout to set an upper bound as to how far in the
     //   future we should tolerate bogus last failure times.  This sets
     //   the upper bound to the time that we would ever consider a server
     //   down to 2*down_server_timeout
@@ -613,7 +613,7 @@ HttpTransact::StartRemapRequest(State *s)
   //                                                             //
   // * the variable <remap_redirect> is set to non-NULL if there //
   //   is a URL provided that the proxy is supposed to redirect  //
-  //   requesters of a particular URL to.                        //
+  //   requestors of a particular URL to.                        //
   /////////////////////////////////////////////////////////////////
 
   if (is_debug_tag_set("http_chdr_describe") || is_debug_tag_set("http_trans")) {
@@ -820,7 +820,7 @@ done:
 bool
 HttpTransact::handle_upgrade_request(State *s)
 {
-  // Quickest way to determine that this is defintely not an upgrade.
+  // Quickest way to determine that this is definitely not an upgrade.
   /* RFC 6455 The method of the request MUST be GET, and the HTTP version MUST
         be at least 1.1. */
   if (!s->hdr_info.client_request.presence(MIME_PRESENCE_UPGRADE) ||
@@ -1247,7 +1247,7 @@ HttpTransact::HandleRequest(State *s)
 
   // Added to skip the dns if the document is in the cache.
   // DNS is requested before cache lookup only if there are rules in cache.config , parent.config or
-  // if the newly added varible doc_in_cache_skip_dns is not enabled
+  // if the newly added variable doc_in_cache_skip_dns is not enabled
   if (s->dns_info.lookup_name[0] <= '9' && s->dns_info.lookup_name[0] >= '0' &&
       (!s->state_machine->enable_redirection || !s->redirect_info.redirect_in_process) &&
       s->parent_params->parent_table->hostMatch) {
@@ -1629,7 +1629,7 @@ HttpTransact::OSDNSLookup(State *s)
     }
   }
 
-  // Check to see if can fullfill expect requests based on the cached
+  // Check to see if can fulfill expect requests based on the cached
   // update some state variables with hostdb information that has
   // been provided.
   ats_ip_copy(&s->server_info.dst_addr, s->host_db_info.ip());
@@ -2080,7 +2080,7 @@ HttpTransact::HandlePushError(State *s, const char *reason)
   s->client_info.keep_alive = HTTP_NO_KEEPALIVE;
 
   // Set half close flag to prevent TCP
-  //   reset from the body still being transfered
+  //   reset from the body still being transferred
   s->state_machine->set_ua_half_close_flag();
 
   build_error_response(s, HTTP_STATUS_BAD_REQUEST, reason, "default");
@@ -2138,7 +2138,7 @@ HttpTransact::HandleCacheOpenRead(State *s)
     SET_VIA_STRING(VIA_DETAIL_CACHE_LOOKUP, VIA_DETAIL_MISS_NOT_CACHED);
     // Perform DNS for the origin when it is required.
     // 1. If parent configuration does not allow to go to origin there is no need of performing DNS
-    // 2. If parent satisfies the request there is no need to go to origin to perfrom DNS
+    // 2. If parent satisfies the request there is no need to go to origin to perform DNS
     HandleCacheOpenReadMiss(s);
   } else {
     // cache hit
@@ -2794,7 +2794,7 @@ HttpTransact::build_response_from_cache(State *s, HTTPWarningCode warning_code)
   // Check if cached response supports Range. If it does, append
   // Range transformation plugin
   // A little misnomer. HTTP_STATUS_RANGE_NOT_SATISFIABLE
-  // acutally means If-Range match fails here.
+  // actually means If-Range match fails here.
   // fall through
   default:
     SET_VIA_STRING(VIA_DETAIL_CACHE_LOOKUP, VIA_DETAIL_HIT_SERVED);
@@ -3639,7 +3639,7 @@ HttpTransact::retry_server_connection_not_open(State *s, ServerState_t conn_stat
 
   //////////////////////////////////////////
   // on the first connect attempt failure //
-  // record the failue                   //
+  // record the failure                   //
   //////////////////////////////////////////
   if (0 == s->current.attempts) {
     Log::error("CONNECT:[%d] could not connect [%s] to %s for '%s' connect_result=%d src_port=%d", s->current.attempts,
@@ -3803,7 +3803,7 @@ HttpTransact::handle_forward_server_connection_open(State *s)
 
   if (s->www_auth_content == CACHE_AUTH_FRESH) {
     // no update is needed - either to serve from cache if authorized,
-    // or tunnnel the server response
+    // or tunnel the server response
     if (s->hdr_info.server_response.status_get() == HTTP_STATUS_OK) {
       // borrow a state variable used by the API function
       // this enable us to serve from cache without doing any updating
@@ -4384,7 +4384,7 @@ HttpTransact::handle_cache_operation_on_forward_server_response(State *s)
         our_via = s->hdr_info.client_response.field_create(MIME_FIELD_VIA, MIME_LEN_VIA);
         s->hdr_info.client_response.field_attach(our_via);
       }
-      // HDR FIX ME - Mulitple appends are VERY slow
+      // HDR FIX ME - Multiple appends are VERY slow
       while (resp_via) {
         int clen;
         const char *cfield = resp_via->value_get(&clen);
@@ -4691,7 +4691,7 @@ HttpTransact::set_headers_for_cache_write(State *s, HTTPInfo *cache_info, HTTPHd
   //  quite beyond me.  Seems like a unsafe practice so
   //  FIX ME!
 
-  // Logic added to restore the orignal URL for multiple cache lookup
+  // Logic added to restore the original URL for multiple cache lookup
   // and automatic redirection
   if (s->redirect_info.redirect_in_process) {
     temp_url = &s->redirect_info.original_url;
@@ -6019,7 +6019,7 @@ HttpTransact::is_response_cacheable(State *s, HTTPHdr *request, HTTPHdr *respons
   if ((s->cache_control.ttl_in_cache <= 0) &&
       do_cookies_prevent_caching((int)s->txn_conf->cache_responses_to_cookies, request, response)) {
     TxnDebug("http_trans", "[is_response_cacheable] "
-                           "response has uncachable cookies, response is not cachable");
+                           "response has uncacheable cookies, response is not cachable");
     return false;
   }
   // if server spits back a WWW-Authenticate
@@ -6177,7 +6177,7 @@ HttpTransact::is_response_cacheable(State *s, HTTPHdr *request, HTTPHdr *respons
       response_code == HTTP_STATUS_PROXY_AUTHENTICATION_REQUIRED) {
     return false;
   }
-  // let is_negative_caching_approriate decide what to do
+  // let is_negative_caching_appropriate decide what to do
   return true;
   /* Since we weren't caching response obtained with
      Authorization (the cache control stuff was commented out previously)
@@ -7581,7 +7581,7 @@ HttpTransact::build_request(State *s, HTTPHdr *base_request, HTTPHdr *outgoing_r
   // handle_conditional_headers appears to be obsolete.  Nothing happens
   // unless s->cache_info.action == HttpTransact::CACHE_DO_UPDATE.  In that
   // case an assert will go off.  The functionality of this method
-  // (e.g., setting the if-modfied-since header occurs in issue_revalidate
+  // (e.g., setting the if-modified-since header occurs in issue_revalidate
   // HttpTransactHeaders::handle_conditional_headers(&s->cache_info, outgoing_request);
 
   if (s->next_hop_scheme < 0) {
@@ -8448,7 +8448,7 @@ HttpTransact::client_result_stat(State *s, ink_hrtime total_time, ink_hrtime req
   // Increment the completed connection count
   HTTP_INCREMENT_DYN_STAT(http_completed_requests_stat);
 
-  // Set the stat now that we know what happend
+  // Set the stat now that we know what happened
   ink_hrtime total_msec   = ink_hrtime_to_msec(total_time);
   ink_hrtime process_msec = ink_hrtime_to_msec(request_process_time);
   switch (client_transaction_result) {

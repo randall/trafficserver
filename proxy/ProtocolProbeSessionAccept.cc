@@ -116,7 +116,7 @@ struct ProtocolProbeTrampoline : public Continuation, public ProtocolProbeSessio
       } else {
         Debug("proxyprotocol",
               "ioCompletionEvent: proxy protocol DOES NOT have a configured whitelist of trusted IPs but proxy protocol is "
-              "ernabled on this port - processing all connections");
+              "enabled on this port - processing all connections");
       }
 
       if (http_has_proxy_v1(reader, netvc)) {

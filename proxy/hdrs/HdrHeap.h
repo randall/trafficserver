@@ -272,7 +272,7 @@ public:
   // Overflow block ptr
   //   Overflow blocks are necessary because we can
   //     run out of space in the header heap and the
-  //     heap is not rellocatable
+  //     heap is not relocatable
   //   Overflow blocks have the HdrHeap full structure
   //    header on them, although only first block can
   //    point to string heaps
@@ -473,7 +473,7 @@ public:
 
   HdrHeap *m_heap = nullptr;
 
-  // In order to prevent gratitous refcounting,
+  // In order to prevent gratuitous refcounting,
   //  automatic C++ copies are disabled!
   HdrHeapSDKHandle(const HdrHeapSDKHandle &r) = delete;
   HdrHeapSDKHandle &operator=(const HdrHeapSDKHandle &r) = delete;

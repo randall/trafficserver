@@ -534,7 +534,7 @@ HttpBodyFactory::determine_set_by_language(std::unique_ptr<BodySetTable> &table_
       // strange character sets for these people --- we'd rather //
       // use a more portable "default" set.  The index value we  //
       // get back isn't used, because it's a little hard to know //
-      // how to tradeoff language indices vs. charset indices.   //
+      // how to trade-off language indices vs. charset indices.   //
       // If someone cares, we could surely work charset indices  //
       // into the sorting computation below.                     //
       /////////////////////////////////////////////////////////////
@@ -663,7 +663,7 @@ HttpBodyFactory::is_response_suppressed(HttpTransact::State *context)
   // as the connection is going to be closed anyway.
   /*
      if (context->client_info.port_attribute == SERVER_PORT_BLIND_TUNNEL) {
-     // Blind SSL tunnels always supress error messages
+     // Blind SSL tunnels always suppress error messages
      return true;
      } else
    */
