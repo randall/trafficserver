@@ -1884,7 +1884,7 @@ HttpSM::state_read_server_response_header(int event, void *data)
 
   server_response_hdr_bytes += bytes_used;
 
-  // Don't allow HTTP 0.9 (unparsable headers) on resued connections.
+  // Don't allow HTTP 0.9 (unparsable headers) on reused connections.
   // And don't allow empty headers from closed connections
   if ((state == PARSE_RESULT_DONE && t_state.hdr_info.server_response.version_get() == HTTPVersion(0, 9) &&
        server_session->transact_count > 1) ||
@@ -2884,9 +2884,9 @@ HttpSM::is_http_server_eos_truncation(HttpTunnelProducer *p)
   //  tabled outlines when we mark the server read as failed  //
   //                                                          //
   //    No C-L               :  read success                  //
-  //    Received byts < C-L  :  read failed (=> Cache Abort)  //
-  //    Received byts == C-L :  read success                  //
-  //    Received byts > C-L  :  read success                  //
+  //    Received bytes < C-L  :  read failed (=> Cache Abort)  //
+  //    Received bytes == C-L :  read success                  //
+  //    Received bytes > C-L  :  read success                  //
   //////////////////////////////////////////////////////////////
   int64_t cl = t_state.hdr_info.server_response.get_content_length();
 
@@ -2920,7 +2920,7 @@ HttpSM::tunnel_handler_server(int event, HttpTunnelProducer *p)
   case VC_EVENT_ERROR:
     t_state.squid_codes.log_code  = SQUID_LOG_ERR_READ_TIMEOUT;
     t_state.squid_codes.hier_code = SQUID_HIER_TIMEOUT_DIRECT;
-    /* fallthru */
+    /* fallthrough */
 
   case VC_EVENT_EOS:
 
@@ -4551,7 +4551,7 @@ HttpSM::do_cache_lookup_and_read()
 void
 HttpSM::do_cache_delete_all_alts(Continuation *cont)
 {
-  // Do not delete a non-existant object.
+  // Do not delete a non-existent object.
   ink_assert(t_state.cache_info.object_read);
 
   SMDebug("http_seq", "[HttpSM::do_cache_delete_all_alts] Issuing cache delete for %s",
@@ -5032,7 +5032,7 @@ HttpSM::do_http_server_open(bool raw)
     }
   }
 
-  // draft-stenberg-httpbis-tcp recommends only enabling TFO on indempotent methods or
+  // draft-stenberg-httpbis-tcp recommends only enabling TFO on idempotent methods or
   // those with intervening protocol layers (eg. TLS).
 
   if (scheme_to_use == URL_WKSIDX_HTTPS || HttpTransactHeaders::is_method_idempotent(t_state.method)) {
@@ -5528,7 +5528,7 @@ HttpSM::handle_server_setup_error(int event, void *data)
     }
   }
 
-  // Closedown server connection and deallocate buffers
+  // Close down server connection and deallocate buffers
   ink_assert(!server_entry || server_entry->in_tunnel == false);
 
   // if we are waiting on a plugin callout for
@@ -7752,7 +7752,7 @@ HttpSM::redirect_request(const char *arg_redirect_url, const int arg_redirect_le
 
   //(bug 2540703) Clear the previous response if we will attempt the redirect
   if (t_state.hdr_info.client_response.valid()) {
-    // XXX - doing a destroy() for now, we can do a fileds_clear() if we have performance issue
+    // XXX - doing a destroy() for now, we can do a fields_clear() if we have performance issue
     t_state.hdr_info.client_response.destroy();
   }
 
@@ -7870,7 +7870,7 @@ HttpSM::redirect_request(const char *arg_redirect_url, const int arg_redirect_le
         t_state.hdr_info.server_request.m_target_cached = false;
         clientUrl.scheme_set(scheme_str, scheme_len);
         if (isRedirectUrlOriginForm) {
-          // build the rest of the effictive URL: the authority part
+          // build the rest of the effective URL: the authority part
           clientUrl.user_set(origUrl.m_url_impl->m_ptr_user, origUrl.m_url_impl->m_len_user);
           clientUrl.password_set(origUrl.m_url_impl->m_ptr_password, origUrl.m_url_impl->m_len_password);
           clientUrl.host_set(origUrl.m_url_impl->m_ptr_host, origUrl.m_url_impl->m_len_host);
@@ -7962,7 +7962,7 @@ HttpSM::is_redirect_required()
 
   if (redirect_required == true) {
     HTTPStatus status = t_state.hdr_info.client_response.status_get();
-    // check to see if the response from the orgin was a 301, 302, or 303
+    // check to see if the response from the origin was a 301, 302, or 303
     switch (status) {
     case HTTP_STATUS_MULTIPLE_CHOICES:   // 300
     case HTTP_STATUS_MOVED_PERMANENTLY:  // 301

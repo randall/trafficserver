@@ -276,7 +276,7 @@ Http1ClientSession::do_io_close(int alerrno)
 
     if (client_vc) {
       // We want the client to know that that we're finished
-      //  writing.  The write shutdown accomplishes this.  Unfortuantely,
+      //  writing.  The write shutdown accomplishes this.  Unfortunately,
       //  the IO Core semantics don't stop us from getting events
       //  on the write side of the connection like timeouts so we
       //  need to zero out the write of the continuation with
@@ -504,7 +504,7 @@ Http1ClientSession::attach_server_session(HttpServerSession *ssession, bool tran
 
     // Since this our slave, issue an IO to detect a close and
     //  have it call the client session back.  This IO also prevent
-    //  the server net conneciton from calling back a dead sm
+    //  the server net connection from calling back a dead sm
     SET_HANDLER(&Http1ClientSession::state_keep_alive);
     slave_ka_vio = ssession->do_io_read(this, INT64_MAX, ssession->read_buffer);
     ink_assert(slave_ka_vio != ka_vio);

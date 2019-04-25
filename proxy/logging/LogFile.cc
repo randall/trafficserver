@@ -81,7 +81,7 @@ LogFile::LogFile(const char *name, const char *header, LogFileFormat format, uin
 /*-------------------------------------------------------------------------
   LogFile::LogFile
 
-  This (copy) contructor builds a LogFile object from another LogFile object.
+  This (copy) constructor builds a LogFile object from another LogFile object.
   -------------------------------------------------------------------------*/
 
 LogFile::LogFile(const LogFile &copy)
@@ -310,7 +310,7 @@ LogFile::preproc_and_try_delete(LogBuffer *lb)
     // Ok, now we need to write the binary buffer to the file, and we
     // can do so in one swift write.  The question is, do we write the
     // LogBufferHeader with each buffer or not?  The answer is yes.
-    // Even though we'll be puttint down redundant data (things that
+    // Even though we'll be putting down redundant data (things that
     // don't change between buffers), it's not worth trying to separate
     // out the buffer-dependent data from the buffer-independent data.
     //
@@ -590,7 +590,7 @@ LogFile::check_fd()
     //
     // It's time to see if the file really exists.  If we can't see
     // the file (via access), then we'll close our descriptor and
-    // attept to re-open it, which will create the file if it's not
+    // attempt to re-open it, which will create the file if it's not
     // there.
     //
     if (m_name && !LogFile::exists(m_name)) {

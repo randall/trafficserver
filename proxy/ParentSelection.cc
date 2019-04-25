@@ -262,7 +262,7 @@ ParentConfig::startup()
   // Load the initial configuration
   reconfigure();
 
-  // Setup the callbacks for reconfiuration
+  // Setup the callbacks for reconfiguration
   //   parent table
   parentConfigUpdate->attach(file_var);
   //   default parent
@@ -830,7 +830,7 @@ ParentRecord::Print()
 
 // ParentRecord* createDefaultParent(char* val)
 //
-//  Atttemtps to allocate and init new ParentRecord
+//  Attempts to allocate and init new ParentRecord
 //    for a default parent
 //
 //  Returns a pointer to the new record on success
@@ -1542,7 +1542,7 @@ EXCLUSIVE_REGRESSION_TEST(PARENTSELECTION)(RegressionTest * /* t ATS_UNUSED */, 
   FP;
   RE(verify(result, PARENT_SPECIFIED, "frisky", 80), 190);
 
-  // now set the host staus on fuzzy to up and it should now
+  // now set the host status on fuzzy to up and it should now
   // be retried.
   _st.setHostStatus("fuzzy", HOST_STATUS_UP, 0, Reasons::MANUAL);
   ST(191);

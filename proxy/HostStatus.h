@@ -46,7 +46,7 @@ enum HostStatus_t {
 struct HostStatRec_t {
   HostStatus_t status;
   time_t marked_down;     // the time that this host was marked down.
-  unsigned int down_time; // number of seconds that the host should be down, 0 is indefinately
+  unsigned int down_time; // number of seconds that the host should be down, 0 is indefinitely
 };
 
 struct Reasons {

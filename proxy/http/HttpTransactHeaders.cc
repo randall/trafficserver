@@ -208,7 +208,7 @@ HttpTransactHeaders::copy_header_fields(HTTPHdr *src_hdr, HTTPHdr *new_hdr, bool
 
   // Nuke hop-by-hop headers
   //
-  //    The hop-by-hop header fields are layed out by the spec
+  //    The hop-by-hop header fields are laid out by the spec
   //    with two adjustments
   //      1) we treat TE as hop-by-hop because spec implies
   //         that it is by declaring anyone who sends a TE must
@@ -217,7 +217,7 @@ HttpTransactHeaders::copy_header_fields(HTTPHdr *src_hdr, HTTPHdr *new_hdr, bool
   //         we'll have problems with the TE being forwarded to the server
   //         and us caching the transfer encoded documents and then
   //         serving it to a client that can not handle it
-  //      2) Transfer enconding is copied.  If the transfer encoding
+  //      2) Transfer encoding is copied.  If the transfer encoding
   //         is changed for example by dechunking, the transfer encoding
   //         should be modified when when the decision is made to dechunk it
 

@@ -341,7 +341,7 @@ REGRESSION_TEST(HPACK_EncodeString)(RegressionTest *t, int, int *pstatus)
   uint8_t buf[BUFSIZE_FOR_REGRESSION_TEST];
   int len;
 
-  // FIXME Current encoder support only huffman conding.
+  // FIXME Current encoder support only huffman coding.
   for (unsigned int i = 2; i < sizeof(string_test_case) / sizeof(string_test_case[0]); i++) {
     memset(buf, 0, BUFSIZE_FOR_REGRESSION_TEST);
 

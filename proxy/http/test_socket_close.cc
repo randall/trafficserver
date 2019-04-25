@@ -503,7 +503,7 @@ do_shutdown(int s, Task_t task)
     return (error);
   }
   // success
-  cout << "sutdowm is done" << endl;
+  cout << "shutdown is done" << endl;
   return (0);
 }
 

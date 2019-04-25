@@ -109,7 +109,7 @@ LogFormat::id_from_name(const char *name)
     CryptoHash hash;
     CryptoContext().hash_immediate(hash, name, static_cast<int>(strlen(name)));
 #if defined(linux)
-    /* Mask most signficant bit so that return value of this function
+    /* Mask most significant bit so that return value of this function
      * is not sign extended to be a negative number.
      * This problem is only known to occur on Linux which
      * is a 32-bit OS.
@@ -333,7 +333,7 @@ LogFormat::format_from_specification(char *spec, char **file_name, char **file_h
   format_name = token;
 
   //
-  // Next should be the printf-stlye format symbol string
+  // Next should be the printf-style format symbol string
   //
   token = tok.getNext();
   if (token == nullptr) {
@@ -543,11 +543,11 @@ LogFormat::parse_symbol_string(const char *symbol_string, LogFieldList *field_li
 // 1) Octal representation: '\abc', for example: '\060'
 //    0 < (a*8^2 + b*8 + c) < 255
 //
-// 2) Hex representation: '\xab', for exampe: '\x3A'
+// 2) Hex representation: '\xab', for example: '\x3A'
 //    0 < (a*16 + b) < 255
 //
 // Return -1 if the beginning four characters are not valid
-// escape sequence, otherwise reutrn unsigned char value of the
+// escape sequence, otherwise return unsigned char value of the
 // escape sequence in the string.
 //
 // NOTE: The value of escape sequence should be greater than 0

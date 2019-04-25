@@ -161,7 +161,7 @@ HttpSessionAcceptOptions::setSessionProtocolPreference(SessionProtocolSet const 
 } // namespace detail
 
 /**
-   The continuation mutex is NULL to allow parellel accepts in NT. No
+   The continuation mutex is NULL to allow parallel accepts in NT. No
    state is recorded by the handler and values are required to be set
    during construction via the @c Options struct and never changed. So
    a NULL mutex is safe.

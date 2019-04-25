@@ -434,7 +434,7 @@ Http2ClientSession::state_read_connection_preface(int event, void *edata)
 
     // XXX start the write VIO ...
 
-    // If we have unconsumed data, start tranferring frames now.
+    // If we have unconsumed data, start transferring frames now.
     if (this->sm_reader->is_read_avail_more_than(0)) {
       return this->handleEvent(VC_EVENT_READ_READY, vio);
     }

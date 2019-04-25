@@ -348,7 +348,7 @@ start_HttpProxyServer()
         return;
       }
     }
-    // XXX although we make a good pretence here, I don't believe that NetProcessor::main_accept() ever actually returns
+    // XXX although we make a good pretense here, I don't believe that NetProcessor::main_accept() ever actually returns
     // NULL. It would be useful to be able to detect errors and spew them here though.
   }
 

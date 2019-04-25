@@ -254,13 +254,13 @@ private:
   bool body_done       = false;
   bool chunked         = false;
 
-  // A brief disucssion of similar flags and state variables:  _state, closed, terminate_stream
+  // A brief discussion of similar flags and state variables:  _state, closed, terminate_stream
   //
   // _state tracks the HTTP2 state of the stream.  This field completely coincides with the H2 spec.
   //
   // closed is a flag that gets set when the framework indicates that the stream should be shutdown.  This flag
   // is set from either do_io_close, which indicates that the HttpSM is starting the close, or initiating_close,
-  // which indicates that the HTTP2 infrastructure is starting the close (e.g. due to the HTTP2 session shuttig down
+  // which indicates that the HTTP2 infrastructure is starting the close (e.g. due to the HTTP2 session shutting down
   // or a end of stream frame being received.  The closed flag does not indicate that it is safe to delete the stream
   // immediately. Perhaps the closed flag could be folded into the _state field.
   //
@@ -269,7 +269,7 @@ private:
   // we need to enforce that the stream is not deleted until after the state machine has shutdown.  The reentrancy_count is
   // associated with the terminate_stream flag.  We need to make sure that we don't delete the stream object while we have stream
   // methods on the stack.  The reentrancy count is incremented as we enter the stream event handler.  As we leave the event
-  // handler we decrement the reentrancy count, and check to see if the teriminate_stream flag and destroy the object if that is the
+  // handler we decrement the reentrancy count, and check to see if the terminate_stream flag and destroy the object if that is the
   // case.
   // The same pattern is used with HttpSM for object clean up.
   //

@@ -563,7 +563,7 @@ LogUtils::file_is_writeable(const char *full_filename, off_t *size_bytes, bool *
     }
   }
 
-  // check for the current filesize limit
+  // check for the current file size limit
   //
   if (ret_val == 0) {
     struct rlimit limit_data;
