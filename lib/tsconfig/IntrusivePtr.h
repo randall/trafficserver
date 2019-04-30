@@ -129,7 +129,7 @@ protected:
 /* ----------------------------------------------------------------------- */
 /** Intrusive shared pointer.
 
-    This is a reference counted smart pointer. A single object is jointly ownded by a set of
+    This is a reference counted smart pointer. A single object is jointly owned by a set of
     pointers. When the last of the pointers is destructed the target object is also destructed.
 
     To use @c IntrusivePtr on type @a T, @a T must inherit from a reference counter class,
@@ -220,7 +220,7 @@ public:
   IntrusivePtr(IntrusivePtr<U> && that);
 
   /** Cross type assignment.
-      This succeeds if an @a U* can be implicitily converted to a @a T*.
+      This succeeds if an @a U* can be implicitly converted to a @a T*.
   */
   template <typename U>
   self_type &operator=(IntrusivePtr<U> const &that);

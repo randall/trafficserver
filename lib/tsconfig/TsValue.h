@@ -328,7 +328,7 @@ namespace detail {
 
     /** Allocate a local buffer.
         This buffer will persist until the implementation instance
-        is destoyed.
+        is destroyed.
         @return The allocated buffer.
     */
     Buffer alloc(size_t n);
@@ -573,7 +573,7 @@ public:
   Value find(
     char const* path ///< Path relative to this value.
   );
-  /** Find a value using a precondensed path.
+  /** Find a value using a pre-condensed path.
       @return The value if found, an void valid if not.
   */
   Value find(

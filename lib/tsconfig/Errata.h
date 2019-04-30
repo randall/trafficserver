@@ -12,7 +12,7 @@
     augmented as the error travels up the stack frame.
 
     This could be done with exceptions but
-    - That is more effort to implemention
+    - That is more effort to implementation
     - Generally more expensive.
 
     Each message on a stack contains text and a numeric identifier.
@@ -25,7 +25,7 @@
     path, imposing very little overhead. On the other hand, if an
     error occurs and is handled, that is generally so expensive that
     optimizations are pointless (although, of course, one should not
-    be gratuitiously expensive).
+    be gratuitously expensive).
 
     The library also provides the @c Rv ("return value") template to
     make returning values and status easier. This template allows a
@@ -41,7 +41,7 @@
 
     To further ease use, the library has the ability to define @a
     sinks.  A sink is a function that acts on an erratum when it
-    becomes unreferenced. The indended use is to send the messages to
+    becomes unreferenced. The intended use is to send the messages to
     an output log. This makes reporting errors to a log from even
     deeply nested functions easy while preserving the ability of the
     top level logic to control such logging.
@@ -194,7 +194,7 @@ public:
 
     /** Push a constructed @c Message.
 	The @c Message is set to have the @a id and @a code. The other arguments are converted
-	to strings and concatenated to form the messsage text.
+	to strings and concatenated to form the message text.
 	@return A reference to this object.
     */
     template < typename ... Args >
@@ -264,7 +264,7 @@ public:
         We can't use the container iterators here because the element type is
         not yet defined. If we define the element type here, it can't contain
         an Errata and we have to do funky things to get around that. So we
-        have our own iterators, which are just shadowing sublclasses of the
+        have our own iterators, which are just shadowing subclasses of the
         container iterators.
      */
     class iterator;
@@ -315,7 +315,7 @@ public:
         SinkHandlerFunction m_f; ///< Client supplied handler.
     };
 
-    /// Register a sink function for abandonded erratum.
+    /// Register a sink function for abandoned erratum.
     static void registerSink(SinkHandlerFunction f) {
         registerSink(Sink::Handle(new SinkFunctionWrapper(f)));
     }
