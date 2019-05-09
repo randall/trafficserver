@@ -300,10 +300,9 @@ load_option_set(const YAML::Node &setting, const char *name, CfgString *opts, si
     return zret;
   }
 
-  int nr         = setting.size();
   bool list_opts = false;
-  for (int i = 0; i < nr; ++i) {
-    YAML::Node item  = setting[i];
+  for (auto it = setting.begin(); it != setting.end(); ++it) {
+    YAML::Node item  = *it;
     std::string text = item.as<std::string>();
     for (spot = opts; spot < limit; ++spot) {
       if (spot->m_text == text) {
@@ -416,10 +415,10 @@ CacheImpl::loader(const YAML::Node &cfg)
   }
 
   // Check for global (default) security setting.
-  YAML::Node prop = cfg[SVC_PROP_SECURITY];
-  if (prop) {
-    ts::Rv<std::string> rv = load_security(prop);
-    if (rv.isOK()) {
+  YAML::Node prop_sec = cfg[SVC_PROP_SECURITY];
+  if (prop_sec) {
+    ts::Rv<std::string> rv = load_security(prop_sec);
+    if (rv.isOK() && rv.result().size() > 0) {
       std::string md5_key = rv.result();
       this->useMD5Security(ts::ConstBuffer(md5_key.c_str(), md5_key.size()));
     } else {
@@ -427,9 +426,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     }
   }
 
-  prop = cfg[SVC_PROP_ROUTERS];
-  if (prop) {
-    zret.pull(load_routers(prop, Seed_Router).doNotLog());
+  auto prop_routers = cfg[SVC_PROP_ROUTERS];
+  if (prop_routers) {
+    zret.pull(load_routers(prop_routers, Seed_Router).doNotLog());
   }
 
   for (auto it = svc_list.begin(); it != svc_list.end(); ++it) {
@@ -441,9 +440,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     ServiceGroup svc_info;
 
     // Get the service ID.
-    prop = svc_cfg[SVC_PROP_ID];
-    if (prop) {
-      int x = prop.as<int>();
+    YAML::Node propId = svc_cfg[SVC_PROP_ID];
+    if (propId) {
+      int x = propId.as<int>();
       if (0 <= x && x <= 255) {
         svc_info.setSvcId(x);
       } else {
@@ -454,9 +453,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     }
 
     // Service type.
-    prop = svc_cfg[SVC_PROP_TYPE];
-    if (prop) {
-      std::string text = prop.as<std::string>();
+    YAML::Node propType = svc_cfg[SVC_PROP_TYPE];
+    if (propType) {
+      std::string text = propType.as<std::string>();
       if ("DYNAMIC" == text) {
         svc_info.setSvcType(ServiceGroup::DYNAMIC);
       } else if ("STANDARD" == text) {
@@ -471,12 +470,12 @@ CacheImpl::loader(const YAML::Node &cfg)
     }
 
     // Get the protocol.
-    prop = svc_cfg[SVC_PROP_PROTOCOL];
-    if (prop) {
+    YAML::Node protocol = svc_cfg[SVC_PROP_PROTOCOL];
+    if (protocol) {
       if (svc_info.getSvcType() == ServiceGroup::STANDARD) {
         zret.push(Svc_Prop_Ignored(SVC_PROP_PROTOCOL));
       } else {
-        int x = prop.as<int>();
+        int x = protocol.as<int>();
         if (0 <= x && x <= 255) {
           svc_info.setProtocol(x);
         } else {
@@ -490,12 +489,12 @@ CacheImpl::loader(const YAML::Node &cfg)
 
     // Get the priority.
     svc_info.setPriority(0); // OK to default to this value.
-    prop = svc_cfg[SVC_PROP_PRIORITY];
-    if (prop) {
+    YAML::Node priority = svc_cfg[SVC_PROP_PRIORITY];
+    if (priority) {
       if (svc_info.getSvcType() == ServiceGroup::STANDARD) {
         zret.push(Svc_Prop_Ignored(SVC_PROP_PRIORITY));
       } else {
-        int x = prop.as<int>();
+        int x = priority.as<int>();
         if (0 <= x && x <= 255) {
           svc_info.setPriority(x);
         } else {
@@ -506,9 +505,9 @@ CacheImpl::loader(const YAML::Node &cfg)
 
     // Service flags.
     svc_info.setFlags(0);
-    prop = svc_cfg[SVC_PROP_PRIMARY_HASH];
-    if (prop) {
-      ts::Errata status = load_option_set(prop, SVC_PROP_PRIMARY_HASH, HASH_OPTS, N_OPTS(HASH_OPTS));
+    YAML::Node primaryHash = svc_cfg[SVC_PROP_PRIMARY_HASH];
+    if (primaryHash) {
+      ts::Errata status = load_option_set(primaryHash, SVC_PROP_PRIMARY_HASH, HASH_OPTS, N_OPTS(HASH_OPTS));
       uint32_t f        = 0;
       for (size_t i = 0; i < N_OPTS(HASH_OPTS); ++i) {
         if (HASH_OPTS[i].m_found) {
@@ -528,26 +527,28 @@ CacheImpl::loader(const YAML::Node &cfg)
       zret.push(Prop_Not_Found(SVC_PROP_PRIMARY_HASH, SVC_NAME));
     }
 
-    prop = svc_cfg[SVC_PROP_ALT_HASH];
-    if (prop) {
-      ts::Errata status = load_option_set(prop, SVC_PROP_ALT_HASH, HASH_OPTS, N_OPTS(HASH_OPTS));
+    YAML::Node altHash = svc_cfg[SVC_PROP_ALT_HASH];
+    if (altHash) {
+      ts::Errata status = load_option_set(altHash, SVC_PROP_ALT_HASH, HASH_OPTS, N_OPTS(HASH_OPTS));
       uint32_t f        = 0;
       for (size_t i = 0; i < N_OPTS(HASH_OPTS); ++i) {
         if (HASH_OPTS[i].m_found) {
           f |= ServiceGroup::SRC_IP_ALT_HASH << i;
         }
       }
+
       if (f) {
         svc_info.enableFlags(f);
       }
+
       if (!status) {
         zret.push(Ignored_Opt_Errors(SVC_PROP_ALT_HASH).set(status));
       }
     }
 
-    prop = svc_cfg[SVC_PROP_PORT_TYPE];
-    if (prop) {
-      std::string text = prop.as<std::string>();
+    YAML::Node portType = svc_cfg[SVC_PROP_PORT_TYPE];
+    if (portType) {
+      std::string text = portType.as<std::string>();
       if ("src" == text) {
         svc_info.enableFlags(ServiceGroup::PORTS_SOURCE);
       } else if ("dst" == text) {
@@ -560,13 +561,13 @@ CacheImpl::loader(const YAML::Node &cfg)
     // Ports for service.
     svc_info.clearPorts();
 
-    prop = svc_cfg[SVC_PROP_PORTS];
-    if (prop) {
+    YAML::Node ports = svc_cfg[SVC_PROP_PORTS];
+    if (ports) {
       if (ServiceGroup::STANDARD == svc_info.getSvcType()) {
         zret.push(Svc_Prop_Ignored_In_Standard(SVC_PROP_PORTS));
       } else {
-        if (prop.IsSequence()) {
-          size_t nport = prop.size();
+        if (ports.IsSequence()) {
+          size_t nport = ports.size();
           size_t sidx  = 0;
 
           // Clip to maximum protocol allowed ports.
@@ -576,7 +577,7 @@ CacheImpl::loader(const YAML::Node &cfg)
           }
 
           // Step through the ports.
-          for (auto it = prop.begin(); it != prop.end(); ++it) {
+          for (auto it = ports.begin(); it != ports.end(); ++it) {
             const YAML::Node &port_cfg = *it;
             int x                      = port_cfg.as<int>();
             if (0 <= x && x <= 65535) {
@@ -593,7 +594,7 @@ CacheImpl::loader(const YAML::Node &cfg)
           }
         } else {
           // port is a scalar
-          int x = prop.as<int>();
+          int x = ports.as<int>();
           svc_info.setPort(0, x); // ??? start at 0? same with sidx
           svc_info.enableFlags(ServiceGroup::PORTS_DEFINED);
         }
@@ -603,9 +604,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     }
 
     // Security option for this service group.
-    prop = svc_cfg[SVC_PROP_SECURITY];
-    if (prop) {
-      ts::Rv<std::string> security = load_security(prop);
+    YAML::Node sec_prop = svc_cfg[SVC_PROP_SECURITY];
+    if (sec_prop) {
+      ts::Rv<std::string> security = load_security(sec_prop);
       if (security.isOK()) {
         use_group_local_security = true;
         if (!security.result().empty()) {
@@ -620,9 +621,9 @@ CacheImpl::loader(const YAML::Node &cfg)
 
     // Get any group specific routers.
     std::vector<uint32_t> routers;
-    prop = svc_cfg[SVC_PROP_ROUTERS];
-    if (prop) {
-      ts::Errata status = load_routers(prop, routers);
+    YAML::Node routers_prop = svc_cfg[SVC_PROP_ROUTERS];
+    if (routers_prop) {
+      ts::Errata status = load_routers(routers_prop, routers);
       if (!status)
         zret.push(ts::Errata::Message(23, LVL_INFO, "Router specification invalid.").set(status));
     }
@@ -642,9 +643,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     GroupData &svc = this->defineServiceGroup(svc_info);
 
     // Is there a process we should track?
-    prop = svc_cfg[SVC_PROP_PROC];
-    if (prop) {
-      std::string text = prop.as<std::string>();
+    YAML::Node proc_name = svc_cfg[SVC_PROP_PROC];
+    if (proc_name) {
+      std::string text = proc_name.as<std::string>();
       svc.setProcName(ts::ConstBuffer(text.c_str(), text.size()));
     }
 
@@ -664,24 +665,25 @@ CacheImpl::loader(const YAML::Node &cfg)
     // Look for optional properties.
 
     svc.m_packet_forward = ServiceGroup::GRE; // default
-    prop                 = svc_cfg[SVC_PROP_FORWARD];
-    if (prop) {
-      ts::Errata status = load_option_set(prop, SVC_PROP_FORWARD, FORWARD_OPTS, N_FORWARD_OPTS);
+    YAML::Node forward   = svc_cfg[SVC_PROP_FORWARD];
+    if (forward) {
+      ts::Errata status = load_option_set(forward, SVC_PROP_FORWARD, FORWARD_OPTS, N_FORWARD_OPTS);
       bool gre          = FORWARD_OPTS[0].m_found;
       bool l2           = FORWARD_OPTS[1].m_found;
       if (gre || l2) {
         svc.m_packet_forward = gre ? l2 ? ServiceGroup::GRE_OR_L2 : ServiceGroup::GRE : ServiceGroup::L2;
-        if (!status.isOK())
+        if (!status.isOK()) {
           zret.push(Ignored_Opt_Errors(SVC_PROP_FORWARD).set(status));
+        }
       } else {
         zret.push(ts::Errata::Message(26, LVL_INFO, "Defaulting to GRE forwarding.").set(status));
       }
     }
 
-    svc.m_packet_return = ServiceGroup::GRE; // default.
-    prop                = svc_cfg[SVC_PROP_RETURN];
-    if (prop) {
-      ts::Errata status = load_option_set(prop, SVC_PROP_RETURN, RETURN_OPTS, N_RETURN_OPTS);
+    svc.m_packet_return    = ServiceGroup::GRE; // default.
+    YAML::Node prop_return = svc_cfg[SVC_PROP_RETURN];
+    if (prop_return) {
+      ts::Errata status = load_option_set(prop_return, SVC_PROP_RETURN, RETURN_OPTS, N_RETURN_OPTS);
       bool gre          = RETURN_OPTS[0].m_found;
       bool l2           = RETURN_OPTS[1].m_found;
       if (gre || l2) {
@@ -695,9 +697,9 @@ CacheImpl::loader(const YAML::Node &cfg)
     }
 
     svc.m_cache_assign = ServiceGroup::HASH_ONLY; // default
-    prop               = svc_cfg[SVC_PROP_ASSIGN];
-    if (prop) {
-      ts::Errata status = load_option_set(prop, SVC_PROP_ASSIGN, ASSIGN_OPTS, N_OPTS(ASSIGN_OPTS));
+    YAML::Node assign  = svc_cfg[SVC_PROP_ASSIGN];
+    if (assign) {
+      ts::Errata status = load_option_set(assign, SVC_PROP_ASSIGN, ASSIGN_OPTS, N_OPTS(ASSIGN_OPTS));
       bool hash         = ASSIGN_OPTS[0].m_found;
       bool mask         = ASSIGN_OPTS[1].m_found;
 

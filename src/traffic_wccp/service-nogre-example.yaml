@@ -43,7 +43,7 @@ services:
     assignment: hash
     forward: l2
     return: l2
-    routers: 10.10.50.1
+    routers: [ 10.10.50.1 ]
 
   - name: WCCP RTSP Client
     description: Capture packets from client

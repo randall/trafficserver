@@ -138,8 +138,9 @@ main(int argc, char **argv)
 
   int zret; // getopt return.
   int zidx; // option index.
-  bool fail            = false;
-  const char *FAIL_MSG = "";
+  bool fail = false;
+
+  std::string FAIL_MSG;
 
   while (-1 != (zret = getopt_long_only(argc, argv, "", OPTIONS, &zidx))) {
     switch (zret) {
@@ -165,8 +166,12 @@ main(int argc, char **argv)
       break;
     case OPT_SERVICE: {
       ts::Errata status = wcp.loadServicesFromFile(optarg);
-      if (!status)
-        fail = true;
+      if (!status) {
+        std::stringstream errMsg;
+        errMsg << "Failed: " << zret;
+        FAIL_MSG = errMsg.str();
+        fail     = true;
+      }
       break;
     }
     case OPT_DEBUG:
@@ -179,7 +184,7 @@ main(int argc, char **argv)
   }
 
   if (fail) {
-    printf(USAGE_TEXT, FAIL_MSG);
+    printf(USAGE_TEXT, FAIL_MSG.c_str());
     return 1;
   }
 
