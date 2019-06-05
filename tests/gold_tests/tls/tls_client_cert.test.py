@@ -92,6 +92,8 @@ ts.Disk.remap_config.AddLine(
 )
 
 ts.Disk.sni_yaml.AddLine(
+    'sni:')
+ts.Disk.sni_yaml.AddLine(
     '- fqdn: bar.com')
 ts.Disk.sni_yaml.AddLine(
     '  client_cert: {0}/signed2-bar.pem'.format(ts.Variables.SSLDir))
