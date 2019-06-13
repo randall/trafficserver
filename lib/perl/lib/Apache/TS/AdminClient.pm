@@ -390,7 +390,6 @@ The Apache Traffic Server Administration Manual will explain what these strings 
  proxy.config.header.parse.no_host_url_redirect
  proxy.config.hostdb
  proxy.config.hostdb.fail.timeout
- proxy.config.hostdb.filename
  proxy.config.hostdb.lookup_timeout
  proxy.config.hostdb.migrate_on_demand
  proxy.config.hostdb.re_dns_on_reload

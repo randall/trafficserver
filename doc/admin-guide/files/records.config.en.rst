@@ -2664,10 +2664,6 @@ HostDB
 
     Set the interval (in seconds) in which to re-query DNS regardless of TTL status.
 
-.. ts:cv:: CONFIG proxy.config.hostdb.filename STRING host.db
-
-   The filename to persist hostdb to on disk.
-
 .. ts:cv:: CONFIG proxy.config.cache.hostdb.sync_frequency INT 0
 
    Set the frequency (in seconds) to sync hostdb to disk. If set to zero (default as of v9.0.0), we won't

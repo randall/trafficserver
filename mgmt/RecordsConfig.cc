@@ -913,9 +913,6 @@ static const RecordElement RecordsConfig[] =
   //##############################################################################
   {RECT_CONFIG, "proxy.config.hostdb", RECD_INT, "1", RECU_DYNAMIC, RR_NULL, RECC_NULL, "[0-1]", RECA_NULL}
   ,
-  //       # up to 511 characters, may not be changed while running
-  {RECT_CONFIG, "proxy.config.hostdb.filename", RECD_STRING, "host.db", RECU_RESTART_TS, RR_NULL, RECC_NULL, nullptr, RECA_NULL}
-  ,
   //       # in entries, may not be changed while running
   {RECT_CONFIG, "proxy.config.hostdb.max_count", RECD_INT, "-1", RECU_RESTART_TS, RR_NULL, RECC_NULL, nullptr, RECA_NULL}
   ,

@@ -315,7 +315,6 @@ HostDBCache::start(int flags)
   //
   REC_ReadConfigInt32(hostdb_enable, "proxy.config.hostdb");
   REC_ReadConfigString(storage_path, "proxy.config.hostdb.storage_path", sizeof(storage_path));
-  REC_ReadConfigString(hostdb_filename, "proxy.config.hostdb.filename", sizeof(hostdb_filename));
 
   // Max number of items
   REC_ReadConfigInt32(hostdb_max_count, "proxy.config.hostdb.max_count");
