@@ -2,7 +2,7 @@ ats-magick is a transformation plug-in which allows to run any ImageMagick's con
 
 Ideas for how to use this plug-in are, but not limited to:
  - convert from multiple formats to a single image format.
- - do simple operatins like resize, crop, etc.
+ - do simple operations like resize, crop, etc.
  - add watermarks or automated labels.
  - transform images in a very radical way.
 
@@ -22,7 +22,7 @@ openssl genrsa -out rsa256-private 512;
 openssl rsa -in rsa256-private -pubout > rsa256-public;
 ```
 
-The `test.sh` script, helps verifing ImageMagick's convert works. The script outputs the right query parameter for you.
+The `test.sh` script, helps verifying ImageMagick's convert works. The script outputs the right query parameter for you.
 
 `
 

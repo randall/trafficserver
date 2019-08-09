@@ -1,6 +1,6 @@
 /** @file
 
-  subscriber.h - a containuer of connection objects
+  subscriber.h - a container of connection objects
 
   @section license License
 

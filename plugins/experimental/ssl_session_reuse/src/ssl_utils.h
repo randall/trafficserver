@@ -1,6 +1,6 @@
 /** @file
 
-  ssl_utils.h - a containuer of connection objects
+  ssl_utils.h - a container of connection objects
 
   @section license License
 
@@ -84,7 +84,7 @@ int get_key_length();
 /* Initialize ssl parameters */
 /**
    Return the result of initialization. If 0 is returned, it means
-   the initializtion is success, -1 means it is failure.
+   the initialization is success, -1 means it is failure.
 
    @param conf_file the configuration file
 
