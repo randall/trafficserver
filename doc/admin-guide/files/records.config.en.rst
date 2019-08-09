@@ -2676,10 +2676,6 @@ HostDB
 
     Set the interval (in seconds) in which to re-query DNS regardless of TTL status.
 
-.. ts:cv:: CONFIG proxy.config.hostdb.filename STRING host.db
-
-   The filename to persist hostdb to on disk.
-
 .. ts:cv:: CONFIG proxy.config.cache.hostdb.sync_frequency INT 0
 
    Set the frequency (in seconds) to sync hostdb to disk. If set to zero (default as of v9.0.0), we won't
@@ -2872,13 +2868,6 @@ Logging Configuration
    <proxy.config.output.logfile>`. This is identifying data about the
    transaction and all of the :c:type:`transaction milestones <TSMilestonesType>`.
 
-.. ts:cv:: CONFIG proxy.config.log.config.filename STRING logging.yaml
-   :reloadable:
-
-   This configuration value specifies the path to the
-   :file:`logging.yaml` configuration file. If this is a relative
-   path, |TS| loads it relative to the ``SYSCONFDIR`` directory.
-
 Diagnostic Logging Configuration
 ================================
 
@@ -3024,10 +3013,6 @@ Reverse Proxy
 URL Remap Rules
 ===============
 
-.. ts:cv:: CONFIG proxy.config.url_remap.filename STRING remap.config
-
-   Sets the name of the :file:`remap.config` file.
-
 .. ts:cv:: CONFIG proxy.config.url_remap.remap_required INT 1
    :reloadable:
 
@@ -3149,26 +3134,13 @@ SSL Termination
    ===== ======================================================================
 
 
-.. ts:cv:: CONFIG proxy.config.ssl.server.multicert.filename STRING ssl_multicert.config
-
-   The location of the :file:`ssl_multicert.config` file, relative
-   to the |TS| configuration directory. In the following
-   example, if the |TS| configuration directory is
-   `/etc/trafficserver`, the |TS| SSL configuration file
-   and the corresponding certificates are located in
-   `/etc/trafficserver/ssl`::
-
-      CONFIG proxy.config.ssl.server.multicert.filename STRING ssl/ssl_multicert.config
-      CONFIG proxy.config.ssl.server.cert.path STRING etc/trafficserver/ssl
-      CONFIG proxy.config.ssl.server.private_key.path STRING etc/trafficserver/ssl
-
 .. ts:cv:: CONFIG proxy.config.ssl.server.multicert.exit_on_load_fail INT 1
 
    By default (``1``), |TS| will not start unless all the SSL certificates listed in the
    :file:`ssl_multicert.config` file successfully load.  If false (``0``), SSL certificate
    load failures will not prevent |TS| from starting.
 
-.. ts:cv:: CONFIG proxy.config.ssl.server.cert.path STRING /config
+.. ts:cv:: CONFIG proxy.config.ssl.server.cert.path STRING NULL
 
    The location of the SSL certificates and chains used for accepting
    and validation new SSL sessions. If this is a relative path,
@@ -3216,11 +3188,6 @@ SSL Termination
    ``head -c48 /dev/urandom | openssl enc -base64 | head -c48 > file.ticket``. Also
    note that OpenSSL session tickets are sensitive to the version of the ca-certificates. Once the
    file is changed with new tickets, use :option:`traffic_ctl config reload` to begin using them.
-
-.. ts:cv:: CONFIG proxy.config.ssl.servername.filename STRING sni.yaml
-
-   The filename of the :file:`sni.yaml` configuration file.
-   If relative, it is relative to the configuration directory.
 
 .. ts:cv:: CONFIG proxy.config.ssl.max_record_size INT 0
 

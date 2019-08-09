@@ -33,8 +33,7 @@ the items specified by this file and if there is a match, the values specified i
 the defaults. This is done during the inbound connection processing and be some outbound properties
 can be overridden again later, such as via :file:`remap.config` or plugins.
 
-By default this is named :file:`sni.yaml`. The file can be changed by setting
-:ts:cv:`proxy.config.ssl.servername.filename`. This file is loaded on start up and by
+This file is named :file:`sni.yaml`.  This file is loaded on start up and by
 :option:`traffic_ctl config reload` if the file has been modified since process start.
 
 The configuration file is YAML-based. After parsing the configuration, a list of tables will be the result.

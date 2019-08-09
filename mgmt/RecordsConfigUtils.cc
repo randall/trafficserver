@@ -116,4 +116,17 @@ void
 LibRecordsConfigInit()
 {
   RecordsConfigIterate(initialize_record, nullptr);
+
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.storage_filename", "storage.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.control.filename", "cache.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.ip_allow.filename", "ip_allow.yaml", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.hosting_filename", "hosting.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.volume_filename", "volume.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.dns.splitdns.filename", "splitdns.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.hostdb.filename", "host.db", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.log.config.filename", "logging.yaml", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.url_remap.filename", "remap.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.ssl.server.multicert.filename", "ssl_multicert.config", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.ssl.servername.filename", "sni.yaml", RECP_NON_PERSISTENT);
+  RecRegisterStatString(RECT_PROCESS, "proxy.config.http.parent_proxy.file", "parent.config", RECP_NON_PERSISTENT);
 }
