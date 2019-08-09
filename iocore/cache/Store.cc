@@ -40,6 +40,8 @@
 const char Store::VOLUME_KEY[]           = "volume";
 const char Store::HASH_BASE_STRING_KEY[] = "id";
 
+static constexpr const char *STORAGE_CONFIG_FILENAME = "storage.config";
+
 static span_error_t
 make_span_error(int error)
 {
@@ -325,14 +327,13 @@ Store::read_config()
   Span *sd = nullptr, *cur = nullptr;
   Span *ns;
   ats_scoped_fd fd;
-  ats_scoped_str storage_path(RecConfigReadConfigPath("proxy.config.cache.storage_filename", "storage.config"));
 
-  Note("storage.config loading ...");
-  Debug("cache_init", "Store::read_config, fd = -1, \"%s\"", (const char *)storage_path);
-  fd = ::open(storage_path, O_RDONLY);
+  Note("%s loading ...", STORAGE_CONFIG_FILENAME);
+  Debug("cache_init", "Store::read_config, fd = -1, \"%s\"", STORAGE_CONFIG_FILENAME);
+  fd = ::open(STORAGE_CONFIG_FILENAME, O_RDONLY);
   if (fd < 0) {
     Error("storage.config failed to load");
-    return Result::failure("open %s: %s", (const char *)storage_path, strerror(errno));
+    return Result::failure("open %s: %s", STORAGE_CONFIG_FILENAME, strerror(errno));
   }
 
   // For each line

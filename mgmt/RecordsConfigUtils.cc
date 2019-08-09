@@ -117,7 +117,6 @@ LibRecordsConfigInit()
 {
   RecordsConfigIterate(initialize_record, nullptr);
 
-  RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.storage_filename", "storage.config", RECP_NON_PERSISTENT);
   RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.control.filename", "cache.config", RECP_NON_PERSISTENT);
   RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.ip_allow.filename", "ip_allow.yaml", RECP_NON_PERSISTENT);
   RecRegisterStatString(RECT_PROCESS, "proxy.config.cache.hosting_filename", "hosting.config", RECP_NON_PERSISTENT);
