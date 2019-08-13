@@ -206,7 +206,7 @@ namespace io
     assert(pointer != nullptr);
     TSContDataSet(operation->continuation_, pointer);
 
-#ifndef NDEBUG
+#ifdef DEBUG
     {
       WriteOperationPointer *const p = static_cast<WriteOperationPointer *>(TSContDataGet(operation->continuation_));
       assert(pointer == p);

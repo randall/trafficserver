@@ -29,14 +29,14 @@
 #include <memory>
 #include <ts/ts.h>
 
-#ifdef NDEBUG
-#define CHECK(X) X
-#else
+#ifdef DEBUG
 #define CHECK(X)                                         \
   {                                                      \
     const TSReturnCode r = static_cast<TSReturnCode>(X); \
     assert(r == TS_SUCCESS);                             \
   }
+#else
+#define CHECK(X) X
 #endif
 
 namespace ats
