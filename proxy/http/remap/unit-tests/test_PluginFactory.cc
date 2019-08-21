@@ -94,7 +94,6 @@ static void
 setupConfigPathTest(const fs::path &configPath, const fs::path &pluginBuildPath, const fs::path &uuid, fs::path &effectivePath,
                     fs::path &runtimePath, time_t mtime = 0, bool append = false)
 {
-  std::string error;
   if (!append) {
     clean();
   }

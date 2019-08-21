@@ -298,15 +298,6 @@ RecLinkConfigByte(const char *name, RecByte *rec_byte)
   return RecRegisterConfigUpdateCb(name, link_byte, (void *)rec_byte);
 }
 
-RecErrT
-RecLinkConfigBool(const char *name, RecBool *rec_bool)
-{
-  if (RecGetRecordBool(name, rec_bool) == REC_ERR_FAIL) {
-    return REC_ERR_FAIL;
-  }
-  return RecRegisterConfigUpdateCb(name, link_byte, (void *)rec_bool);
-}
-
 //-------------------------------------------------------------------------
 // RecRegisterConfigUpdateCb
 //-------------------------------------------------------------------------
@@ -322,14 +313,6 @@ RecRegisterConfigUpdateCb(const char *name, RecConfigUpdateCb update_cb, void *c
 
     rec_mutex_acquire(&(r->lock));
     if (REC_TYPE_IS_CONFIG(r->rec_type)) {
-      /* -- upgrade to support a list of callback functions
-         if (!(r->config_meta.update_cb)) {
-         r->config_meta.update_cb = update_cb;
-         r->config_meta.update_cookie = cookie;
-         err = REC_ERR_OKAY;
-         }
-       */
-
       RecConfigUpdateCbList *new_callback = static_cast<RecConfigUpdateCbList *>(ats_malloc(sizeof(RecConfigUpdateCbList)));
       memset(new_callback, 0, sizeof(RecConfigUpdateCbList));
       new_callback->update_cb     = update_cb;
@@ -729,107 +712,6 @@ RecGetRecordCheckExpr(const char *name, char **check_expr, bool lock)
 }
 
 RecErrT
-RecGetRecordDefaultDataString_Xmalloc(char *name, char **buf, bool lock)
-{
-  RecErrT err;
-
-  if (lock) {
-    ink_rwlock_rdlock(&g_records_rwlock);
-  }
-
-  if (auto it = g_records_ht.find(name); it != g_records_ht.end()) {
-    RecRecord *r = it->second;
-
-    *buf = static_cast<char *>(ats_malloc(sizeof(char) * 1024));
-    memset(*buf, 0, 1024);
-    err = REC_ERR_OKAY;
-
-    switch (r->data_type) {
-    case RECD_INT:
-      snprintf(*buf, 1023, "%" PRId64 "", r->data_default.rec_int);
-      break;
-    case RECD_FLOAT:
-      snprintf(*buf, 1023, "%f", r->data_default.rec_float);
-      break;
-    case RECD_STRING:
-      if (r->data_default.rec_string) {
-        ink_strlcpy(*buf, r->data_default.rec_string, 1024);
-      } else {
-        ats_free(*buf);
-        *buf = nullptr;
-      }
-      break;
-    case RECD_COUNTER:
-      snprintf(*buf, 1023, "%" PRId64 "", r->data_default.rec_counter);
-      break;
-    default:
-      ink_assert(!"Unexpected RecD type");
-      ats_free(*buf);
-      *buf = nullptr;
-      break;
-    }
-  } else {
-    err = REC_ERR_FAIL;
-  }
-
-  if (lock) {
-    ink_rwlock_unlock(&g_records_rwlock);
-  }
-
-  return err;
-}
-
-RecErrT
-RecGetRecordAccessType(const char *name, RecAccessT *access, bool lock)
-{
-  RecErrT err = REC_ERR_FAIL;
-
-  if (lock) {
-    ink_rwlock_rdlock(&g_records_rwlock);
-  }
-
-  if (auto it = g_records_ht.find(name); it != g_records_ht.end()) {
-    RecRecord *r = it->second;
-
-    rec_mutex_acquire(&(r->lock));
-    *access = r->config_meta.access_type;
-    err     = REC_ERR_OKAY;
-    rec_mutex_release(&(r->lock));
-  }
-
-  if (lock) {
-    ink_rwlock_unlock(&g_records_rwlock);
-  }
-
-  return err;
-}
-
-RecErrT
-RecSetRecordAccessType(const char *name, RecAccessT access, bool lock)
-{
-  RecErrT err = REC_ERR_FAIL;
-
-  if (lock) {
-    ink_rwlock_rdlock(&g_records_rwlock);
-  }
-
-  if (auto it = g_records_ht.find(name); it != g_records_ht.end()) {
-    RecRecord *r = it->second;
-
-    rec_mutex_acquire(&(r->lock));
-    r->config_meta.access_type = access;
-    err                        = REC_ERR_OKAY;
-    rec_mutex_release(&(r->lock));
-  }
-
-  if (lock) {
-    ink_rwlock_unlock(&g_records_rwlock);
-  }
-
-  return err;
-}
-
-RecErrT
 RecGetRecordSource(const char *name, RecSourceT *source, bool lock)
 {
   RecErrT err = REC_ERR_FAIL;
@@ -1079,14 +961,6 @@ REC_ConfigReadFloat(const char *name)
 {
   RecFloat t = 0;
   RecGetRecordFloat(name, &t);
-  return t;
-}
-
-RecCounter
-REC_ConfigReadCounter(const char *name)
-{
-  RecCounter t = 0;
-  RecGetRecordCounter(name, &t);
   return t;
 }
 

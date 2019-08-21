@@ -315,7 +315,6 @@ getCanonicalRequestSha256Hash(TsInterface &api, bool signPayload, const StringSe
   StringMap paramsMap;
   std::istringstream istr(String(query, length));
   String token;
-  StringSet container;
 
   while (std::getline(istr, token, '&')) {
     String::size_type pos(token.find_first_of('='));

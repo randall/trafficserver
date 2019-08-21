@@ -85,7 +85,6 @@ public:
 RemapPluginUnitTest *
 setupSandBox(const fs::path configPath)
 {
-  std::string error;
   clean();
 
   /* Create the directory structure and install plugins */

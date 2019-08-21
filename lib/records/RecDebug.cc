@@ -67,12 +67,3 @@ _RecDebug(DiagsLevel dl, const SourceLocation &loc, const char *fmt, ...)
   }
   va_end(ap);
 }
-
-//-------------------------------------------------------------------------
-// RecDebugOff
-//-------------------------------------------------------------------------
-void
-RecDebugOff()
-{
-  g_diags = nullptr;
-}

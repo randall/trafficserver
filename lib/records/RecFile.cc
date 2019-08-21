@@ -57,16 +57,6 @@ RecFileOpenW(const char *file)
 }
 
 //-------------------------------------------------------------------------
-// RecFileSync
-//-------------------------------------------------------------------------
-
-int
-RecFileSync(RecHandle h_file)
-{
-  return (fsync(h_file) == 0) ? REC_ERR_OKAY : REC_ERR_FAIL;
-}
-
-//-------------------------------------------------------------------------
 // RecFileClose
 //-------------------------------------------------------------------------
 
@@ -118,20 +108,6 @@ RecSnapFileWrite(RecHandle h_file, char *buf, int size, int *bytes_written)
   }
 
   if ((*bytes_written = ::pwrite(h_file, buf, size, VERSION_HDR_SIZE)) < 0) {
-    *bytes_written = 0;
-    return REC_ERR_FAIL;
-  }
-  return REC_ERR_OKAY;
-}
-
-//-------------------------------------------------------------------------
-// RecFileWrite
-//-------------------------------------------------------------------------
-
-int
-RecFileWrite(RecHandle h_file, char *buf, int size, int *bytes_written)
-{
-  if ((*bytes_written = ::write(h_file, buf, size)) < 0) {
     *bytes_written = 0;
     return REC_ERR_FAIL;
   }

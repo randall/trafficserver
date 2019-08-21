@@ -56,18 +56,17 @@ get_yaml_path(const std::string &path)
 {
   // yaml_file 2 and 3 are for temporary use in case the change may break for people using runroot already
   // this can be removed in the future.
-  std::string yaml_file;
-  std::string yaml_file2;
-  std::string yaml_file3;
-  if (is_directory(path.c_str())) {
+  if (is_directory(path)) {
     std::string yaml_file(Layout::relative_to(path, "runroot.yaml"));
     if (exists(yaml_file)) {
       return yaml_file;
     }
+
     std::string yaml_file2(Layout::relative_to(path, "runroot.yml"));
     if (exists(yaml_file2)) {
       return yaml_file2;
     }
+
     std::string yaml_file3(Layout::relative_to(path, "runroot_path.yml"));
     if (exists(yaml_file3)) {
       return yaml_file3;

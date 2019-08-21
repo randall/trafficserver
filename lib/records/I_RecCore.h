@@ -138,8 +138,6 @@ RecErrT RecRegisterRawStatUpdateFunc(const char *name, RecRawStatBlock *rsb, int
 // be sure to set 'lock' to 'false' as the hash-table rwlock has
 // already been taken out for the callback.
 
-// RecSetRecordConvert -> WebMgmtUtils.cc::varSetFromStr()
-RecErrT RecSetRecordConvert(const char *name, const RecString rec_string, RecSourceT source, bool lock = true);
 RecErrT RecSetRecordInt(const char *name, RecInt rec_int, RecSourceT source, bool lock = true);
 RecErrT RecSetRecordFloat(const char *name, RecFloat rec_float, RecSourceT source, bool lock = true);
 RecErrT RecSetRecordString(const char *name, const RecString rec_string, RecSourceT source, bool lock = true);
@@ -170,11 +168,7 @@ RecErrT RecGetRecordOrderAndId(const char *name, int *order, int *id, bool lock 
 RecErrT RecGetRecordUpdateType(const char *name, RecUpdateT *update_type, bool lock = true);
 RecErrT RecGetRecordCheckType(const char *name, RecCheckT *check_type, bool lock = true);
 RecErrT RecGetRecordCheckExpr(const char *name, char **check_expr, bool lock = true);
-RecErrT RecGetRecordDefaultDataString_Xmalloc(char *name, char **buf, bool lock = true);
 RecErrT RecGetRecordSource(const char *name, RecSourceT *source, bool lock = true);
-
-RecErrT RecGetRecordAccessType(const char *name, RecAccessT *secure, bool lock = true);
-RecErrT RecSetRecordAccessType(const char *name, RecAccessT secure, bool lock = true);
 
 //------------------------------------------------------------------------
 // Signal and Alarms
@@ -271,18 +265,9 @@ void RecConfigWarnIfUnregistered();
     _var = (RecByte)REC_ConfigReadInteger(_config_var_name);  \
   } while (0)
 
-// Allow to treat our "INT" configs as a bool type internally. Note
-// that the bool type is just a wrapper around RECD_INT.
-#define REC_EstablishStaticConfigBool(_var, _config_var_name) \
-  do {                                                        \
-    RecLinkConfigBool(_config_var_name, &_var);               \
-    _var = 0 != REC_ConfigReadInteger(_config_var_name);      \
-  } while (0)
-
 RecInt REC_ConfigReadInteger(const char *name);
 char *REC_ConfigReadString(const char *name);
 RecFloat REC_ConfigReadFloat(const char *name);
-RecCounter REC_ConfigReadCounter(const char *name);
 
 // MGMT2 Marco's -- converting lmgmt->record_data->readXXX
 RecInt REC_readInteger(const char *name, bool *found, bool lock = true);

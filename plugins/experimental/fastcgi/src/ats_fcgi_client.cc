@@ -69,7 +69,7 @@ FCGIClientRequest::FCGIClientRequest(int request_id, TSHttpTxn txn)
   state_->requestHeaders = GenerateFcgiRequestHeaders();
   // TODO Call printFCGIRequestHeaders() to printFCGIHeaders
   // printFCGIRequestHeaders();
-  string str("POST"), value;
+  string str("POST");
   if (str.compare(state_->requestHeaders["REQUEST_METHOD"]) == 0) {
     Transaction &transaction = utils::internal::getTransaction(state_->txn_);
     Headers &h               = transaction.getClientRequest().getHeaders();

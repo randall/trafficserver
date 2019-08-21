@@ -26,20 +26,6 @@
 #include "MgmtDefs.h"
 #include "records/P_RecCore.h"
 
-// class MgmtData - stores information from local manager
-//    variables in its native type
-//
-class MgmtData
-{
-public:
-  MgmtData();
-  ~MgmtData();
-  bool compareFromString(const char *str);
-  bool setFromName(const char *varName);
-  RecDataT type;
-  RecData data;
-};
-
 // Convert to byte units (GB, MB, KB)
 void bytesFromInt(RecInt bytes, char *bufVal);
 
@@ -60,22 +46,9 @@ bool varSetFromStr(const char *varName, const char *value);
 bool varIntFromName(const char *varName, RecInt *value);
 bool varFloatFromName(const char *varName, RecFloat *value);
 bool varCounterFromName(const char *varName, RecCounter *value);
-bool varDataFromName(RecDataT varType, const char *varName, RecData *value);
-
-// No conversion done.  varName must represent a value of the appropriate
-//  type
-// Default argument "convert" added to allow great flexibility in type checking
-bool varSetInt(const char *varName, RecInt value, bool convert = false);
-bool varSetCounter(const char *varName, RecCounter value, bool convert = false);
-bool varSetFloat(const char *varName, RecFloat value, bool convert = false);
-bool varSetData(RecDataT varType, const char *varName, RecData value);
 
 // Return the type of the variable named
 RecDataT varType(const char *varName);
-
-int convertHtmlToUnix(char *buffer);
-int substituteUnsafeChars(char *buffer);
-char *substituteForHTMLChars(const char *buffer);
 
 int setHostnameVar();
 void appendDefaultDomain(char *hostname, int bufLength);
@@ -84,4 +57,3 @@ bool recordValidityCheck(const char *varName, const char *value);
 bool recordRegexCheck(const char *pattern, const char *value);
 bool recordRangeCheck(const char *pattern, const char *value);
 bool recordIPCheck(const char *pattern, const char *value);
-bool recordRestartCheck(const char *varName);

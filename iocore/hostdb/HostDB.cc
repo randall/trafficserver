@@ -152,13 +152,6 @@ check_for_retry(HostDBMark &mark, HostResStyle style)
   return zret;
 }
 
-const char *
-string_for(HostDBMark mark)
-{
-  static const char *STRING[] = {"Generic", "IPv4", "IPv6", "SRV"};
-  return STRING[mark];
-}
-
 //
 // Function Prototypes
 //

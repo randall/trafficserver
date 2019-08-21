@@ -1277,7 +1277,6 @@ Check_Freelist(const std::string &devicePath)
 void
 Init_disk(ts::file::path const &input_file_path)
 {
-  Cache cache;
   VolumeAllocator va;
 
   if (!OPEN_RW_FLAG) {

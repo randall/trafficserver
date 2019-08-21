@@ -41,7 +41,7 @@ test_url()
   URL url;
   const char *start;
   const char *end;
-  int i, old_length, new_length;
+  int i, old_length;
 
   failed = 0;
   for (i = 0; i < nstrs; i++) {

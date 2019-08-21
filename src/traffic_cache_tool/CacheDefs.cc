@@ -73,23 +73,6 @@ operator<<(std::ostream &s, CacheDataBlocks const &n)
   return s << n.count() << " data blocks";
 }
 
-Errata
-URLparser::parseURL(TextView URI)
-{
-  Errata zret;
-  static const TextView HTTP("http");
-  static const TextView HTTPS("https");
-  TextView scheme = URI.take_prefix_at(':');
-  if ((strcasecmp(scheme, HTTP) == 0) || (strcasecmp(scheme, HTTPS) == 0)) {
-    TextView hostname = URI.take_prefix_at(':');
-    if (!hostname) // i.e. port not present
-    {
-    }
-  }
-
-  return zret;
-}
-
 int
 URLparser::getPort(std::string &fullURL, int &port_ptr, int &port_len)
 {

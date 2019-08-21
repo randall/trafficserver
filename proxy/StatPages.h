@@ -99,13 +99,8 @@ public:
 protected:
   inkcoreapi void resp_clear();
   inkcoreapi void resp_add(const char *fmt, ...);
-  inkcoreapi void resp_add_sep();
   inkcoreapi void resp_begin(const char *title);
   inkcoreapi void resp_end();
-  void resp_begin_numbered();
-  void resp_end_numbered();
-  inkcoreapi void resp_begin_unnumbered();
-  inkcoreapi void resp_end_unnumbered();
   inkcoreapi void resp_begin_item();
   void resp_end_item();
   inkcoreapi void resp_begin_table(int border, int columns, int percent);

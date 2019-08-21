@@ -188,12 +188,6 @@ BaseStatPagesHandler::resp_add(const char *fmt, ...)
 }
 
 void
-BaseStatPagesHandler::resp_add_sep()
-{
-  resp_add("<hr width=\"100%%\">\n");
-}
-
-void
 BaseStatPagesHandler::resp_begin(const char *title)
 {
   resp_clear();
@@ -208,30 +202,6 @@ BaseStatPagesHandler::resp_end()
 {
   resp_add("</body>\n"
            "</html>\n");
-}
-
-void
-BaseStatPagesHandler::resp_begin_numbered()
-{
-  resp_add("<ol>\n");
-}
-
-void
-BaseStatPagesHandler::resp_end_numbered()
-{
-  resp_add("</ol>\n");
-}
-
-void
-BaseStatPagesHandler::resp_begin_unnumbered()
-{
-  resp_add("<ul>\n");
-}
-
-void
-BaseStatPagesHandler::resp_end_unnumbered()
-{
-  resp_add("</ul>\n");
 }
 
 void
