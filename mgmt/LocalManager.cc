@@ -122,14 +122,6 @@ LocalManager::processDrain(int to_drain)
 }
 
 void
-LocalManager::rollLogFiles()
-{
-  mgmt_log("[LocalManager::rollLogFiles] Log files are being rolled.\n");
-  signalEvent(MGMT_EVENT_ROLL_LOG_FILES, "rollLogs");
-  return;
-}
-
-void
 LocalManager::hostStatusSetDown(const char *marshalled_req, int len)
 {
   signalEvent(MGMT_EVENT_HOST_STATUS_DOWN, marshalled_req, len);

@@ -193,34 +193,6 @@ HttpBodyFactory::fabricate_with_old_api(const char *type, HttpTransact::State *c
   return buffer;
 }
 
-void
-HttpBodyFactory::dump_template_tables(FILE *fp)
-{
-  lock();
-  if (table_of_sets) {
-    for (const auto &it1 : *table_of_sets.get()) {
-      HttpBodySet *body_set = static_cast<HttpBodySet *>(it1.second);
-      if (body_set) {
-        fprintf(fp, "set %s: name '%s', lang '%s', charset '%s'\n", it1.first.c_str(), body_set->set_name,
-                body_set->content_language, body_set->content_charset);
-
-        ///////////////////////////////////////////
-        // loop over body-types->body hash table //
-        ///////////////////////////////////////////
-
-        ink_assert(body_set->is_sane());
-        if (body_set->table_of_pages) {
-          for (const auto &it2 : *body_set->table_of_pages.get()) {
-            fprintf(fp, "  %-30s: %" PRId64 " bytes\n", it2.first.c_str(), it2.second->byte_count);
-          }
-        }
-      }
-    }
-  }
-
-  unlock();
-}
-
 ////////////////////////////////////////////////////////////////////////
 //
 // Configuration Change Callback
@@ -1011,28 +983,6 @@ HttpBodySet::init(char *set, char *dir)
 
   close(fd);
   return lines_added;
-}
-
-HttpBodyTemplate *
-HttpBodySet::get_template_by_name(const char *name)
-{
-  Debug("body_factory", "    calling get_template_by_name(%s)", name);
-
-  if (table_of_pages == nullptr) {
-    return nullptr;
-  }
-
-  if (auto it = table_of_pages->find(name); it != table_of_pages->end()) {
-    HttpBodyTemplate *t = it->second;
-    if ((t == nullptr) || (!t->is_sane())) {
-      return nullptr;
-    }
-    Debug("body_factory", "    get_template_by_name(%s) -> (file %s, length %" PRId64 ")", name, t->template_pathname,
-          t->byte_count);
-    return t;
-  }
-  Debug("body_factory", "    get_template_by_name(%s) -> NULL", name);
-  return nullptr;
 }
 
 void

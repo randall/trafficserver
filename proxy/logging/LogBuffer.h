@@ -80,8 +80,6 @@ struct LogBufferHeader {
   uint32_t fmt_name_offset;      // offset to format name string
   uint32_t fmt_fieldlist_offset; // offset to format fieldlist string
   uint32_t fmt_printf_offset;    // offset to format printf string
-  uint32_t src_hostname_offset;  // offset to source (client) hostname
-  uint32_t log_filename_offset;  // offset to log filename
   uint32_t data_offset;          // offset to start of data entry
   // section
 
@@ -89,8 +87,6 @@ struct LogBufferHeader {
 
   char *fmt_fieldlist();
   char *fmt_printf();
-  char *src_hostname();
-  char *log_filename();
 };
 
 union LB_State {
@@ -184,7 +180,6 @@ public:
   static int32_t M_ID;
 
   // static functions
-  static size_t max_entry_bytes();
   static int to_ascii(LogEntryHeader *entry, LogFormatType type, char *buf, int max_len, const char *symbol_str, char *printf_str,
                       unsigned buffer_version, const char *alt_format = nullptr);
   static int resolve_custom_entry(LogFieldList *fieldlist, char *printf_str, char *read_from, char *write_to, int write_to_len,

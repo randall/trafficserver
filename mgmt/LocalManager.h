@@ -85,7 +85,6 @@ public:
   void processRestart();
   void processBounce();
   void processDrain(int to_drain = 1);
-  void rollLogFiles();
   void clearStats(const char *name = nullptr);
   void hostStatusSetDown(const char *marshalled_req, int len);
   void hostStatusSetUp(const char *marshalled_req, int len);

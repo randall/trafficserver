@@ -180,43 +180,10 @@ check_lockfile()
 }
 
 /*-------------------------------------------------------------------------
-  init_log_standalone
-
-  This routine should be called from the main() function of the standalone
-  program.
-  -------------------------------------------------------------------------*/
-
-void
-init_log_standalone(const char *pgm_name, bool one_copy)
-{
-  char logfile[LOG_FILENAME_SIZE];
-
-  // ensure that only one copy of the sac is running
-  //
-  if (one_copy) {
-    check_lockfile();
-  }
-
-  snprintf(logfile, sizeof(logfile), "%s.log", pgm_name);
-
-  // set stdin/stdout to be unbuffered
-  //
-  setbuf(stdin, nullptr);
-  setbuf(stdout, nullptr);
-
-  openlog(pgm_name, LOG_PID | LOG_NDELAY | LOG_NOWAIT, LOG_DAEMON);
-
-  init_system(true);
-  initialize_process_manager();
-  diagsConfig = new DiagsConfig(pgm_name, logfile, error_tags, action_tags);
-  diags       = diagsConfig->diags;
-}
-
-/*-------------------------------------------------------------------------
   init_log_standalone_basic
 
-  This routine is similar to init_log_standalone, but it is intended for
-  simple standalone applications that do not read the records.config file
+  This is intended for simple standalone applications that
+  do not read the records.config file
   and that do not need a process manager, thus it:
 
   1) does not call initialize_process_manager

@@ -100,7 +100,6 @@ public:
   ~LogObject() override;
 
   void add_filter(LogFilter *filter, bool copy = true);
-  void set_filter_list(const LogFilterList &list, bool copy = true);
 
   inline void
   set_fmt_timestamps()
@@ -379,14 +378,12 @@ public:
   // Flush the buffers on all the managed log objects.
   void flush_all_objects();
 
-  LogObject *get_object_with_signature(uint64_t signature);
   void check_buffer_expiration(long time_now);
 
   unsigned roll_files(long time_now);
 
   int log(LogAccess *lad);
   void display(FILE *str = stdout);
-  void add_filter_to_all(LogFilter *filter);
   LogObject *find_by_format_name(const char *name) const;
   size_t preproc_buffers(int idx);
   void open_local_pipes();

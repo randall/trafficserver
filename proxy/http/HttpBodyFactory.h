@@ -144,7 +144,6 @@ public:
     return (magic == HTTP_BODY_SET_MAGIC);
   }
 
-  HttpBodyTemplate *get_template_by_name(const char *name);
   void set_template_by_name(const char *name, HttpBodyTemplate *t);
 };
 
@@ -199,7 +198,6 @@ public:
     return msg;
   }
 
-  void dump_template_tables(FILE *fp = stderr);
   void reconfigure();
   static const char *determine_set_by_language(std::unique_ptr<BodySetTable> &table_of_sets, StrList *acpt_language_list,
                                                StrList *acpt_charset_list, float *Q_best_ptr, int *La_best_ptr, int *Lc_best_ptr,

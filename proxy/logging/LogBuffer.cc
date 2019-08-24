@@ -82,26 +82,6 @@ LogBufferHeader::fmt_printf()
   return addr;
 }
 
-char *
-LogBufferHeader::src_hostname()
-{
-  char *addr = nullptr;
-  if (src_hostname_offset) {
-    addr = reinterpret_cast<char *>(this) + src_hostname_offset;
-  }
-  return addr;
-}
-
-char *
-LogBufferHeader::log_filename()
-{
-  char *addr = nullptr;
-  if (log_filename_offset) {
-    addr = reinterpret_cast<char *>(this) + log_filename_offset;
-  }
-  return addr;
-}
-
 LogBuffer::LogBuffer(LogObject *owner, size_t size, size_t buf_align, size_t write_align)
   : m_size(size), m_buf_align(buf_align), m_write_align(write_align), m_owner(owner), m_references(0)
 {
@@ -377,8 +357,6 @@ LogBuffer::_add_buffer_header()
   m_header->fmt_name_offset      = 0;
   m_header->fmt_fieldlist_offset = 0;
   m_header->fmt_printf_offset    = 0;
-  m_header->src_hostname_offset  = 0;
-  m_header->log_filename_offset  = 0;
 
   if (fmt->name()) {
     m_header->fmt_name_offset = header_len;
@@ -392,19 +370,10 @@ LogBuffer::_add_buffer_header()
     m_header->fmt_printf_offset = header_len;
     header_len += add_header_str(fmt->printf_str(), &m_buffer[header_len], m_size - header_len);
   }
-  if (Log::config->hostname) {
-    m_header->src_hostname_offset = header_len;
-    header_len += add_header_str(Log::config->hostname, &m_buffer[header_len], m_size - header_len);
-  }
-  if (m_owner->get_base_filename()) {
-    m_header->log_filename_offset = header_len;
-    header_len += add_header_str(m_owner->get_base_filename(), &m_buffer[header_len], m_size - header_len);
-  }
+
   // update the rest of the header fields; make sure the header_len is
   // correctly aligned, so that the first record will start on a legal
   // alignment mark.
-  //
-
   header_len = INK_ALIGN_DEFAULT(header_len);
 
   m_header->byte_count  = header_len;
@@ -425,18 +394,6 @@ LogBuffer::update_header_data()
     m_header->byte_count     = m_state.s.offset;
     m_header->high_timestamp = LogUtils::timestamp();
   }
-}
-
-/*-------------------------------------------------------------------------
-  LogBuffer::max_entry_bytes
-
-  This static function simply returns the greatest number of bytes than an
-  entry can be and fit into a LogBuffer.
-  -------------------------------------------------------------------------*/
-size_t
-LogBuffer::max_entry_bytes()
-{
-  return (Log::config->log_buffer_size - sizeof(LogBufferHeader));
 }
 
 /*-------------------------------------------------------------------------

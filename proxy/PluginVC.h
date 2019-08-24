@@ -227,9 +227,6 @@ public:
   void set_passive_addr(sockaddr const *ip ///< Address and port.
   );
 
-  void set_active_data(void *data);
-  void set_passive_data(void *data);
-
   void set_transparent(bool passive_side, bool active_side);
 
   /// Set the plugin ID for the internal VCs.

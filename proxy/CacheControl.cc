@@ -114,12 +114,6 @@ cacheControlFile_CB(const char * /* name ATS_UNUSED */, RecDataT /* data_type AT
 //   Begin API functions
 //
 bool
-host_rule_in_CacheControlTable()
-{
-  return (CacheControlTable->hostMatch ? true : false);
-}
-
-bool
 ip_rule_in_CacheControlTable()
 {
   return (CacheControlTable->ipMatch ? true : false);

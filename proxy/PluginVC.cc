@@ -1234,18 +1234,6 @@ PluginVCCore::set_active_addr(sockaddr const *ip)
 }
 
 void
-PluginVCCore::set_passive_data(void *data)
-{
-  passive_data = data;
-}
-
-void
-PluginVCCore::set_active_data(void *data)
-{
-  active_data = data;
-}
-
-void
 PluginVCCore::set_transparent(bool passive_side, bool active_side)
 {
   passive_vc.set_is_transparent(passive_side);
