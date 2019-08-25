@@ -208,8 +208,6 @@ struct Store {
 
     return nullptr;
   }
-  // try to allocate, return (s == gotten, diff == not gotten)
-  void try_realloc(Store &s, Store &diff);
 
   // free back the contents of a store.
   // must have been JUST allocated (no intervening allocs/frees)

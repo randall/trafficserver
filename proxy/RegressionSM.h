@@ -46,7 +46,6 @@ struct RegressionSM : public Continuation {
   // public API
   void done(int status = REGRESSION_TEST_NOT_RUN);
   void run(int *pstatus);
-  void run_in(int *pstatus, ink_hrtime t);
 
   // internal
   int status           = REGRESSION_TEST_INPROGRESS;

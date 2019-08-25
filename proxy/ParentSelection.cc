@@ -957,31 +957,6 @@ SocksServerConfig::print()
   SocksServerConfig::release(params);
 }
 
-#define TEST_FAIL(str)                \
-  {                                   \
-    printf("%d: %s\n", test_id, str); \
-    err = REGRESSION_TEST_FAILED;     \
-  }
-
-void
-request_to_data(HttpRequestData *req, sockaddr const *srcip, sockaddr const *dstip, const char *str)
-{
-  HTTPParser parser;
-
-  ink_zero(req->src_ip);
-  ats_ip_copy(&req->src_ip.sa, srcip);
-  ink_zero(req->dest_ip);
-  ats_ip_copy(&req->dest_ip.sa, dstip);
-
-  req->hdr = new HTTPHdr;
-
-  http_parser_init(&parser);
-
-  req->hdr->parse_req(&parser, &str, str + strlen(str), true);
-
-  http_parser_clear(&parser);
-}
-
 static int passes;
 static int fails;
 

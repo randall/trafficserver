@@ -75,14 +75,6 @@ RegressionSM::xrun(RegressionSM *aparent)
 }
 
 void
-RegressionSM::run_in(int *apstatus, ink_hrtime t)
-{
-  pstatus = apstatus;
-  SET_HANDLER(&RegressionSM::regression_sm_start);
-  eventProcessor.schedule_in(this, t);
-}
-
-void
 RegressionSM::child_done(int astatus)
 {
   SCOPED_MUTEX_LOCK(l, mutex, this_ethread());

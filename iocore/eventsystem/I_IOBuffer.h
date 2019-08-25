@@ -1022,8 +1022,6 @@ public:
   */
   int64_t write(IOBufferChain const *chain, int64_t len = INT64_MAX, int64_t offset = 0);
 
-  int64_t remove_append(IOBufferReader *);
-
   /**
     Returns a pointer to the first writable block on the block chain.
     Returns nullptr if there are not currently any writable blocks on the

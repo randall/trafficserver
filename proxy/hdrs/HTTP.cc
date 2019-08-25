@@ -159,16 +159,6 @@ is_digit(char c)
  ***********************************************************************/
 
 void
-http_hdr_adjust(HTTPHdrImpl * /* hdrp ATS_UNUSED */, int32_t /* offset ATS_UNUSED */, int32_t /* length ATS_UNUSED */,
-                int32_t /* delta ATS_UNUSED */)
-{
-  ink_release_assert(!"http_hdr_adjust not implemented");
-}
-
-/*-------------------------------------------------------------------------
-  -------------------------------------------------------------------------*/
-
-void
 http_init()
 {
   static int init = 1;
@@ -623,15 +613,6 @@ HTTPHdr::length_get() const
   length += mime_hdr_length_get(m_http->m_fields_impl);
 
   return length;
-}
-
-/*-------------------------------------------------------------------------
-  -------------------------------------------------------------------------*/
-
-void
-http_hdr_type_set(HTTPHdrImpl *hh, HTTPType type)
-{
-  hh->m_polarity = type;
 }
 
 /*-------------------------------------------------------------------------
@@ -2261,39 +2242,6 @@ HTTPInfo::check_marshalled(char *buf, int len)
   }
 
   return true;
-}
-
-// void HTTPInfo::set_buffer_reference(RefCountObj* block_ref)
-//
-//    Setting a buffer reference for the alt is separate from
-//     the unmarshalling operation because the clustering
-//     utilizes the system differently than cache does
-//    The cache maintains external refcounting of the buffer that
-//     the alt is in & doesn't always destroy the alt when its
-//     done with it because it figures it doesn't need to since
-//     it is managing the buffer
-//    The receiver of ClusterRPC system has the alt manage the
-//     buffer itself and therefore needs to call this function
-//     to set up the reference
-//
-void
-HTTPInfo::set_buffer_reference(RefCountObj *block_ref)
-{
-  ink_assert(m_alt->m_magic == CACHE_ALT_MAGIC_ALIVE);
-
-  // Free existing reference
-  if (m_alt->m_ext_buffer != nullptr) {
-    if (m_alt->m_ext_buffer->refcount_dec() == 0) {
-      m_alt->m_ext_buffer->free();
-    }
-  }
-  // Set up the ref count for the external buffer
-  //   if there is one
-  if (block_ref) {
-    block_ref->refcount_inc();
-  }
-
-  m_alt->m_ext_buffer = block_ref;
 }
 
 int

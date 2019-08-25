@@ -61,26 +61,6 @@ init_buffer_allocators(int iobuffer_advice)
 }
 
 int64_t
-MIOBuffer::remove_append(IOBufferReader *r)
-{
-  int64_t l = 0;
-  while (r->block) {
-    Ptr<IOBufferBlock> b = r->block;
-    r->block             = r->block->next;
-    b->_start += r->start_offset;
-    if (b->start() >= b->end()) {
-      r->start_offset = -r->start_offset;
-      continue;
-    }
-    r->start_offset = 0;
-    l += b->read_avail();
-    append_block(b.get());
-  }
-  r->mbuf->_writer = nullptr;
-  return l;
-}
-
-int64_t
 MIOBuffer::write(const void *abuf, int64_t alen)
 {
   const char *buf = static_cast<const char *>(abuf);

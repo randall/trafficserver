@@ -43,7 +43,6 @@ public:
   void enableProtocols(const SessionProtocolSet &protos);
 
   SLINK(QUICNextProtocolAccept, link);
-  SSLNextProtocolSet *getProtoSet();
 
   // noncopyable
   QUICNextProtocolAccept(const QUICNextProtocolAccept &) = delete;            // disabled

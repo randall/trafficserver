@@ -256,7 +256,6 @@ public:
   }
 
   // Sanity Check Functions
-  void sanity_check_strs();
   bool check_marshalled(uint32_t buf_length);
 
   // Debugging functions

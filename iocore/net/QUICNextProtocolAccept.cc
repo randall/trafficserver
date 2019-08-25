@@ -86,10 +86,4 @@ QUICNextProtocolAccept::QUICNextProtocolAccept() : SessionAccept(nullptr)
   SET_HANDLER(&QUICNextProtocolAccept::mainEvent);
 }
 
-SSLNextProtocolSet *
-QUICNextProtocolAccept::getProtoSet()
-{
-  return &this->protoset;
-}
-
 QUICNextProtocolAccept::~QUICNextProtocolAccept() {}

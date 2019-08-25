@@ -350,61 +350,6 @@ HttpCompat::parse_mime_type(const char *mime_string, char *type, char *subtype, 
   *d++ = '\0';
 }
 
-void
-HttpCompat::parse_mime_type_with_len(const char *mime_string, int mime_string_len, char *type, char *subtype, int type_len,
-                                     int subtype_len)
-{
-  const char *s, *s_toofar, *e;
-  char *d;
-
-  *type = *subtype = '\0';
-  s_toofar         = mime_string + mime_string_len;
-
-  /////////////////////
-  // skip whitespace //
-  /////////////////////
-
-  for (s = mime_string; (s < s_toofar) && ParseRules::is_ws(*s); s++) {
-    ;
-  }
-
-  ///////////////////////////////////////////////////////////////////////
-  // scan type (until NUL, out of room, comma/semicolon, space, slash) //
-  ///////////////////////////////////////////////////////////////////////
-
-  d = type;
-  e = type + type_len;
-  while ((s < s_toofar) && (d < e - 1) && (!ParseRules::is_ws(*s)) && (*s != ';') && (*s != ',') && (*s != '/')) {
-    *d++ = *s++;
-  }
-  *d++ = '\0';
-
-  //////////////////////////////////////////////////////////////
-  // skip remainder of text and space, then slash, then space //
-  //////////////////////////////////////////////////////////////
-
-  while ((s < s_toofar) && (*s != ';') && (*s != ',') && (*s != '/')) {
-    ++s;
-  }
-  if ((s < s_toofar) && (*s == '/')) {
-    ++s;
-  }
-  while ((s < s_toofar) && ParseRules::is_ws(*s)) {
-    ++s;
-  }
-
-  //////////////////////////////////////////////////////////////////////////
-  // scan subtype (until NUL, out of room, comma/semicolon, space, slash) //
-  //////////////////////////////////////////////////////////////////////////
-
-  d = subtype;
-  e = subtype + subtype_len;
-  while ((s < s_toofar) && (d < e - 1) && (!ParseRules::is_ws(*s)) && (*s != ';') && (*s != ',') && (*s != '/')) {
-    *d++ = *s++;
-  }
-  *d++ = '\0';
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //
 //      bool HttpCompat::do_vary_header_values_match(MIMEField *hv1, MIMEField *hv2)

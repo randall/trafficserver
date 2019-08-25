@@ -7553,11 +7553,6 @@ HttpSM::set_next_state()
   }
 }
 
-void
-clear_http_handler_times()
-{
-}
-
 // YTS Team, yamsat Plugin
 
 void

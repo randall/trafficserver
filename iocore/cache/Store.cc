@@ -685,59 +685,6 @@ Store::spread_alloc(Store &s, unsigned int blocks, bool mmapable)
   }
 }
 
-void
-Store::try_realloc(Store &s, Store &diff)
-{
-  for (unsigned i = 0; i < s.n_disks; i++) {
-    Span *prev = nullptr;
-    for (Span *sd = s.disk[i]; sd;) {
-      for (unsigned j = 0; j < n_disks; j++) {
-        for (Span *d = disk[j]; d; d = d->link.next) {
-          if (!strcmp(sd->pathname, d->pathname)) {
-            if (sd->offset >= d->offset && (sd->end() <= d->end())) {
-              if (!sd->file_pathname || (sd->end() == d->end())) {
-                d->blocks -= sd->blocks;
-                goto Lfound;
-              } else if (sd->offset == d->offset) {
-                d->blocks -= sd->blocks;
-                d->offset += sd->blocks;
-                goto Lfound;
-              } else {
-                Span *x = new Span(*d);
-                // d will be the first vol
-                d->blocks    = sd->offset - d->offset;
-                d->link.next = x;
-                // x will be the last vol
-                x->offset = sd->offset + sd->blocks;
-                x->blocks -= x->offset - d->offset;
-                goto Lfound;
-              }
-            }
-          }
-        }
-      }
-      {
-        if (!prev) {
-          s.disk[i] = s.disk[i]->link.next;
-        } else {
-          prev->link.next = sd->link.next;
-        }
-        diff.extend(i + 1);
-        sd->link.next = diff.disk[i];
-        diff.disk[i]  = sd;
-        sd            = prev ? prev->link.next : s.disk[i];
-        continue;
-      }
-    Lfound:;
-      prev = sd;
-      sd   = sd->link.next;
-    }
-  }
-  normalize();
-  s.normalize();
-  diff.normalize();
-}
-
 //
 // Stupid grab first available space allocator
 //

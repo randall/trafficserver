@@ -217,23 +217,6 @@ mgmt_fatal(const int lerrno, const char *message_format, ...)
   ::exit(1);
 } /* End mgmt_fatal */
 
-static inline int
-get_interface_mtu(int sock_fd, struct ifreq *ifr)
-{
-  if (ioctl(sock_fd, SIOCGIFMTU, ifr) < 0) {
-    mgmt_log("[getAddrForIntr] Unable to obtain MTU for "
-             "interface '%s'",
-             ifr->ifr_name);
-    return 0;
-  } else {
-#if defined(solaris) || defined(hpux)
-    return ifr->ifr_metric;
-#else
-    return ifr->ifr_mtu;
-#endif
-  }
-}
-
 void
 mgmt_sleep_sec(int seconds)
 {

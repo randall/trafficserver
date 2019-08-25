@@ -92,26 +92,6 @@ mgmt_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 }
 
 //-------------------------------------------------------------------------
-// mgmt_open
-//-------------------------------------------------------------------------
-
-int
-mgmt_open(const char *path, int oflag)
-{
-  int r, retries;
-  for (retries = 0; retries < MGMT_MAX_TRANSIENT_ERRORS; retries++) {
-    r = ::open(path, oflag);
-    if (r >= 0) {
-      return r;
-    }
-    if (!mgmt_transient_error()) {
-      break;
-    }
-  }
-  return r;
-}
-
-//-------------------------------------------------------------------------
 // mgmt_select
 //-------------------------------------------------------------------------
 

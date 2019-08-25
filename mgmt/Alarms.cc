@@ -270,31 +270,6 @@ Alarms::signalAlarm(alarm_t a, const char *desc, const char *ip)
 
 } /* End Alarms::signalAlarm */
 
-/*
- * clearUnSeen(...)
- *   This function is a sweeper function to clean up those alarms that have
- * been taken care of through other local managers or at the peer itself.
- */
-void
-Alarms::clearUnSeen(char *ip)
-{
-  ink_mutex_acquire(&mutex);
-  for (auto &&it : remote_alarms) {
-    std::string const &key = it.first;
-    Alarm *tmp             = it.second;
-
-    if (key.find(ip) != std::string::npos) { /* Make sure alarm is for correct ip */
-      if (!tmp->seen) {                      /* Make sure we did not see it in peer's report */
-        remote_alarms.erase(key);
-        ats_free(tmp->description);
-        ats_free(tmp);
-      }
-    }
-  }
-  ink_mutex_release(&mutex);
-  return;
-} /* End Alarms::clearUnSeen */
-
 void
 Alarms::execAlarmBin(const char *desc)
 {

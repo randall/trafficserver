@@ -47,7 +47,6 @@ public:
   void enableProtocols(const SessionProtocolSet &protos);
 
   SLINK(SSLNextProtocolAccept, link);
-  SSLNextProtocolSet *getProtoSet();
 
   // noncopyable
   SSLNextProtocolAccept(const SSLNextProtocolAccept &) = delete;            // disabled

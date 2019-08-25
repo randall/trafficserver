@@ -409,9 +409,6 @@ extern int HTTP_LEN_S_MAXAGE;
 extern int HTTP_LEN_NEED_REVALIDATE_ONCE;
 extern int HTTP_LEN_100_CONTINUE;
 
-/* Private */
-void http_hdr_adjust(HTTPHdrImpl *hdrp, int32_t offset, int32_t length, int32_t delta);
-
 /* Public */
 void http_init();
 
@@ -1374,7 +1371,6 @@ public:
   inkcoreapi int marshal(char *buf, int len);
   static int unmarshal(char *buf, int len, RefCountObj *block_ref);
   static int unmarshal_v24_1(char *buf, int len, RefCountObj *block_ref);
-  void set_buffer_reference(RefCountObj *block_ref);
   int get_handle(char *buf, int len);
 
   int32_t

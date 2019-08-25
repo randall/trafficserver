@@ -41,9 +41,6 @@ public:
 
   static void parse_mime_type(const char *mime_string, char *type, char *subtype, int type_len, int subtype_len);
 
-  static void parse_mime_type_with_len(const char *mime_string, int mime_string_len, char *type, char *subtype, int type_len,
-                                       int subtype_len);
-
   static bool do_vary_header_values_match(MIMEField *hv1, MIMEField *hv2);
 
   static float find_Q_param_in_strlist(StrList *strlist);

@@ -171,12 +171,6 @@ SSLNextProtocolAccept::SSLNextProtocolAccept(Continuation *ep, bool transparent_
   SET_HANDLER(&SSLNextProtocolAccept::mainEvent);
 }
 
-SSLNextProtocolSet *
-SSLNextProtocolAccept::getProtoSet()
-{
-  return &this->protoset;
-}
-
 SSLNextProtocolAccept::~SSLNextProtocolAccept()
 {
   free_MIOBuffer(this->buffer);

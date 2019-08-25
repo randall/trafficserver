@@ -480,68 +480,6 @@ HdrHeap::required_space_for_evacuation()
   return ret;
 }
 
-void
-HdrHeap::sanity_check_strs()
-{
-  int num_heaps = 0;
-  struct HeapCheck heaps[HDR_BUF_RONLY_HEAPS + 1];
-
-  // Build up a string check table
-  if (m_read_write_heap) {
-    heaps[num_heaps].start = (reinterpret_cast<char *>(m_read_write_heap.get())) + sizeof(HdrStrHeap);
-
-    int heap_size = m_read_write_heap->m_heap_size - (sizeof(HdrStrHeap) + m_read_write_heap->m_free_size);
-
-    heaps[num_heaps].end = heaps[num_heaps].start + heap_size;
-    num_heaps++;
-  }
-
-  for (auto &i : m_ronly_heap) {
-    if (i.m_heap_start != nullptr) {
-      heaps[num_heaps].start = i.m_heap_start;
-      heaps[num_heaps].end   = i.m_heap_start + i.m_heap_len;
-      num_heaps++;
-    }
-  }
-
-  // Loop over the objects in heap call the check
-  //   function on each one
-  HdrHeap *h = this;
-
-  while (h) {
-    char *data = h->m_data_start;
-
-    while (data < h->m_free_start) {
-      HdrHeapObjImpl *obj = reinterpret_cast<HdrHeapObjImpl *>(data);
-
-      switch (obj->m_type) {
-      case HDR_HEAP_OBJ_URL:
-        ((URLImpl *)obj)->check_strings(heaps, num_heaps);
-        break;
-      case HDR_HEAP_OBJ_HTTP_HEADER:
-        ((HTTPHdrImpl *)obj)->check_strings(heaps, num_heaps);
-        break;
-      case HDR_HEAP_OBJ_MIME_HEADER:
-        ((MIMEHdrImpl *)obj)->check_strings(heaps, num_heaps);
-        break;
-      case HDR_HEAP_OBJ_FIELD_BLOCK:
-        ((MIMEFieldBlockImpl *)obj)->check_strings(heaps, num_heaps);
-        break;
-      case HDR_HEAP_OBJ_EMPTY:
-      case HDR_HEAP_OBJ_RAW:
-        // Nothing to do
-        break;
-      default:
-        ink_release_assert(0);
-      }
-
-      data = data + obj->m_length;
-    }
-
-    h = h->m_next;
-  }
-}
-
 // int HdrHeap::marshal_length()
 //
 //  Determines what the length of a buffer needs to
