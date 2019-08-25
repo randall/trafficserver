@@ -59,7 +59,6 @@ public:
   virtual in_port_t get_outbound_port() const;
   virtual IpAddr get_outbound_ip4() const;
   virtual IpAddr get_outbound_ip6() const;
-  virtual void set_outbound_port(in_port_t port);
   virtual void set_outbound_ip(const IpAddr &new_addr);
   virtual bool is_outbound_transparent() const;
   virtual void set_outbound_transparent(bool flag);

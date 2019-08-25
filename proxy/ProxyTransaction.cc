@@ -205,11 +205,6 @@ ProxyTransaction::get_outbound_port() const
 {
   return upstream_outbound_options.outbound_port;
 }
-void
-ProxyTransaction::set_outbound_port(in_port_t port)
-{
-  upstream_outbound_options.outbound_port = port;
-}
 
 IpAddr
 ProxyTransaction::get_outbound_ip4() const

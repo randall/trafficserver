@@ -58,24 +58,6 @@ public:
   virtual ~Processor();
 
   /**
-    Returns a Thread appropriate for the processor.
-
-    Returns a new instance of a Thread or Thread derived class of
-    a thread which is the thread class for the processor.
-
-    @param thread_index reserved for future use.
-
-  */
-  virtual Thread *create_thread(int thread_index);
-
-  /**
-    Returns the number of threads required for this processor. If
-    the number is not defined or not used, it is equal to 0.
-
-  */
-  virtual int get_thread_count();
-
-  /**
     This function attempts to stop the processor. Please refer to
     the documentation on each processor to determine if it is
     supported.

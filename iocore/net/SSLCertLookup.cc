@@ -69,11 +69,6 @@ struct SSLAddressLookupKey {
   {
     key[sep] = '\0';
   }
-  void
-  unsplit()
-  {
-    key[sep] = '.';
-  }
 
 private:
   char key[(TS_IP6_SIZE * 2) /* hex addr */ + 1 /* dot */ + 4 /* port */ + 1 /* nullptr */];
