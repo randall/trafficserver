@@ -242,16 +242,3 @@ OneWayMultiTunnel::close_target_vio(int result, VIO *vio)
     }
   }
 }
-
-void
-OneWayMultiTunnel::reenable_all()
-{
-  for (int i = 0; i < n_vioTargets; i++) {
-    if (vioTargets[i]) {
-      vioTargets[i]->reenable();
-    }
-  }
-  if (vioSource) {
-    vioSource->reenable();
-  }
-}

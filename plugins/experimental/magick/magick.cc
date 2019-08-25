@@ -317,14 +317,6 @@ struct Wand {
   }
 
   bool
-  setFormat(const char *const s) const
-  {
-    assert(nullptr != s);
-    assert(nullptr != wand);
-    return MagickSetImageFormat(wand, s) == MagickTrue;
-  }
-
-  bool
   write(const char *const s) const
   {
     assert(nullptr != s);

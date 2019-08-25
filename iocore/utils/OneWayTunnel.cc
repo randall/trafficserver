@@ -373,17 +373,6 @@ OneWayTunnel::connection_closed(int result)
   }
 }
 
-void
-OneWayTunnel::reenable_all()
-{
-  if (vioSource) {
-    vioSource->reenable();
-  }
-  if (vioTarget) {
-    vioTarget->reenable();
-  }
-}
-
 bool
 OneWayTunnel::last_connection()
 {

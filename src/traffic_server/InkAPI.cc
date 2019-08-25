@@ -9442,7 +9442,7 @@ TSAcceptorGetbyID(int ID)
 {
   SCOPED_MUTEX_LOCK(lock, naVecMutex, this_ethread());
   auto ret = naVec.at(ID);
-  Debug("ssl", "getNetAccept in INK API.cc %p", ret);
+  Debug("ssl", "TSAcceptorGetbyID in INK API.cc %p", ret);
   return reinterpret_cast<TSAcceptor>(ret);
 }
 

@@ -257,33 +257,6 @@ public:
     TSMutexUnlock(list_mutex);
   }
 
-  SslData *
-  get_newest()
-  {
-    TSMutexLock(list_mutex);
-    SslData *ret = head;
-    TSMutexUnlock(list_mutex);
-    return ret;
-  }
-
-  SslData *
-  get_oldest()
-  {
-    TSMutexLock(list_mutex);
-    SslData *ret = tail;
-    TSMutexUnlock(list_mutex);
-    return ret;
-  }
-
-  int
-  get_size()
-  {
-    TSMutexLock(list_mutex);
-    int ret = size;
-    TSMutexUnlock(list_mutex);
-    return ret;
-  }
-
   // Set scheduled flag
   int
   set_schedule(const std::string &commonName, bool flag)

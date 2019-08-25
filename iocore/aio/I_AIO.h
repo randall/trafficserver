@@ -136,7 +136,6 @@ struct DiskHandler : public Continuation {
 #endif
 
 void ink_aio_init(ts::ModuleVersion version);
-int ink_aio_start();
 void ink_aio_set_callback(Continuation *error_callback);
 
 int ink_aio_read(AIOCallback *op,

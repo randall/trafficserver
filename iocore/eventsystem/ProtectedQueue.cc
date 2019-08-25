@@ -81,16 +81,6 @@ flush_signals(EThread *thr)
 }
 
 void
-ProtectedQueue::dequeue_timed(ink_hrtime cur_time, ink_hrtime timeout, bool sleep)
-{
-  (void)cur_time;
-  if (sleep) {
-    this->wait(timeout);
-  }
-  this->dequeue_external();
-}
-
-void
 ProtectedQueue::dequeue_external()
 {
   Event *e = static_cast<Event *>(ink_atomiclist_popall(&al));

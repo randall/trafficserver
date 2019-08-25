@@ -254,11 +254,6 @@ ProxyTransaction::set_proxy_ssn(ProxySession *new_proxy_ssn)
   proxy_ssn = new_proxy_ssn;
 }
 
-void
-ProxyTransaction::set_h2c_upgrade_flag()
-{
-}
-
 Http1ServerSession *
 ProxyTransaction::get_server_session() const
 {
@@ -281,11 +276,6 @@ void
 ProxyTransaction::set_restart_immediate(bool val)
 {
   restart_immediate = true;
-}
-bool
-ProxyTransaction::get_restart_immediate() const
-{
-  return restart_immediate;
 }
 
 int

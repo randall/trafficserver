@@ -185,8 +185,6 @@ struct OneWayTunnel : public Continuation {
 
   void connection_closed(int result);
 
-  virtual void reenable_all();
-
   bool last_connection();
 
   VIO *vioSource             = nullptr;

@@ -70,16 +70,12 @@ public:
   virtual bool is_chunked_encoding_supported() const;
 
   virtual void set_proxy_ssn(ProxySession *set_proxy_ssn);
-  virtual void set_h2c_upgrade_flag();
 
   virtual const char *get_protocol_string();
 
   virtual int populate_protocol(std::string_view *result, int size) const;
 
   virtual const char *protocol_contains(std::string_view tag_prefix) const;
-
-  /// Non-Virtual Methods
-  //
 
   /// Non-Virtual Accessors
   //
@@ -102,7 +98,6 @@ public:
   HttpSM *get_sm() const;
 
   void set_restart_immediate(bool val);
-  bool get_restart_immediate() const;
 
   // This function must return a non-negative number that is different for two in-progress transactions with the same proxy_ssn
   // session.

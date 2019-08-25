@@ -1189,7 +1189,6 @@ public:
   void alloc_xmalloc(int64_t buf_size);
   void append_block_internal(IOBufferBlock *b);
   int64_t write(IOBufferBlock const *b, int64_t len, int64_t offset);
-  int64_t puts(char *buf, int64_t len);
 
   // internal interface
 

@@ -132,28 +132,6 @@ MIOBuffer::write(IOBufferBlock const *b, int64_t alen, int64_t offset)
 }
 
 int64_t
-MIOBuffer::puts(char *s, int64_t len)
-{
-  char *pc = end();
-  char *pb = s;
-  while (pc < buf_end()) {
-    if (len-- <= 0) {
-      return -1;
-    }
-    if (!*pb || *pb == '\n') {
-      int64_t n = static_cast<int64_t>(pb - s);
-      memcpy(end(), s, n + 1); // Up to and including '\n'
-      end()[n + 1] = 0;
-      fill(n + 1);
-      return n + 1;
-    }
-    pc++;
-    pb++;
-  }
-  return 0;
-}
-
-int64_t
 IOBufferReader::read(void *ab, int64_t len)
 {
   char *b       = static_cast<char *>(ab);

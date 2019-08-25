@@ -168,16 +168,6 @@ ink_aio_init(ts::ModuleVersion v)
 #endif
 }
 
-int
-ink_aio_start()
-{
-#ifdef AIO_STATS
-  data = new AIOTestData();
-  eventProcessor.schedule_in(data, HRTIME_MSECONDS(100), ET_CALL);
-#endif
-  return 0;
-}
-
 #if AIO_MODE != AIO_MODE_NATIVE
 
 static void *aio_thread_main(void *arg);

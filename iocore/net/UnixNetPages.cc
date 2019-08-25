@@ -183,12 +183,6 @@ struct ShowNet : public ShowCont {
     eventProcessor.thread_group[ET_NET]._thread[0]->schedule_imm(this); // This can not use ET_TASK
     return EVENT_CONT;
   }
-  int
-  showHostnames(int event, Event *e)
-  {
-    CHECK_SHOW(begin("Net Connections to/from Host"));
-    return complete(event, e);
-  }
 
   ShowNet(Continuation *c, HTTPHdr *h) : ShowCont(c, h), ithread(0)
   {

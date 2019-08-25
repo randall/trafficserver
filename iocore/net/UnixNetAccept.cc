@@ -136,13 +136,6 @@ Ldone:
   return count;
 }
 
-NetAccept *
-getNetAccept(int ID)
-{
-  SCOPED_MUTEX_LOCK(lock, naVecMutex, this_ethread());
-  return naVec.at(ID);
-}
-
 //
 // Initialize the NetAccept for execution in its own thread.
 // This should be done for low latency, high connection rate sockets.

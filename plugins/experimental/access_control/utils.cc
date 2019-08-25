@@ -32,33 +32,6 @@
 #include "common.h"
 #include "utils.h"
 
-/**
- * @brief Parse a counted string containing a long integer
- *
- * @param s ptr to the counted string
- * @param lenght character count
- * @param val where the long integer to be stored
- * @return true - success, false - failed to parse
- */
-bool
-parseStrLong(const char *s, size_t length, long &val)
-{
-  // Make an extra copy since strtol expects NULL-terminated strings.
-  char str[length + 1];
-  strncpy(str, s, length);
-  str[length] = 0;
-
-  errno = 0;
-  char *temp;
-  val = strtol(str, &temp, 0);
-
-  if (temp == str || *temp != '\0' || ((val == LONG_MIN || val == LONG_MAX) && errno == ERANGE)) {
-    AccessControlError("Could not convert '%s' to a long integer and leftover string is: '%s'", str, temp);
-    return false;
-  }
-  return true;
-}
-
 /* ******* Encoding/Decoding functions ******* */
 
 /**
@@ -126,66 +99,6 @@ hexDecode(const char *in, size_t inLen, char *out, size_t outLen)
   while (src < (srcEnd - 1) && dst < dstEnd) {
     *dst++ = hex2uchar(*src) << 4 | hex2uchar(*(src + 1));
     src += 2;
-  }
-  return dst - out;
-}
-
-/**
- * @brief URL(percent)-encode a counted string
- *
- * @param in ptr to an input decoded counted string
- * @param inLen input character count
- * @param out ptr to an output buffer where the encoded string will be stored.
- * @param outLen output character count (output max size, should be 3 x inLen + 1)
- * @return the number of character actually added to the output buffer.
- */
-size_t
-urlEncode(const char *in, size_t inLen, char *out, size_t outLen)
-{
-  const char *src = in;
-  char *dst       = out;
-  while (static_cast<size_t>(src - in) < inLen && static_cast<size_t>(dst - out) < outLen) {
-    if (isalnum(*src) || *src == '-' || *src == '_' || *src == '.' || *src == '~') {
-      *dst++ = *src;
-    } else if (*src == ' ') {
-      *dst++ = '+';
-    } else {
-      *dst++ = '%';
-      sprintf(dst, "%02x", static_cast<unsigned char>(*src));
-      dst += 2;
-    }
-    src++;
-  }
-  return dst - out;
-}
-
-/**
- * @brief URL(percent)-decode a counted string
- *
- * @param in ptr to an input encoded counted string
- * @param inLen input character count
- * @param out ptr to an output buffer where the decoded string will be stored.
- * @param outLen output character count (output max size, should be inLen + 1)
- * @return the number of character actually added to the output buffer.
- */
-size_t
-urlDecode(const char *in, size_t inLen, char *out, size_t outLen)
-{
-  const char *src = in;
-  char *dst       = out;
-  while (static_cast<size_t>(src - in) < inLen && static_cast<size_t>(dst - out) < outLen) {
-    if (*src == '%') {
-      if (src[1] && src[2]) {
-        int u  = hex2uchar(*(src + 1)) << 4 | hex2uchar(*(src + 2));
-        *dst++ = static_cast<char>(u);
-        src += 2;
-      }
-    } else if (*src == '+') {
-      *dst++ = ' ';
-    } else {
-      *dst++ = *src;
-    }
-    src++;
   }
   return dst - out;
 }

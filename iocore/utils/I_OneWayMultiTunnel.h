@@ -122,7 +122,6 @@ struct OneWayMultiTunnel : public OneWayTunnel {
   //
   int startEvent(int event, void *data);
 
-  void reenable_all() override;
   void close_target_vio(int result, VIO *vio = nullptr) override;
 
   int n_vioTargets                      = 0;

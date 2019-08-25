@@ -293,23 +293,9 @@ public:
   UDPReadContinuation();
   ~UDPReadContinuation() override;
   inline void free();
-  inline void init_token(Event *completionToken);
-  inline void init_read(int fd, IOBufferBlock *buf, int len, struct sockaddr *fromaddr, socklen_t *fromaddrlen);
-
-  void
-  set_timer(int seconds)
-  {
-    timeout_interval = HRTIME_SECONDS(seconds);
-  }
 
   void cancel();
   int readPollEvent(int event, Event *e);
-
-  Action *
-  getAction()
-  {
-    return event;
-  }
 
   void setupPollDescriptor();
 
@@ -363,32 +349,6 @@ UDPReadContinuation::free()
   timeout_interval = 0;
   mutex            = nullptr;
   udpReadContAllocator.free(this);
-}
-
-inline void
-UDPReadContinuation::init_token(Event *completionToken)
-{
-  if (completionToken->continuation) {
-    this->mutex = completionToken->continuation->mutex;
-  } else {
-    this->mutex = new_ProxyMutex();
-  }
-  event = completionToken;
-}
-
-inline void
-UDPReadContinuation::init_read(int rfd, IOBufferBlock *buf, int len, struct sockaddr *fromaddr_, socklen_t *fromaddrlen_)
-{
-  ink_assert(rfd >= 0 && buf != nullptr && fromaddr_ != nullptr && fromaddrlen_ != nullptr);
-  fd          = rfd;
-  readbuf     = buf;
-  readlen     = len;
-  fromaddr    = ats_ip6_cast(fromaddr_);
-  fromaddrlen = fromaddrlen_;
-  SET_HANDLER(&UDPReadContinuation::readPollEvent);
-  period = -HRTIME_MSECONDS(net_event_period);
-  setupPollDescriptor();
-  this_ethread()->schedule_every(this, period);
 }
 
 UDPReadContinuation::~UDPReadContinuation()

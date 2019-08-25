@@ -138,7 +138,6 @@ public:
   bool is_client_closed() const;
 
   int64_t connection_id() const;
-  TSHttpHookID get_hookid() const;
   bool has_hooks() const;
 
   APIHook *hook_get(TSHttpHookID id) const;

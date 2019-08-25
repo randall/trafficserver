@@ -257,12 +257,6 @@ ProxySession::get_server_session() const
   return nullptr;
 }
 
-TSHttpHookID
-ProxySession::get_hookid() const
-{
-  return hook_state.id();
-}
-
 void
 ProxySession::set_active_timeout(ink_hrtime timeout_in)
 {

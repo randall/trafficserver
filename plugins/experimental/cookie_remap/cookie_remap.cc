@@ -234,12 +234,6 @@ public:
     return cookie;
   }
 
-  const std::string &
-  getOperation() const
-  {
-    return operation;
-  }
-
   operation_type
   getOpType() const
   {
@@ -434,12 +428,6 @@ public:
   setSendTo(const std::string &s)
   {
     sendto = s;
-  }
-
-  const std::string &
-  getSendTo() const
-  {
-    return sendto;
   }
 
   void

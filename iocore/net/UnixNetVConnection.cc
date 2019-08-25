@@ -983,12 +983,6 @@ UnixNetVConnection::load_buffer_and_write(int64_t towrite, MIOBufferAccessor &bu
 }
 
 void
-UnixNetVConnection::readDisable(NetHandler *nh)
-{
-  read_disable(nh, this);
-}
-
-void
 UnixNetVConnection::readSignalError(NetHandler *nh, int err)
 {
   read_signal_error(nh, this, err);
