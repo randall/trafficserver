@@ -28,7 +28,6 @@
 #include "LocalManager.h"
 #include "ConfigManager.h"
 #include "WebMgmtUtils.h"
-#include "ExpandingArray.h"
 #include "MgmtSocket.h"
 #include "tscore/I_Layout.h"
 #include "FileManager.h"
@@ -45,7 +44,6 @@
 ConfigManager::ConfigManager(const char *fileName_, const char *configName_, bool root_access_needed_, ConfigManager *parentConfig_)
   : root_access_needed(root_access_needed_), parentConfig(parentConfig_)
 {
-  ExpandingArray existVer(25, true); // Existing versions
   struct stat fileInfo;
   ink_assert(fileName_ != nullptr);
 

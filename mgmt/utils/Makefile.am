@@ -46,8 +46,6 @@ libutils_COMMON = \
 
 libutils_lm_la_SOURCES = \
 	$(libutils_COMMON) \
-	ExpandingArray.cc \
-	ExpandingArray.h \
 	MgmtLocalCleanup.cc
 
 libutils_p_la_SOURCES = \

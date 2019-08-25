@@ -29,8 +29,6 @@
 class FileManager;
 class TextBuffer;
 
-class ExpandingArray;
-
 //
 //  class ConfigManager
 //

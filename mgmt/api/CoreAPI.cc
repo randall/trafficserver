@@ -41,7 +41,6 @@
 #include "ConfigManager.h"
 #include "WebMgmtUtils.h"
 #include "tscore/Diags.h"
-#include "ExpandingArray.h"
 
 #include "CoreAPI.h"
 #include "CoreAPIShared.h"

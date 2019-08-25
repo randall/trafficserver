@@ -81,7 +81,6 @@ public:
   void resolveAlarm(alarm_t a, char *ip = nullptr);
 
   void constructAlarmMessage(const AppVersionInfo &version, char *ip, char *message, int max);
-  void resetSeenFlag(char *ip);
   void clearUnSeen(char *ip);
 
   void execAlarmBin(const char *desc);

@@ -271,26 +271,6 @@ Alarms::signalAlarm(alarm_t a, const char *desc, const char *ip)
 } /* End Alarms::signalAlarm */
 
 /*
- * resetSeenFlag(...)
- *   Function resets the "seen" flag for a given peer's alarms. This allows
- * us to flush alarms that may have expired naturally or were dealt.
- */
-void
-Alarms::resetSeenFlag(char *ip)
-{
-  ink_mutex_acquire(&mutex);
-  for (auto &&it : remote_alarms) {
-    std::string const &key = it.first;
-    Alarm *tmp             = it.second;
-    if (key.find(ip) != std::string::npos) {
-      tmp->seen = false;
-    }
-  }
-  ink_mutex_release(&mutex);
-  return;
-} /* End Alarms::resetSeenFlag */
-
-/*
  * clearUnSeen(...)
  *   This function is a sweeper function to clean up those alarms that have
  * been taken care of through other local managers or at the peer itself.

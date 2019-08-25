@@ -119,47 +119,6 @@ print_err(const char *module, TSMgmtError err)
   }
 }
 
-/*-------------------------------------------------------------
- * print_string_list
- *-------------------------------------------------------------*/
-void
-print_string_list(TSStringList list)
-{
-  int i, count, buf_pos = 0;
-  char buf[1000];
-
-  if (!list) {
-    return;
-  }
-  count = TSStringListLen(list);
-  for (i = 0; i < count; i++) {
-    char *str = TSStringListDequeue(list);
-    snprintf(buf + buf_pos, sizeof(buf) - buf_pos, "%s,", str);
-    buf_pos = strlen(buf);
-    TSStringListEnqueue(list, str);
-  }
-  printf("%s \n", buf);
-}
-
-/*-------------------------------------------------------------
- * print_int_list
- *-------------------------------------------------------------*/
-void
-print_int_list(TSIntList list)
-{
-  int i, count, buf_pos = 0;
-  char buf[1000];
-
-  count = TSIntListLen(list);
-  for (i = 0; i < count; i++) {
-    int *elem = TSIntListDequeue(list);
-    snprintf(buf + buf_pos, sizeof(buf) - buf_pos, "%d:", *elem);
-    buf_pos = strlen(buf);
-    TSIntListEnqueue(list, elem);
-  }
-  printf("Int List: %s \n", buf);
-}
-
 /***************************************************************************
  * Control Testing
  ***************************************************************************/
@@ -247,36 +206,6 @@ reconfigure()
   }
 
   print_err("reconfigure", ret);
-}
-
-/* ------------------------------------------------------------------------
- * test_action_need
- * ------------------------------------------------------------------------
- * tests if correct action need is returned when requested record is set
- */
-void
-test_action_need()
-{
-  TSActionNeedT action;
-
-  // RU_NULL record
-  TSRecordSetString("proxy.config.proxy_name", "proxy_dorky", &action);
-  printf("[TSRecordSetString] proxy.config.proxy_name \n\tAction Should: [%d]\n\tAction is    : [%d]\n", TS_ACTION_UNDEFINED,
-         action);
-}
-
-/* Bouncer the traffic_server process(es) */
-void
-bounce()
-{
-  TSMgmtError ret;
-
-  printf("BOUNCER\n");
-  if ((ret = TSBounce(true)) != TS_ERR_OKAY) {
-    printf("[TSBounce] FAILED\n");
-  }
-
-  print_err("bounce", ret);
 }
 
 /***************************************************************************

@@ -28,7 +28,6 @@
 
 #include <unordered_map>
 
-class ExpandingArray;
 class ConfigManager;
 
 typedef void (*FileCallbackFunc)(char *, char *);

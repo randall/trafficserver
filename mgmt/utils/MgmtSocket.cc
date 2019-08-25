@@ -92,29 +92,6 @@ mgmt_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 }
 
 //-------------------------------------------------------------------------
-// mgmt_fopen
-//-------------------------------------------------------------------------
-
-FILE *
-mgmt_fopen(const char *filename, const char *mode)
-{
-  FILE *f;
-  int retries;
-  for (retries = 0; retries < MGMT_MAX_TRANSIENT_ERRORS; retries++) {
-    // no leak here as f will be returned if it is > 0
-    // coverity[overwrite_var]
-    f = ::fopen(filename, mode);
-    if (f != nullptr) {
-      return f;
-    }
-    if (!mgmt_transient_error()) {
-      break;
-    }
-  }
-  return f;
-}
-
-//-------------------------------------------------------------------------
 // mgmt_open
 //-------------------------------------------------------------------------
 
@@ -134,45 +111,6 @@ mgmt_open(const char *path, int oflag)
   return r;
 }
 
-//-------------------------------------------------------------------------
-// mgmt_open_mode
-//-------------------------------------------------------------------------
-
-int
-mgmt_open_mode(const char *path, int oflag, mode_t mode)
-{
-  int r, retries;
-  for (retries = 0; retries < MGMT_MAX_TRANSIENT_ERRORS; retries++) {
-    r = ::open(path, oflag, mode);
-    if (r >= 0) {
-      return r;
-    }
-    if (!mgmt_transient_error()) {
-      break;
-    }
-  }
-  return r;
-}
-
-//-------------------------------------------------------------------------
-// mgmt_open_mode_elevate
-//-------------------------------------------------------------------------
-
-int
-mgmt_open_mode_elevate(const char *path, int oflag, mode_t mode, bool elevate_p)
-{
-  int r, retries;
-  for (retries = 0; retries < MGMT_MAX_TRANSIENT_ERRORS; retries++) {
-    r = elevate_p ? elevating_open(path, oflag, mode) : ::open(path, oflag, mode);
-    if (r >= 0) {
-      return r;
-    }
-    if (!mgmt_transient_error()) {
-      break;
-    }
-  }
-  return r;
-}
 //-------------------------------------------------------------------------
 // mgmt_select
 //-------------------------------------------------------------------------
@@ -204,26 +142,6 @@ mgmt_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struc
 #else
   return ::select(nfds, readfds, writefds, errorfds, timeout);
 #endif
-}
-
-//-------------------------------------------------------------------------
-// mgmt_sendto
-//-------------------------------------------------------------------------
-
-int
-mgmt_sendto(int fd, void *buf, int len, int flags, struct sockaddr *to, int tolen)
-{
-  int r, retries;
-  for (retries = 0; retries < MGMT_MAX_TRANSIENT_ERRORS; retries++) {
-    r = ::sendto(fd, static_cast<char *>(buf), len, flags, to, tolen);
-    if (r >= 0) {
-      return r;
-    }
-    if (!mgmt_transient_error()) {
-      break;
-    }
-  }
-  return r;
 }
 
 //-------------------------------------------------------------------------

@@ -38,17 +38,11 @@
 
 #include "records/P_RecCore.h"
 
-int mgmt_readline(int fd, char *buf, int maxlen);
-int mgmt_writeline(int fd, const char *data, int nbytes);
-
 int mgmt_read_pipe(int fd, char *buf, int bytes_to_read);
 int mgmt_write_pipe(int fd, char *buf, int bytes_to_write);
 
 void mgmt_use_syslog();
 void mgmt_cleanup();
-
-struct in_addr *mgmt_sortipaddrs(int num, struct in_addr **list);
-bool mgmt_getAddrForIntr(char *intrName, sockaddr *addr, int *mtu = nullptr);
 
 /* the following functions are all DEPRECATED.  The Diags
    interface should be used exclusively in the future */
