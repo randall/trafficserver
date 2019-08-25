@@ -78,8 +78,7 @@ libhttp_a_SOURCES = \
 	ForwardedConfig.cc
 
 if BUILD_TESTS
-libhttp_a_SOURCES += HttpUpdateTester.cc \
-	RegressionHttpTransact.cc
+libhttp_a_SOURCES += RegressionHttpTransact.cc
 endif
 
 check_PROGRAMS = test_proxy_http

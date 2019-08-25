@@ -353,12 +353,6 @@ start_HttpProxyServer()
     // NULL. It would be useful to be able to detect errors and spew them here though.
   }
 
-#if TS_HAS_TESTS
-  if (is_action_tag_set("http_update_test")) {
-    init_http_update_test();
-  }
-#endif
-
   // Set up stat page for http connection count
   statPagesManager.register_http("connection_count", register_ShowConnectionCount);
 

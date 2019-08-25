@@ -52,47 +52,6 @@ HttpUpdateSM::destroy()
   httpUpdateSMAllocator.free(this);
 }
 
-Action *
-HttpUpdateSM::start_scheduled_update(Continuation *cont, HTTPHdr *request)
-{
-  // Use passed continuation's mutex for this state machine
-  this->mutex = cont->mutex;
-  SCOPED_MUTEX_LOCK(lock, this->mutex, this_ethread());
-
-  // Set up the Action
-  cb_cont   = cont;
-  cb_action = cont;
-
-  start_sub_sm();
-
-  // Make a copy of the request we being asked to do
-  t_state.hdr_info.client_request.create(HTTP_TYPE_REQUEST);
-  t_state.hdr_info.client_request.copy(request);
-
-  // Fix ME: What should these be set to since there is not a
-  //   real client
-  ats_ip4_set(&t_state.client_info.src_addr, htonl(INADDR_LOOPBACK), 0);
-  t_state.client_info.port_attribute = HttpProxyPort::TRANSPORT_DEFAULT;
-
-  t_state.req_flavor = HttpTransact::REQ_FLAVOR_SCHEDULED_UPDATE;
-
-  // We always deallocate this later so initialize it down
-  http_parser_init(&http_parser);
-
-  // We need to call state to add us to the http sm list
-  //   but since we can terminate the state machine on this
-  //   stack, do this by calling througth the main handler
-  //   so the sm will be properly terminated
-  this->default_handler = &HttpUpdateSM::state_add_to_list;
-  this->handleEvent(EVENT_NONE, nullptr);
-
-  if (cb_occured == 0) {
-    return &cb_action;
-  } else {
-    return ACTION_RESULT_DONE;
-  }
-}
-
 void
 HttpUpdateSM::handle_api_return()
 {

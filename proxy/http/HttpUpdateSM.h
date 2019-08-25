@@ -52,8 +52,6 @@ public:
   static HttpUpdateSM *allocate();
   void destroy() override;
 
-  Action *start_scheduled_update(Continuation *cont, HTTPHdr *req);
-
   //  private:
   bool cb_occured       = false;
   Continuation *cb_cont = nullptr;
@@ -72,6 +70,3 @@ HttpUpdateSM::allocate()
   extern ClassAllocator<HttpUpdateSM> httpUpdateSMAllocator;
   return httpUpdateSMAllocator.alloc();
 }
-
-// Regression/Testing Routing
-void init_http_update_test();

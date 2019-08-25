@@ -56,8 +56,6 @@ protected:
     self_type *_prev{nullptr}; // Backward link.
   } _link;
 
-  bool is_in_list() const;
-
   friend class Container;
 };
 
@@ -70,12 +68,6 @@ auto
 Message::Linkage::prev_ptr(self_type *that) -> self_type *&
 {
   return that->_link._prev;
-}
-
-bool
-Message::is_in_list() const
-{
-  return _link._next || _link._prev;
 }
 
 class Container
