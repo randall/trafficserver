@@ -646,26 +646,6 @@ ats_ip_getbestaddrinfo(const char *host, IpEndpoint *ip4, IpEndpoint *ip6)
 }
 
 int
-ats_ip_check_characters(std::string_view text)
-{
-  bool found_colon = false;
-  bool found_hex   = false;
-  for (char c : text) {
-    if (':' == c) {
-      found_colon = true;
-    } else if ('.' == c || isdigit(c)) { /* empty */
-      ;
-    } else if (isxdigit(c)) {
-      found_hex = true;
-    } else {
-      return AF_UNSPEC;
-    }
-  }
-
-  return found_hex && !found_colon ? AF_UNSPEC : found_colon ? AF_INET6 : AF_INET;
-}
-
-int
 ats_tcp_somaxconn()
 {
   int value = 0;

@@ -82,7 +82,6 @@ public:
 
   size_t count() const;
   self_type &clear();
-  Message::Severity max_severity() const;
   void print() const;
 
 protected:
@@ -120,14 +119,6 @@ Container::debug(std::string_view fmt, Args &&... args) -> self_type &
   msg->_severity = Message::LVL_DEBUG;
   _msgs.append(msg);
   return *this;
-}
-
-Message::Severity
-Container::max_severity() const
-{
-  auto spot = std::max_element(_msgs.begin(), _msgs.end(),
-                               [](Message const &lhs, Message const &rhs) { return lhs._severity < rhs._severity; });
-  return spot == _msgs.end() ? Message::Severity::LVL_DEBUG : spot->_severity;
 }
 
 void

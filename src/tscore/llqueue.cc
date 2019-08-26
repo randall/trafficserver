@@ -138,18 +138,6 @@ queue_len(LLQ *Q)
   return len;
 }
 
-uint64_t
-queue_highwater(LLQ *Q)
-{
-  uint64_t highwater;
-
-  /* Do I really need to grab the lock here? */
-  /* ink_mutex_acquire(&(Q->mux)); */
-  highwater = Q->highwater;
-  /* ink_mutex_release(&(Q->mux)); */
-  return highwater;
-}
-
 /*
  *---------------------------------------------------------------------------
  *

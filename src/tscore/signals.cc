@@ -113,25 +113,6 @@ check_signal_thread(void *ptr)
   return nullptr;
 }
 
-void
-signal_start_check_thread(signal_handler_t handler)
-{
-  ink_thread_create(nullptr, check_signal_thread, reinterpret_cast<void *>(handler), 0, 0, nullptr);
-}
-
-bool
-signal_is_masked(int signo)
-{
-  sigset_t current;
-
-  sigemptyset(&current);
-  if (ink_thread_sigsetmask(SIG_SETMASK, nullptr /* oldset */, &current) == 0) {
-    return sigismember(&current, signo) == 1;
-  }
-
-  return false;
-}
-
 bool
 signal_is_crash(int signo)
 {

@@ -149,14 +149,6 @@ int ats_ip_parse(std::string_view src,            ///< [in] String to search.
                  std::string_view *rest = nullptr ///< [out] Remnant past the addr/port if any.
 );
 
-/**  Check to see if a buffer contains only IP address characters.
-     @return
-    - AF_UNSPEC - not a numeric address.
-    - AF_INET - only digits and dots.
-    - AF_INET6 - colons found.
-*/
-int ats_ip_check_characters(std::string_view text);
-
 /**
   Wrapper for inet_addr().
 

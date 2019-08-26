@@ -35,18 +35,6 @@ operator<<(std::ostream &s, IpEndpoint const &addr)
   return s;
 }
 
-void
-IpMapTestPrint(IpMap &map)
-{
-  printf("IpMap Dump\n");
-  for (auto &spot : map) {
-    ip_text_buffer ipb1, ipb2;
-
-    printf("%s - %s : %p\n", ats_ip_ntop(spot.min(), ipb1, sizeof ipb1), ats_ip_ntop(spot.max(), ipb2, sizeof(ipb2)), spot.data());
-  }
-  printf("\n");
-}
-
 // --- Test helper classes ---
 class MapMarkedAt : public Catch::MatcherBase<IpMap>
 {

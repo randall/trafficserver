@@ -144,37 +144,6 @@ int64_to_str(char *buf, unsigned int buf_size, int64_t val, unsigned int *total_
   return out_buf;
 }
 
-int
-squid_timestamp_to_buf(char *buf, unsigned int buf_size, long timestamp_sec, long timestamp_usec)
-{
-  int res;
-  const unsigned int tmp_buf_size = 32;
-  char tmp_buf[tmp_buf_size];
-
-  unsigned int num_chars_s;
-  char *ts_s = int64_to_str(tmp_buf, tmp_buf_size - 4, timestamp_sec, &num_chars_s, 0, '0');
-  ink_assert(ts_s);
-
-  // convert milliseconds
-  //
-  tmp_buf[tmp_buf_size - 5] = '.';
-  int ms                    = timestamp_usec / 1000;
-  unsigned int num_chars_ms;
-  char ATS_UNUSED *ts_ms = int64_to_str(&tmp_buf[tmp_buf_size - 4], 4, ms, &num_chars_ms, 4, '0');
-  ink_assert(ts_ms && num_chars_ms == 4);
-
-  unsigned int chars_to_write = num_chars_s + 3; // no eos
-
-  if (buf_size >= chars_to_write) {
-    memcpy(buf, ts_s, chars_to_write);
-    res = chars_to_write;
-  } else {
-    res = -(static_cast<int>(chars_to_write));
-  }
-
-  return res;
-}
-
 #ifdef USE_TIME_STAMP_COUNTER_HRTIME
 uint32_t
 init_hrtime_TCS()

@@ -272,8 +272,6 @@ int ink_res_init(ink_res_state, IpEndpoint const *pHostList, size_t pHostListSiz
 int ink_res_mkquery(ink_res_state, int, const char *, int, int, const unsigned char *, int, const unsigned char *, unsigned char *,
                     int);
 
-int ink_ns_name_ntop(const u_char *src, char *dst, size_t dstsiz);
-
 /** Initialize global values for HttpProxyPort / Host Resolution.
  */
 void ts_host_res_global_init();

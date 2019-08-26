@@ -48,6 +48,5 @@ int enqueue(LLQ *q, void *data);
 void *dequeue(LLQ *q);
 bool queue_is_empty(LLQ *q);
 uint64_t queue_len(LLQ *Q);
-uint64_t queue_highwater(LLQ *Q);
 void delete_queue(LLQ *Q); /* only deletes an empty queue but
                               provides symmetry. */
