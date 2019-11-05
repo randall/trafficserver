@@ -23,7 +23,8 @@ import time
 import os
 
 # https://github.com/mpdavis/python-jose
-from jose import jwk, jwt
+from jose import jwt
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -41,7 +42,7 @@ def main():
     keys = config["keys"]
 
     # Randomly select a key
-    key_index = random.randint(0,len(keys)-1)
+    key_index = random.randint(0, len(keys)-1)
     print("Using Key: " + str(keys[key_index]["kid"]) + " to sign URI.")
     key = keys[key_index]
 
@@ -58,7 +59,7 @@ def main():
     if("aud" in config.keys()):
         claimset["aud"] = config["aud"]
 
-    if("cdnistt"  in config.keys()):
+    if("cdnistt" in config.keys()):
         if config["cdnistt"]:
             claimset["cdnistt"] = 1
             if("cdniets" in config.keys()):
@@ -66,9 +67,10 @@ def main():
             else:
                 claimset["cdniets"] = 30
 
-    Token = jwt.encode(claimset,key,algorithm=key["alg"])
+    Token = jwt.encode(claimset, key, algorithm=key["alg"])
 
     print("Signed URL: " + args.uri + "?urisigning=" + Token)
 
+
 if __name__ == "__main__":
-     main()
+    main()

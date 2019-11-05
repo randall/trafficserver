@@ -31,7 +31,7 @@ from docutils.parsers import rst
 from docutils.parsers.rst import directives
 from sphinx.domains import Domain, ObjType, std
 from sphinx.roles import XRefRole
-from sphinx.locale import  _
+from sphinx.locale import _
 import sphinx
 
 import os
@@ -47,6 +47,7 @@ try:
 except NameError:
     def is_string_type(s):
         return isinstance(s, str)
+
 
 class TSConfVar(std.Target):
     """
@@ -115,9 +116,7 @@ class TSConfVar(std.Target):
 
         if ('class' in self.options):
             title.set_class(self.options.get('class'))
-        # This has to be a distinct node before the title. if nested then
-        # the browser will scroll forward to just past the title.
-        anchor = nodes.target('', '', names=[cv_name])
+
         # Second (optional) arg is 'msgNode' - no idea what I should pass for that
         # or if it even matters, although I now think it should not be used.
         self.state.document.note_explicit_target(title)
@@ -239,9 +238,6 @@ class TSStat(std.Target):
 
         node.append(title)
 
-        # This has to be a distinct node before the title. if nested then
-        # the browser will scroll forward to just past the title.
-        anchor = nodes.target('', '', names=[stat_name])
         # Second (optional) arg is 'msgNode' - no idea what I should pass for that
         # or if it even matters, although I now think it should not be used.
         self.state.document.note_explicit_target(title)

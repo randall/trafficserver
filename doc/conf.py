@@ -38,8 +38,6 @@ from sphinx import version_info
 sys.path.insert(0, os.path.abspath('ext'))
 sys.path.insert(0, os.path.abspath('.'))
 
-from manpages import man_pages
-
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -345,11 +343,6 @@ latex_elements = {
     #'preamble': '',
 }
 
-if 'latex_a4' in tags:
-    latex_elements['papersize'] = 'a4paper'
-elif 'latex_paper' in tags:
-    latex_elements['papersiize'] = 'letterpaper'
-
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
@@ -378,8 +371,6 @@ latex_documents = [
 #latex_domain_indices = True
 
 # -- Options for manual page output --------------------------------------------
-
-# The global "man_pages" is imported from ts/manpages.py
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
