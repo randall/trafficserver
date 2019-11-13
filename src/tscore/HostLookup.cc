@@ -290,7 +290,6 @@ CharIndex::~CharIndex()
 void
 CharIndex::Insert(string_view match_data, HostBranch *toInsert)
 {
-  unsigned char index;
   CharIndexBlock *cur = &root;
 
   ink_assert(!match_data.empty());
@@ -304,7 +303,7 @@ CharIndex::Insert(string_view match_data, HostBranch *toInsert)
     illegalKey->emplace(match_data, toInsert);
   } else {
     while (true) {
-      index = asciiToTable[static_cast<unsigned char>(match_data.front())];
+      unsigned char index = asciiToTable[static_cast<unsigned char>(match_data.front())];
 
       // Check to see if are at the level we supposed be at
       if (match_data.size() == 1) {
@@ -886,7 +885,7 @@ HostLookup::MatchNext(HostLookupState *s, void **opaque_ptr)
   HostBranch *cur = s->cur;
 
   // Check to see if there is any work to be done
-  if (leaf_array.size() <= 0) {
+  if (leaf_array.empty()) {
     return false;
   }
 
