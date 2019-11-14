@@ -93,6 +93,7 @@ HostMatcher<Data, MatchResult>::HostMatcher(const char *name, const char *filena
 
 template <class Data, class MatchResult> HostMatcher<Data, MatchResult>::~HostMatcher()
 {
+  host_lookup->Print();
   delete host_lookup;
 }
 

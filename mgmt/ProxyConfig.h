@@ -60,7 +60,7 @@ public:
   enum {
     // The number of seconds to wait before garbage collecting stale ConfigInfo objects. There's
     // no good reason to tune this, outside of regression tests, so don't.
-    CONFIG_PROCESSOR_RELEASE_SECS = 60
+    CONFIG_PROCESSOR_RELEASE_SECS = 5
   };
 
   template <typename ClassType, typename ConfigType> struct scoped_config {

@@ -33,11 +33,11 @@
 #include "tscore/HostLookup.h"
 #include "tscpp/util/TextView.h"
 
-#include <string_view>
 #include <array>
 #include <memory>
 
 using std::string_view;
+using std::string;
 using ts::TextView;
 
 namespace
@@ -239,10 +239,6 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-    iterator()
-    { /*q.reserve(HOST_TABLE_DEPTH * 2);*/
-    } // was 6, guessing that was twice the table depth.
-
     value_type *operator->();
     value_type &operator*();
     bool operator==(self_type const &that) const;
@@ -263,7 +259,7 @@ public:
   };
 
   ~CharIndex();
-  void Insert(string_view match_data, HostBranch *toInsert);
+  void Insert(string match_data, HostBranch *toInsert);
   HostBranch *Lookup(string_view match_data);
 
   iterator begin();
@@ -279,6 +275,7 @@ CharIndex::~CharIndex()
 {
   // clean up the illegal key table.
   if (illegalKey) {
+    printf("~ CharIndex illegalKey\n");
     // TODO
     /*
   for (auto spot = illegalKey->begin(), limit = illegalKey->end(); spot != limit; delete &*(spot++)) {
@@ -293,9 +290,10 @@ CharIndex::~CharIndex()
 //   Places a binding for match_data to toInsert into the index
 //
 void
-CharIndex::Insert(string_view match_data, HostBranch *toInsert)
+CharIndex::Insert(string match_data, HostBranch *toInsert)
 {
   CharIndexBlock *cur = &root;
+  printf("CharIndex::Insert %p v: %s p: %p\n", this, std::string(match_data).c_str(), toInsert);
 
   ink_assert(!match_data.empty());
 
@@ -304,32 +302,34 @@ CharIndex::Insert(string_view match_data, HostBranch *toInsert)
     if (illegalKey == nullptr) {
       illegalKey.reset(new Table);
     }
+
     toInsert->key = match_data;
     illegalKey->emplace(match_data, toInsert);
-  } else {
-    while (true) {
-      unsigned char index = asciiToTable[static_cast<unsigned char>(match_data.front())];
+    return;
+  }
 
-      // Check to see if are at the level we supposed be at
-      if (match_data.size() == 1) {
-        // The slot should always be empty, no duplicate keys are allowed
-        ink_assert(cur->array[index].branch == nullptr);
-        cur->array[index].branch = toInsert;
-        break;
-      } else {
-        // We need to find the next level in the table
+  string_view md(match_data);
+  while (true) {
+    unsigned char index = asciiToTable[static_cast<unsigned char>(md.front())];
 
-        CharIndexBlock *next = cur->array[index].block.get();
+    // Check to see if are at the level we supposed be at
+    if (md.size() == 1) {
+      // The slot should always be empty, no duplicate keys are allowed
+      ink_assert(cur->array[index].branch == nullptr);
+      cur->array[index].branch = toInsert;
+      break;
+    } else {
+      // We need to find the next level in the table
+      CharIndexBlock *next = cur->array[index].block.get();
 
-        // Check to see if we need to expand the table
-        if (next == nullptr) {
-          next = new CharIndexBlock;
-          cur->array[index].block.reset(next);
-        }
-        cur = next;
+      // Check to see if we need to expand the table
+      if (next == nullptr) {
+        next = new CharIndexBlock;
+        cur->array[index].block.reset(next);
       }
-      match_data.remove_prefix(1);
+      cur = next;
     }
+    md.remove_prefix(1);
   }
 }
 
@@ -560,36 +560,37 @@ HostBranch::~HostBranch()
   switch (type) {
   case HOST_TERMINAL:
     break;
-  case HOST_HASH: {
-    /*
-HostTable *ht = next_level._table;
-for (auto it = ht->begin(); it != ht->end(); ++it) {
-delete it->second;
-}
-*/
+  case HOST_HASH:
     for (auto &item : *next_level._table) {
+      printf("HostBranch::~HostBranch(): HH %p killing %p from %p\n", this, &item, next_level._table);
       delete item.second;
     }
+
     delete next_level._table;
+
     next_level._table = nullptr;
-    //    for (auto spot = ht->begin(), limit = ht->end(); spot != limit; delete &*(spot++)) {
-    //   } // empty
-    // delete ht;
-  } break;
-  case HOST_INDEX: {
-    CharIndex *ci = next_level._index;
-    for (auto &branch : *ci) {
-      printf("HostBranch::~HostBranch(): %p killing %p from %p\n", this, &branch, ci);
+    break;
+  case HOST_INDEX:
+    // match_data
+    for (auto &branch : *next_level._index) {
+      printf("HostBranch::~HostBranch(): HI %p killing %p from %p\n", this, &branch, next_level._index);
       delete &branch;
     }
-    delete ci;
+
+    delete next_level._index;
     next_level._index = nullptr;
-  } break;
+
+    break;
   case HOST_ARRAY:
     for (auto &item : *next_level._array) {
+      printf("HostBranch::~HostBranch(): HA %p killing %p from %p (%s)\n", this, &item, next_level._array, item.match_data.c_str());
+      //      printf("HostBranch::~HostBranch(): HA %p killing %p from %p\n", this, &item, next_level._array,
+      //      std::string(item.match_data).c_str());
       delete item.branch;
     }
+
     delete next_level._array;
+
     next_level._array = nullptr;
     break;
   }
@@ -620,7 +621,7 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
 {
   for (auto curIndex : hb->leaf_indices) {
     auto &leaf{leaf_array[curIndex]};
-    printf("\t\t%s for %.*s\n", LeafTypeStr[leaf.type], static_cast<int>(leaf.match.size()), leaf.match.data());
+    printf("\t%s for %.*s\n", LeafTypeStr[leaf.type], static_cast<int>(leaf.match.size()), leaf.match.data());
     f(leaf_array[curIndex].opaque_data);
   }
 
@@ -639,9 +640,11 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
     }
     break;
   case HostBranch::HOST_ARRAY:
+    /*
     for (auto &item : *(hb->next_level._array)) {
       PrintHostBranch(item.branch, f);
     }
+    */
     break;
   }
 }
@@ -655,7 +658,7 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
 //         HostBranch
 //
 HostBranch *
-HostLookup::TableNewLevel(HostBranch *from, string_view level_data)
+HostLookup::TableNewLevel(HostBranch *from, string level_data)
 {
   ink_assert(from->type == HostBranch::HOST_TERMINAL);
 
@@ -683,12 +686,12 @@ HostLookup::TableNewLevel(HostBranch *from, string_view level_data)
 //      by class HostMatcher
 //
 HostBranch *
-HostLookup::InsertBranch(HostBranch *insert_in, string_view level_data)
+HostLookup::InsertBranch(HostBranch *insert_in, string level_data)
 {
   HostBranch *new_branch = new HostBranch;
-  new_branch->key        = level_data;
   new_branch->type       = HostBranch::HOST_TERMINAL;
   new_branch->level_idx  = insert_in->level_idx + 1;
+  new_branch->key        = level_data;
 
   switch (insert_in->type) {
   case HostBranch::HOST_TERMINAL:
@@ -696,15 +699,15 @@ HostLookup::InsertBranch(HostBranch *insert_in, string_view level_data)
     ink_release_assert(0);
     break;
   case HostBranch::HOST_HASH:
-    //    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._table->emplace(level_data, new_branch);
     break;
   case HostBranch::HOST_INDEX:
-    //   printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._index->Insert(level_data, new_branch);
     break;
   case HostBranch::HOST_ARRAY: {
-    //  printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
 
     //    HostArray* array = insert_in->next_level._array;
 
@@ -786,7 +789,7 @@ HostLookup::FindNextLevel(HostBranch *from, string_view level_data, bool bNotPro
 //    the elements corresponding to match_data
 //
 void
-HostLookup::TableInsert(string_view match_data, int index, bool domain_record)
+HostLookup::TableInsert(string match_data, int index, bool domain_record)
 {
   HostBranch *cur = &root;
   HostBranch *next;
@@ -800,11 +803,11 @@ HostLookup::TableInsert(string_view match_data, int index, bool domain_record)
     TextView token{match.take_suffix_at('.')};
 
     if (cur->next_level._ptr == nullptr) {
-      cur = TableNewLevel(cur, token);
+      cur = TableNewLevel(cur, std::string(token));
     } else {
       next = FindNextLevel(cur, token);
       if (next == nullptr) {
-        cur = InsertBranch(cur, token);
+        cur = InsertBranch(cur, std::string(token));
       } else {
         cur = next;
       }
@@ -977,7 +980,7 @@ HostLookup::AllocateSpace(int num_entries)
 //   Insert a new element in to the table
 //
 void
-HostLookup::NewEntry(string_view match_data, bool domain_record, void *opaque_data_in)
+HostLookup::NewEntry(string match_data, bool domain_record, void *opaque_data_in)
 {
   leaf_array.emplace_back(match_data, opaque_data_in);
   TableInsert(match_data, leaf_array.size() - 1, domain_record);
