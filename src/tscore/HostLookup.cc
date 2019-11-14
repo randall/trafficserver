@@ -239,7 +239,9 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-    iterator() { q.reserve(HOST_TABLE_DEPTH * 2); } // was 6, guessing that was twice the table depth.
+    iterator()
+    { /*q.reserve(HOST_TABLE_DEPTH * 2);*/
+    } // was 6, guessing that was twice the table depth.
 
     value_type *operator->();
     value_type &operator*();
@@ -277,9 +279,12 @@ CharIndex::~CharIndex()
 {
   // clean up the illegal key table.
   if (illegalKey) {
-    for (auto spot = illegalKey->begin(), limit = illegalKey->end(); spot != limit; delete &*(spot++)) {
-      ; // empty
-    }
+    // TODO
+    /*
+  for (auto spot = illegalKey->begin(), limit = illegalKey->end(); spot != limit; delete &*(spot++)) {
+    ; // empty
+  }
+  */
   }
 }
 
@@ -427,7 +432,7 @@ CharIndex::iterator::advance() -> self_type &
       break;
     } else if (state.block->array[state.index].block != nullptr) {
       // There is a lower level block to iterate over, store our current state and descend
-      q[cur_level++] = state;
+      q.push_back(state);
       cur_level++;
       state.block = state.block->array[state.index].block.get();
       state.index = 0;
@@ -551,28 +556,41 @@ const char *LeafTypeStr[] = {"Leaf Invalid", "Host (Partial)", "Host (Full)", "D
 //
 HostBranch::~HostBranch()
 {
-  printf("HostBranch::~HostBranch(): %p\n", this);
+  printf("HostBranch::~HostBranch(): %p type: %d\n", this, type);
   switch (type) {
   case HOST_TERMINAL:
     break;
   case HOST_HASH: {
-    HostTable *ht = next_level._table;
-    for (auto spot = ht->begin(), limit = ht->end(); spot != limit; delete &*(spot++)) {
-    } // empty
-    delete ht;
+    /*
+HostTable *ht = next_level._table;
+for (auto it = ht->begin(); it != ht->end(); ++it) {
+delete it->second;
+}
+*/
+    for (auto &item : *next_level._table) {
+      delete item.second;
+    }
+    delete next_level._table;
+    next_level._table = nullptr;
+    //    for (auto spot = ht->begin(), limit = ht->end(); spot != limit; delete &*(spot++)) {
+    //   } // empty
+    // delete ht;
   } break;
   case HOST_INDEX: {
     CharIndex *ci = next_level._index;
     for (auto &branch : *ci) {
+      printf("HostBranch::~HostBranch(): %p killing %p from %p\n", this, &branch, ci);
       delete &branch;
     }
     delete ci;
+    next_level._index = nullptr;
   } break;
   case HOST_ARRAY:
     for (auto &item : *next_level._array) {
       delete item.branch;
     }
     delete next_level._array;
+    next_level._array = nullptr;
     break;
   }
 }
@@ -646,11 +664,11 @@ HostLookup::TableNewLevel(HostBranch *from, string_view level_data)
   if (from->level_idx == 0) {
     from->type              = HostBranch::HOST_INDEX;
     from->next_level._index = new CharIndex;
-    printf("create ci: %p\n", from->next_level._index);
+    //    printf("create ci: %p\n", from->next_level._index);
   } else {
     from->type              = HostBranch::HOST_ARRAY;
     from->next_level._array = new HostArray;
-    printf("create array: level: %s = %p\n", std::string(level_data).c_str(), from->next_level._array);
+    //    printf("create array: level: %s = %p\n", std::string(level_data).c_str(), from->next_level._array);
   }
 
   return InsertBranch(from, level_data);
@@ -678,15 +696,15 @@ HostLookup::InsertBranch(HostBranch *insert_in, string_view level_data)
     ink_release_assert(0);
     break;
   case HostBranch::HOST_HASH:
-    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    //    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._table->emplace(level_data, new_branch);
     break;
   case HostBranch::HOST_INDEX:
-    printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    //   printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._index->Insert(level_data, new_branch);
     break;
   case HostBranch::HOST_ARRAY: {
-    printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    //  printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
 
     //    HostArray* array = insert_in->next_level._array;
 
@@ -696,16 +714,16 @@ HostLookup::InsertBranch(HostBranch *insert_in, string_view level_data)
       // using HostTable = std::unordered_map<std::string_view, HostBranch *>;
       //
       auto ht = new HostTable;
-      printf("new HT : %s=%p\n", std::string(level_data).c_str(), ht);
+      //      printf("new HT : %s=%p\n", std::string(level_data).c_str(), ht);
       ht->emplace(level_data, new_branch);
 
       for (auto &item : *ha) {
-        printf("emplace : %s=%p\n", item.match_data.c_str(), item.branch);
+        //        printf("emplace : %s=%p\n", item.match_data.c_str(), item.branch);
         ht->emplace(item.match_data, item.branch);
       }
 
       // Ring out the old, ring in the new
-      printf("delete : %p\n", ha);
+      //      printf("delete : %p\n", ha);
       delete ha;
 
       insert_in->next_level._table = ht;
@@ -738,15 +756,15 @@ HostLookup::FindNextLevel(HostBranch *from, string_view level_data, bool bNotPro
     break;
   case HostBranch::HOST_HASH: {
     HostTable *table = from->next_level._table;
-    printf("find : against %p value: %s\n", table, std::string(level_data).c_str());
-
-    for (const auto &x : *table) {
-      // printf("in table: %s=%p\n", std::string(x.first).c_str(), x.second);
-      printf("in table: %p\n", x.second);
-      // printf("in table: %s\n", std::string(x.first).c_str());
-    }
-
-    auto spot = table->find(level_data);
+    //   printf("find : against %p value: %s\n", table, std::string(level_data).c_str());
+    /*
+        for (const auto &x : *table) {
+          // printf("in table: %s=%p\n", std::string(x.first).c_str(), x.second);
+          printf("in table: %p\n", x.second);
+          // printf("in table: %s\n", std::string(x.first).c_str());
+        }
+    */
+    auto spot = table->find(std::string(level_data));
 
     r = spot == table->end() ? nullptr : spot->second;
   } break;
