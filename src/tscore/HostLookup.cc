@@ -275,7 +275,6 @@ CharIndex::~CharIndex()
 {
   // clean up the illegal key table.
   if (illegalKey) {
-    printf("~ CharIndex illegalKey\n");
     // TODO
   }
 }
@@ -287,7 +286,6 @@ void
 CharIndex::Insert(string match_data, HostBranch *toInsert)
 {
   CharIndexBlock *cur = &root;
-  printf("CharIndex::Insert %p v: %s p: %p\n", this, std::string(match_data).c_str(), toInsert);
 
   ink_assert(!match_data.empty());
 
@@ -370,7 +368,6 @@ CharIndex::Lookup(string_view match_data)
 auto
 CharIndex::begin() -> iterator
 {
-  printf("CharIndex::begin()\n");
   iterator zret;
 
   zret.state.block = &root;
@@ -388,7 +385,7 @@ CharIndex::begin() -> iterator
 auto
 CharIndex::end() -> iterator
 {
-  printf("CharIndex::end()\n");
+    /*
   iterator zret;
 
   zret.state.block = &root;
@@ -407,54 +404,85 @@ auto CharIndex::iterator::operator*() -> value_type &
 auto
 CharIndex::iterator::advance() -> self_type &
 {
-  printf("advance() START %p, state.index: %d block: %p\n", this, state.index, state.block);
+//  bool check_branch_p{false}; // skip local branch on the first loop.
 
-  bool check_branch_p{false}; // skip local branch on the first loop.
+   bool first_element;
+int index;
+  // bool first_element is used to tell if first elemente
+  //  pointed to by s has already been returned to caller
+  //  it has unless we are being called from iter_first
+  if (state.index < 0) {
+    first_element = false;
+    index         = state.index + 1;
+  } else {
+    first_element = true;
+    index         = state.index;
+  }
 
-  do {
+  while (true) {
     // Check to see if we need to go back up a level
     if (state.index >= numLegalChars) {
-      printf("advance() BAK? %p state: %p\n", this, &state);
-      if (cur_level <= 0) {    // No more levels so bail out
-        printf("advance() NULLing %p, state.index: %d block: %p\n", this, state.index, state.block);
+      if (cur_level <= 0) {
+        // No more levels so bail out
         state.block = nullptr; // carefully make this @c equal to the end iterator.
         state.index = -1;
         break;
       } else {
-      printf("advance() BAK %p state: %p\n", this, &state);
         // Go back up to a stored level
-        state = q[--cur_level];
+        //state = q[--cur_level];
+        state = q[cur_level - 1] ; // mabye this?
+        cur_level--;
         ++state.index; // did that one before descending.
       }
-    } else if (check_branch_p && state.block->array[state.index].branch != nullptr) {
-        printf("advance() NOT %p state: %p\n", this, &state);
+    } else {
+      // Check to see if there is something to return
+      //
+      //  Note: we check for something to return before a descending
+      //    a level so that when we come back up we will
+      //    be done with this index
+      //
+      if (state.block->array[state.index].branch != nullptr && first_element == false) {
+          break;
+      } else if (state.block->array[state.index].block != nullptr) {
+          // There is a lower level block to iterate over, store our current state and descend
+          q.push_back(state);
+
+          cur_level++;
+          state.block = state.block->array[state.index].block.get();
+          state.index = 0;
+      } else {
+          // Nothing here so advance to next index
+          state.index ++;
+
+      }
+    }
+    first_element = false;
+  }
+/*
+    else if (state.block->array[state.index].branch != nullptr) {
       //  Note: we check for a branch on this level before a descending a level so that when we come back up
       //  this level will be done with this index.
-      break;
+//      break;
+        return *this;
     } else if (state.block->array[state.index].block != nullptr) {
-        printf("advance() LL %p state: %p\n", this, &state);
       // There is a lower level block to iterate over, store our current state and descend
       q.push_back(state);
 
       cur_level++;
       state.block = state.block->array[state.index].block.get();
       state.index = 0;
-        printf("advance() LLX %p state: %p level:%d block: %p\n", this, &state, cur_level, state.block);
     } else {
       ++state.index;
     }
-    check_branch_p = true;
-  } while (true);
-
-  printf("advance() END  %p state.index: %d block: %p cur_level: %d\n", this, state.index, state.block, cur_level);
-
+ //   check_branch_p = true;
+  }
+    */
   return *this;
 }
 
 auto
 CharIndex::iterator::operator++() -> self_type &
 {
-  printf("CharIndex::iterator()++\n");
   return this->advance();
 }
 
@@ -564,13 +592,11 @@ const char *LeafTypeStr[] = {"Leaf Invalid", "Host (Partial)", "Host (Full)", "D
 //
 HostBranch::~HostBranch()
 {
-  printf("HostBranch::~HostBranch(): %p type: %d\n", this, type);
   switch (type) {
   case HOST_TERMINAL:
     break;
   case HOST_HASH:
     for (auto &item : *next_level._table) {
-      printf("HostBranch::~HostBranch(): HH %p killing %p from %p\n", this, &item, next_level._table);
       delete item.second;
     }
 
@@ -581,7 +607,6 @@ HostBranch::~HostBranch()
   case HOST_INDEX:
     // match_data
     for (auto &branch : *next_level._index) {
-      printf("HostBranch::~HostBranch(): HI %p killing %p from %p\n", this, &branch, next_level._index);
       delete &branch;
     }
 
@@ -591,9 +616,6 @@ HostBranch::~HostBranch()
     break;
   case HOST_ARRAY:
     for (auto &item : *next_level._array) {
-      printf("HostBranch::~HostBranch(): HA %p killing %p from %p (%s)\n", this, &item, next_level._array, item.match_data.c_str());
-      //      printf("HostBranch::~HostBranch(): HA %p killing %p from %p\n", this, &item, next_level._array,
-      //      std::string(item.match_data).c_str());
       delete item.branch;
     }
 
@@ -635,29 +657,24 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
 
   switch (hb->type) {
   case HostBranch::HOST_TERMINAL:
-    printf("PHB Terminal: %p\n", hb);
     ink_assert(hb->next_level._ptr == nullptr);
     break;
   case HostBranch::HOST_HASH:
-    printf("PHB HA HH: %p index: %p\n", hb, hb->next_level._table);
     for (auto &branch : *(hb->next_level._table)) {
-    printf("PHB HA HH: %p index: %p branch.second: %p\n", hb, hb->next_level._table, branch.second);
       PrintHostBranch(branch.second, f);
     }
     break;
   case HostBranch::HOST_INDEX:
-    printf("PHB HI HB: %p index: %p\n", hb, hb->next_level._index);
     for (auto &branch : *(hb->next_level._index)) {
-      printf("PHB HI HB: %p index: %p branch: %p\n", hb, hb->next_level._index, &branch);
       PrintHostBranch(&branch, f);
     }
     break;
   case HostBranch::HOST_ARRAY:
-    printf("PHB HA HB: %p index: %p\n", hb, hb->next_level._array);
+
     for (auto &item : *(hb->next_level._array)) {
-    printf("PHB HA HB: %p index: %p item: %p\n", hb, hb->next_level._array, &item);
       PrintHostBranch(item.branch, f);
     }
+
     break;
   }
 }
@@ -680,11 +697,9 @@ HostLookup::TableNewLevel(HostBranch *from, string level_data)
   if (from->level_idx == 0) {
     from->type              = HostBranch::HOST_INDEX;
     from->next_level._index = new CharIndex;
-    //    printf("create ci: %p\n", from->next_level._index);
   } else {
     from->type              = HostBranch::HOST_ARRAY;
     from->next_level._array = new HostArray;
-    //    printf("create array: level: %s = %p\n", std::string(level_data).c_str(), from->next_level._array);
   }
 
   return InsertBranch(from, level_data);
@@ -712,15 +727,12 @@ HostLookup::InsertBranch(HostBranch *insert_in, string level_data)
     ink_release_assert(0);
     break;
   case HostBranch::HOST_HASH:
-    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._table->emplace(level_data, new_branch);
     break;
   case HostBranch::HOST_INDEX:
-    printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
     insert_in->next_level._index->Insert(level_data, new_branch);
     break;
   case HostBranch::HOST_ARRAY: {
-    printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
 
     //    HostArray* array = insert_in->next_level._array;
 
@@ -730,16 +742,13 @@ HostLookup::InsertBranch(HostBranch *insert_in, string level_data)
       // using HostTable = std::unordered_map<std::string_view, HostBranch *>;
       //
       auto ht = new HostTable;
-      //      printf("new HT : %s=%p\n", std::string(level_data).c_str(), ht);
       ht->emplace(level_data, new_branch);
 
       for (auto &item : *ha) {
-        //        printf("emplace : %s=%p\n", item.match_data.c_str(), item.branch);
         ht->emplace(item.match_data, item.branch);
       }
 
       // Ring out the old, ring in the new
-      //      printf("delete : %p\n", ha);
       delete ha;
 
       insert_in->next_level._table = ht;
@@ -772,14 +781,6 @@ HostLookup::FindNextLevel(HostBranch *from, string_view level_data, bool bNotPro
     break;
   case HostBranch::HOST_HASH: {
     HostTable *table = from->next_level._table;
-    //   printf("find : against %p value: %s\n", table, std::string(level_data).c_str());
-    /*
-        for (const auto &x : *table) {
-          // printf("in table: %s=%p\n", std::string(x.first).c_str(), x.second);
-          printf("in table: %p\n", x.second);
-          // printf("in table: %s\n", std::string(x.first).c_str());
-        }
-    */
     auto spot = table->find(std::string(level_data));
 
     r = spot == table->end() ? nullptr : spot->second;
