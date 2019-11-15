@@ -239,7 +239,7 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-    value_type *operator->();
+//    value_type *operator->();
     value_type &operator*();
     bool operator==(self_type const &that) const;
     bool operator!=(self_type const &that) const;
@@ -251,7 +251,7 @@ public:
     // Where we got the last element from
     State state;
 
-    //  Queue of the above levels
+    // Queue of the above levels
     std::vector<State> q;
 
     // internal methods
@@ -277,15 +277,9 @@ CharIndex::~CharIndex()
   if (illegalKey) {
     printf("~ CharIndex illegalKey\n");
     // TODO
-    /*
-  for (auto spot = illegalKey->begin(), limit = illegalKey->end(); spot != limit; delete &*(spot++)) {
-    ; // empty
-  }
-  */
   }
 }
 
-// void CharIndex::Insert(const char* match_data, HostBranch* toInsert)
 //
 //   Places a binding for match_data to toInsert into the index
 //
@@ -376,77 +370,102 @@ CharIndex::Lookup(string_view match_data)
 auto
 CharIndex::begin() -> iterator
 {
+  printf("CharIndex::begin()\n");
   iterator zret;
+
   zret.state.block = &root;
   zret.state.index = 0;
   zret.cur_level   = 0;
+
   if (root.array[0].branch == nullptr) {
     zret.advance();
   }
+
   return zret;
 }
+
+//CharIndex::iterator ENDL;
+//static CharIndex NIL;
 
 auto
 CharIndex::end() -> iterator
 {
-  return {};
+  printf("CharIndex::end()\n");
+  iterator zret;
+
+  zret.state.block = &root;
+  zret.state.index = -1;
+  zret.cur_level   = 0;
+
+//  return NIL.end();
+//  return this;
+  return zret;
 }
 
+/*
 auto CharIndex::iterator::operator-> () -> value_type *
 {
   ink_assert(state.block != nullptr); // clang!
   return state.block->array[state.index].branch;
 }
-
+*/
 auto CharIndex::iterator::operator*() -> value_type &
 {
   ink_assert(state.block != nullptr); // clang!
   return *(state.block->array[state.index].branch);
 }
 
-//
-// HostBranch* CharIndex::iter_next(CharIndexIterState* s)
-//
-//    Finds the next element in the char index and returns
-//      a pointer to it.  If there are no more elements, nullptr
-//      is returned
-//
 auto
 CharIndex::iterator::advance() -> self_type &
 {
+  printf("advance() START %p, state.index: %d block: %p\n", this, state.index, state.block);
+
   bool check_branch_p{false}; // skip local branch on the first loop.
+
   do {
     // Check to see if we need to go back up a level
     if (state.index >= numLegalChars) {
+      printf("advance() BAK? %p state: %p\n", this, &state);
       if (cur_level <= 0) {    // No more levels so bail out
+        printf("advance() NULLing %p, state.index: %d block: %p\n", this, state.index, state.block);
         state.block = nullptr; // carefully make this @c equal to the end iterator.
         state.index = -1;
         break;
-      } else { // Go back up to a stored level
+      } else {
+      printf("advance() BAK %p state: %p\n", this, &state);
+        // Go back up to a stored level
         state = q[--cur_level];
         ++state.index; // did that one before descending.
       }
     } else if (check_branch_p && state.block->array[state.index].branch != nullptr) {
+        printf("advance() NOT %p state: %p\n", this, &state);
       //  Note: we check for a branch on this level before a descending a level so that when we come back up
       //  this level will be done with this index.
       break;
     } else if (state.block->array[state.index].block != nullptr) {
+        printf("advance() LL %p state: %p\n", this, &state);
       // There is a lower level block to iterate over, store our current state and descend
       q.push_back(state);
+
       cur_level++;
       state.block = state.block->array[state.index].block.get();
       state.index = 0;
+        printf("advance() LLX %p state: %p level:%d block: %p\n", this, &state, cur_level, state.block);
     } else {
       ++state.index;
     }
     check_branch_p = true;
   } while (true);
+
+  printf("advance() END  %p state.index: %d block: %p cur_level: %d\n", this, state.index, state.block, cur_level);
+
   return *this;
 }
 
 auto
 CharIndex::iterator::operator++() -> self_type &
 {
+  printf("CharIndex::iterator()++\n");
   return this->advance();
 }
 
@@ -635,16 +654,18 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
     }
     break;
   case HostBranch::HOST_INDEX:
+    printf("PHB HI HB: %p index: %p\n", hb, hb->next_level._index);
     for (auto &branch : *(hb->next_level._index)) {
+      printf("PHB HI HB: %p index: %p branch: %p\n", hb, hb->next_level._index, &branch);
       PrintHostBranch(&branch, f);
     }
     break;
   case HostBranch::HOST_ARRAY:
-    /*
+/*
     for (auto &item : *(hb->next_level._array)) {
       PrintHostBranch(item.branch, f);
     }
-    */
+*/
     break;
   }
 }
