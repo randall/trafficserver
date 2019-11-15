@@ -384,8 +384,6 @@ CharIndex::begin() -> iterator
   return zret;
 }
 
-//CharIndex::iterator ENDL;
-//static CharIndex NIL;
 
 auto
 CharIndex::end() -> iterator
@@ -397,18 +395,9 @@ CharIndex::end() -> iterator
   zret.state.index = -1;
   zret.cur_level   = 0;
 
-//  return NIL.end();
-//  return this;
   return zret;
 }
 
-/*
-auto CharIndex::iterator::operator-> () -> value_type *
-{
-  ink_assert(state.block != nullptr); // clang!
-  return state.block->array[state.index].branch;
-}
-*/
 auto CharIndex::iterator::operator*() -> value_type &
 {
   ink_assert(state.block != nullptr); // clang!
@@ -646,10 +635,13 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
 
   switch (hb->type) {
   case HostBranch::HOST_TERMINAL:
+    printf("PHB Terminal: %p\n", hb);
     ink_assert(hb->next_level._ptr == nullptr);
     break;
   case HostBranch::HOST_HASH:
+    printf("PHB HA HH: %p index: %p\n", hb, hb->next_level._table);
     for (auto &branch : *(hb->next_level._table)) {
+    printf("PHB HA HH: %p index: %p branch.second: %p\n", hb, hb->next_level._table, branch.second);
       PrintHostBranch(branch.second, f);
     }
     break;
@@ -661,11 +653,11 @@ HostLookup::PrintHostBranch(HostBranch *hb, PrintFunc const &f)
     }
     break;
   case HostBranch::HOST_ARRAY:
-/*
+    printf("PHB HA HB: %p index: %p\n", hb, hb->next_level._array);
     for (auto &item : *(hb->next_level._array)) {
+    printf("PHB HA HB: %p index: %p item: %p\n", hb, hb->next_level._array, &item);
       PrintHostBranch(item.branch, f);
     }
-*/
     break;
   }
 }
