@@ -726,15 +726,15 @@ HostLookup::InsertBranch(HostBranch *insert_in, string level_data)
     ink_release_assert(0);
     break;
   case HostBranch::HOST_HASH:
-    printf("insert hh : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert hh : %p=%s=%p\n", insert_in->next_level._index, std::string(level_data).c_str(), new_branch);
     insert_in->next_level._table->emplace(level_data, new_branch);
     break;
   case HostBranch::HOST_INDEX:
-    printf("insert hi : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert hi : %p=%s=%p\n", insert_in->next_level._index, std::string(level_data).c_str(), new_branch);
     insert_in->next_level._index->Insert(level_data, new_branch);
     break;
   case HostBranch::HOST_ARRAY: {
-    printf("insert ha : %s=%p\n", std::string(level_data).c_str(), new_branch);
+    printf("insert ha : %p=%s=%p\n", insert_in->next_level._array,  std::string(level_data).c_str(), new_branch);
 
     //    HostArray* array = insert_in->next_level._array;
 
