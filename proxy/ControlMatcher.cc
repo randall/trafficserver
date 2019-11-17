@@ -95,8 +95,10 @@ template <class Data, class MatchResult> HostMatcher<Data, MatchResult>::~HostMa
 {
   printf("~HostMatcher: gonna print\n");
   host_lookup->Print();
+  printf("~HostMatcher: done print\n");
   printf("~HostMatcher: gonna delete\n");
   delete host_lookup;
+  printf("~HostMatcher: done delete\n");
 }
 
 //
