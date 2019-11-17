@@ -31,6 +31,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <string>
 #include <string_view>
 #include <functional>
@@ -41,7 +42,43 @@ constexpr int HOST_TABLE_DEPTH = 3; // Controls the max number of levels in the 
 constexpr int HOST_ARRAY_MAX   = 8; // Sets the fixed array size
 
 class CharIndex;
-class HostArray;
+struct HostBranch;
+
+//
+// class HostArray
+//
+//   Is a fixed size array for holding HostBranch*
+//   Allows only sequential access to data
+//
+
+class HostArray
+{
+public:
+  /// Element of the @c HostArray.
+  struct Item {
+    HostBranch *branch{nullptr}; ///< Next branch.
+    std::string match_data;      ///< Match data for that branch.
+  };
+  using Array = std::array<Item, HOST_ARRAY_MAX>;
+
+public:
+  bool Insert(std::string_view match_data_in, HostBranch *toInsert);
+  HostBranch *Lookup(std::string_view match_data_in, bool bNotProcess);
+
+  Array::iterator
+  begin()
+  {
+    return array.begin();
+  }
+  Array::iterator
+  end()
+  {
+    return array.begin() + _size;
+  }
+private:
+  int _size{0}; // number of elements currently in the array
+  Array array;
+};
 
 // The data in the HostMatcher tree is pointers to HostBranches. No duplicates keys permitted in the tree.  To handle
 // multiple data items bound the same key, the HostBranch has the lead_indexs array which stores pointers (in the form

@@ -457,41 +457,6 @@ CharIndex::iterator::operator!=(const self_type &that) const
   return !(*this == that);
 }
 
-// class HostArray
-//
-//   Is a fixed size array for holding HostBranch*
-//   Allows only sequential access to data
-//
-
-class HostArray
-{
-  /// Element of the @c HostArray.
-  struct Item {
-    HostBranch *branch{nullptr}; ///< Next branch.
-    std::string match_data;      ///< Match data for that branch.
-  };
-  using Array = std::array<Item, HOST_ARRAY_MAX>;
-
-public:
-  bool Insert(string_view match_data_in, HostBranch *toInsert);
-  HostBranch *Lookup(string_view match_data_in, bool bNotProcess);
-
-  Array::iterator
-  begin()
-  {
-    return array.begin();
-  }
-  Array::iterator
-  end()
-  {
-    return array.begin() + _size;
-  }
-
-private:
-  int _size{0}; // number of elements currently in the array
-  Array array;
-};
-
 // bool HostArray::Insert(const char* match_data_in, HostBranch* toInsert)
 //
 //    Places toInsert into the array with key match_data if there

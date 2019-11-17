@@ -175,6 +175,7 @@ test_tscore_SOURCES = \
 	unit_tests/test_BufferWriterFormat.cc \
 	unit_tests/test_Extendible.cc \
 	unit_tests/test_History.cc \
+	unit_tests/test_HostArray.cc \
 	unit_tests/test_ink_inet.cc \
 	unit_tests/test_IntrusiveHashMap.cc \
 	unit_tests/test_IntrusivePtr.cc \
@@ -183,7 +184,7 @@ test_tscore_SOURCES = \
 	unit_tests/test_List.cc \
 	unit_tests/test_MemArena.cc \
 	unit_tests/test_MT_hashtable.cc \
-  unit_tests/test_ParseRules.cc \
+	unit_tests/test_ParseRules.cc \
 	unit_tests/test_PriorityQueue.cc \
 	unit_tests/test_Ptr.cc \
 	unit_tests/test_Regex.cc \
