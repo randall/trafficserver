@@ -28,16 +28,21 @@
 TEST_CASE("test HostArray", "[libts][HostArray]")
 {
   HostArray ha;
+
   std::string hostname = "phobos.apple.com.edgesuite.net";
   HostBranch *new_branch = new HostBranch;
   new_branch->key        = hostname;
   new_branch->type       = HostBranch::HOST_TERMINAL;
   new_branch->level_idx  = 1;
   REQUIRE(ha.Insert(hostname, new_branch));
+  REQUIRE(ha.size() == 1);
 
-  for (auto &hb : ha) {
-    printf("hb: %p\n", &hb);
-
-  }
+  std::string hostname2 = "apple.com.edgesuite.net";
+  HostBranch *new_branch2 = new HostBranch;
+  new_branch2->key        = hostname2;
+  new_branch2->type       = HostBranch::HOST_TERMINAL;
+  new_branch2->level_idx  = 2;
+  REQUIRE(ha.Insert(hostname2, new_branch));
+  REQUIRE(ha.size() == 2);
 
 }

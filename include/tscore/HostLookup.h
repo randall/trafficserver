@@ -75,6 +75,7 @@ public:
   {
     return array.begin() + _size;
   }
+  size_t size() { return _size; }
 private:
   int _size{0}; // number of elements currently in the array
   Array array;
