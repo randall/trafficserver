@@ -242,7 +242,7 @@ struct CharIndexBlock {
 class CharIndex
 {
 public:
-  struct iterator : public std::iterator<std::forward_iterator_tag, HostBranch, int> {
+  struct iterator : public std::iterator<std::forward_iterator_tag, HostBranch> {
     using self_type = iterator;
 
     struct State {
@@ -250,7 +250,7 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-    iterator() { q.reserve(HOST_TABLE_DEPTH * 2); } // was 6, guessing that was twice the table depth.
+//    iterator() { printf("wtf\n"); }
 
     value_type *operator->();
     value_type &operator*();

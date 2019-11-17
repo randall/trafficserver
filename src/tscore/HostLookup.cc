@@ -276,6 +276,7 @@ CharIndex::Lookup(string_view match_data)
 auto
 CharIndex::begin() -> iterator
 {
+  printf("begin()\n");
   iterator zret;
   zret.state.block = &root;
   zret.state.index = 0;
@@ -289,6 +290,7 @@ CharIndex::begin() -> iterator
 auto
 CharIndex::end() -> iterator
 {
+  printf("end()\n");
   return {};
 }
 
@@ -314,9 +316,11 @@ auto CharIndex::iterator::operator*() -> value_type &
 auto
 CharIndex::iterator::advance() -> self_type &
 {
+    printf("advance()\n");
   bool check_branch_p{false}; // skip local branch on the first loop.
   do {
     // Check to see if we need to go back up a level
+    printf("adv: %d\n", state.index);
     if (state.index >= numLegalChars) {
       if (cur_level <= 0) {    // No more levels so bail out
         state.block = nullptr; // carefully make this @c equal to the end iterator.
@@ -329,10 +333,15 @@ CharIndex::iterator::advance() -> self_type &
     } else if (check_branch_p && state.block->array[state.index].branch != nullptr) {
       //  Note: we check for a branch on this level before a descending a level so that when we come back up
       //  this level will be done with this index.
+//        state.block = nullptr; // carefully make this @c equal to the end iterator.
+//        state.index = -1;
       break;
     } else if (state.block->array[state.index].block != nullptr) {
       // There is a lower level block to iterate over, store our current state and descend
 //      q[cur_level++] = state;
+      printf("cur_level: %d\n", cur_level);
+      //q[cur_level++] = state;
+      //printf("cur_level: %d\n", cur_level);
       q.push_back(state);
       cur_level++;
       state.block    = state.block->array[state.index].block.get();
@@ -354,7 +363,14 @@ CharIndex::iterator::operator++() -> self_type &
 bool
 CharIndex::iterator::operator==(const self_type &that) const
 {
-  return this->state.block == that.state.block && this->state.index == that.state.index;
+
+  printf("operator==: this %p block %p index: %d\n", this, this->state.block, this->state.index);
+  printf("operator==: that %p block %p index: %d\n", &that, that.state.block, that.state.index);
+  bool val = this->state.block == that.state.block && this->state.index == that.state.index;
+
+  printf("operator==: val: %d\n", val);
+
+  return val;
 }
 
 bool
