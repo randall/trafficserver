@@ -40,6 +40,7 @@
 // HostLookup constants
 constexpr int HOST_TABLE_DEPTH = 3; // Controls the max number of levels in the logical tree
 constexpr int HOST_ARRAY_MAX   = 8; // Sets the fixed array size
+constexpr int numLegalChars = 38; // Number of legal characters in the asciiToTable array
 
 class CharIndex;
 struct HostBranch;
@@ -189,4 +190,96 @@ private:
   HostBranch root;          // The top of the search tree
   LeafArray leaf_array;     // array of all leaves in tree
   std::string matcher_name; // Used for Debug/Warning/Error messages
+};
+
+// struct CharIndexBlock
+//
+//   Used by class CharIndex.  Forms a single level in CharIndex tree
+//
+struct CharIndexBlock {
+  struct Item {
+    HostBranch *branch{nullptr};
+    std::unique_ptr<CharIndexBlock> block;
+  };
+  std::array<Item, numLegalChars> array;
+};
+
+// class CharIndex - A constant time string matcher intended for
+//    short strings in a sparsely populated DNS partition
+//
+//    Creates a look up table for character in data string
+//
+//    Mapping from character to table index is done by
+//      asciiToTable[]
+//
+//    The illegalKey hash table is side structure for any
+//     entries that contain illegal hostname characters that
+//     we can not index into the normal table
+//
+//    Example: com
+//      c maps to 13, o maps to 25, m maps to 23
+//
+//                             CharIndexBlock         CharIndexBlock
+//                             -----------         ------------
+//                           0 |    |    |         |    |     |
+//                           . |    |    |         |    |     |
+//    CharIndexBlock         . |    |    |         |    |     |
+//    ----------             . |    |    |         |    |     |
+//  0 |   |    |             . |    |    |   |-->23| ptr|  0  |  (ptr is to the
+//  . |   |    |   |-------->25| 0  |   -----|     |    |     |   hostBranch for
+//  . |   |    |   |         . |    |    |         |    |     |   domain com)
+// 13 | 0 |  --|---|         . |    |    |         |    |     |
+//  . |   |    |             . |    |    |         |    |     |
+//  . |   |    |               |    |    |         |    |     |
+//  . |   |    |               |    |    |         |    |     |
+//    |   |    |               -----------         -----------|
+//    |   |    |
+//    |   |    |
+//    |   |    |
+//    |--------|
+//
+//
+class CharIndex
+{
+public:
+  struct iterator : public std::iterator<std::forward_iterator_tag, HostBranch, int> {
+    using self_type = iterator;
+
+    struct State {
+      int index{-1};
+      CharIndexBlock *block{nullptr};
+    };
+
+    iterator() { q.reserve(HOST_TABLE_DEPTH * 2); } // was 6, guessing that was twice the table depth.
+
+    value_type *operator->();
+    value_type &operator*();
+    bool operator==(self_type const &that) const;
+    bool operator!=(self_type const &that) const;
+    self_type &operator++();
+
+    // Current level.
+    int cur_level{-1};
+
+    // Where we got the last element from
+    State state;
+
+    //  Queue of the above levels
+    std::vector<State> q;
+
+    // internal methods
+    self_type &advance();
+  };
+
+  ~CharIndex();
+  void Insert(std::string_view match_data, HostBranch *toInsert);
+  HostBranch *Lookup(std::string_view match_data);
+
+  iterator begin();
+  iterator end();
+
+private:
+  CharIndexBlock root;
+  using Table = std::unordered_map<std::string_view, HostBranch *>;
+  std::unique_ptr<Table> illegalKey;
 };

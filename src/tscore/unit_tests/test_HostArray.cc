@@ -46,3 +46,15 @@ TEST_CASE("test HostArray", "[libts][HostArray]")
   REQUIRE(ha.size() == 2);
 
 }
+TEST_CASE("test HostLookup", "[libts][HostLookup]")
+{
+   std::string name("parent.config");
+   HostLookup hl(name);
+   std::string h1("aodp.itunes.apple.com");
+   hl.NewEntry(h1, true, nullptr);
+
+   std::string h2("phobos.apple.com.edgesuite.net");
+   hl.NewEntry(h2, true, nullptr);
+
+   hl.Print();
+}
