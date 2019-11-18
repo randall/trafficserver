@@ -38,9 +38,9 @@
 #include <unordered_map>
 
 // HostLookup constants
-constexpr int HOST_TABLE_DEPTH = 3; // Controls the max number of levels in the logical tree
-constexpr int HOST_ARRAY_MAX   = 8; // Sets the fixed array size
-constexpr int numLegalChars = 38; // Number of legal characters in the asciiToTable array
+constexpr int HOST_TABLE_DEPTH = 3;  // Controls the max number of levels in the logical tree
+constexpr int HOST_ARRAY_MAX   = 8;  // Sets the fixed array size
+constexpr int numLegalChars    = 38; // Number of legal characters in the asciiToTable array
 
 class CharIndex;
 struct HostBranch;
@@ -76,7 +76,12 @@ public:
   {
     return array.begin() + _size;
   }
-  size_t size() { return _size; }
+  size_t
+  size()
+  {
+    return _size;
+  }
+
 private:
   int _size{0}; // number of elements currently in the array
   Array array;
@@ -250,7 +255,7 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-//    iterator() { printf("wtf\n"); }
+    //    iterator() { printf("wtf\n"); }
 
     value_type *operator->();
     value_type &operator*();

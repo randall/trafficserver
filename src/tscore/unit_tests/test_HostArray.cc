@@ -29,7 +29,7 @@ TEST_CASE("test HostArray", "[libts][HostArray]")
 {
   HostArray ha;
 
-  std::string hostname = "phobos.apple.com.edgesuite.net";
+  std::string hostname   = "phobos.apple.com.edgesuite.net";
   HostBranch *new_branch = new HostBranch;
   new_branch->key        = hostname;
   new_branch->type       = HostBranch::HOST_TERMINAL;
@@ -37,24 +37,23 @@ TEST_CASE("test HostArray", "[libts][HostArray]")
   REQUIRE(ha.Insert(hostname, new_branch));
   REQUIRE(ha.size() == 1);
 
-  std::string hostname2 = "apple.com.edgesuite.net";
+  std::string hostname2   = "apple.com.edgesuite.net";
   HostBranch *new_branch2 = new HostBranch;
   new_branch2->key        = hostname2;
   new_branch2->type       = HostBranch::HOST_TERMINAL;
   new_branch2->level_idx  = 2;
   REQUIRE(ha.Insert(hostname2, new_branch));
   REQUIRE(ha.size() == 2);
-
 }
 TEST_CASE("test HostLookup", "[libts][HostLookup]")
 {
-   std::string name("parent.config");
-   HostLookup hl(name);
-   std::string h1("aodp.itunes.apple.com");
-   hl.NewEntry(h1, true, nullptr);
+  std::string name("parent.config");
+  HostLookup hl(name);
+  std::string h1("aodp.itunes.apple.com");
+  hl.NewEntry(h1, true, nullptr);
 
-   std::string h2("phobos.apple.com.edgesuite.net");
-   hl.NewEntry(h2, true, nullptr);
+  std::string h2("phobos.apple.com.edgesuite.net");
+  hl.NewEntry(h2, true, nullptr);
 
-   hl.Print();
+  hl.Print();
 }

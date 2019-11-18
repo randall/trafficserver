@@ -303,7 +303,7 @@ auto CharIndex::iterator::operator-> () -> value_type *
 auto CharIndex::iterator::operator*() -> value_type &
 {
   ink_assert(state.block != nullptr); // clang!
-  return *(state.block->array[state.index].branch);
+    return *(state.block->array[state.index].branch);
 }
 
 //
@@ -316,41 +316,80 @@ auto CharIndex::iterator::operator*() -> value_type &
 auto
 CharIndex::iterator::advance() -> self_type &
 {
-    printf("advance()\n");
-  bool check_branch_p{false}; // skip local branch on the first loop.
-  do {
+  printf("advance()\n");
+
+  int index;
+  CharIndexBlock *current = state.block;
+  intptr_t level = cur_level;
+  iterator stored_state;
+  HostBranch *r = nullptr;
+  bool first_element;
+
+  // bool first_element is used to tell if first elemente
+  //  pointed to by s has already been returned to caller
+  //  it has unless we are being called from iter_first
+  if (state.index < 0) {
+    first_element = false;
+    index         = state.index + 1;
+  } else {
+    first_element = true;
+    index         = state.index;
+  }
+
+  while (true) {
     // Check to see if we need to go back up a level
-    printf("adv: %d\n", state.index);
-    if (state.index >= numLegalChars) {
-      if (cur_level <= 0) {    // No more levels so bail out
-        state.block = nullptr; // carefully make this @c equal to the end iterator.
-        state.index = -1;
+    printf("adv: %d\n", index);
+    if (index >= numLegalChars) {
+      if (level <= 0) {
+        // No more levels so bail out
         break;
-      } else { // Go back up to a stored level
-        state = q[--cur_level];
-        ++state.index; // did that one before descending.
+      } else {
+        // Go back up to a stored level
+        state = q[level - 1];
+        ink_assert(state.block != nullptr);
+        ink_assert(state.index >= 0);
+        level--;
+        current = stored_state.state.block;
+        index = stored_state.state.index + 1;
       }
-    } else if (check_branch_p && state.block->array[state.index].branch != nullptr) {
-      //  Note: we check for a branch on this level before a descending a level so that when we come back up
-      //  this level will be done with this index.
-//        state.block = nullptr; // carefully make this @c equal to the end iterator.
-//        state.index = -1;
-      break;
-    } else if (state.block->array[state.index].block != nullptr) {
-      // There is a lower level block to iterate over, store our current state and descend
-//      q[cur_level++] = state;
-      printf("cur_level: %d\n", cur_level);
-      //q[cur_level++] = state;
-      //printf("cur_level: %d\n", cur_level);
-      q.push_back(state);
-      cur_level++;
-      state.block    = state.block->array[state.index].block.get();
-      state.index    = 0;
     } else {
-      ++state.index;
+      // Check to see if there is something to return
+      //
+      //  Note: we check for something to return before a descending
+      //    a level so that when we come back up we will
+      //    be done with this index
+      //
+      if (current->array[state.index].branch != nullptr && first_element == false) {
+        r = current->array[state.index].branch;
+        cur_level = level;
+        state.index = index;
+        state.block = current;
+        break;
+      } else if (current->array[state.index].block != nullptr) {
+        // There is a lower level block to iterate over, store our current state and descend
+        stored_state.state.block = current;
+        stored_state.state.index = index;
+        printf("push: %d vs level: %d\n", q.size(), level);
+        if (q.size() < level) {
+            q.push_back(stored_state.state);
+        } else {
+            q[level] = stored_state.state;
+        }
+        current = current->array[state.index].block.get();
+        index = 0;
+        level++;
+      } else {
+        // Nothing here so advance to next index
+        index++;
+      }
     }
-    check_branch_p = true;
-  } while (true);
+    first_element = false;
+  }
+
+  if (r == nullptr) {
+    state.block = {}; // carefully make this @c equal to the end iterator.
+    state.index = -1;
+  }
   return *this;
 }
 
@@ -363,7 +402,6 @@ CharIndex::iterator::operator++() -> self_type &
 bool
 CharIndex::iterator::operator==(const self_type &that) const
 {
-
   printf("operator==: this %p block %p index: %d\n", this, this->state.block, this->state.index);
   printf("operator==: that %p block %p index: %d\n", &that, that.state.block, that.state.index);
   bool val = this->state.block == that.state.block && this->state.index == that.state.index;
