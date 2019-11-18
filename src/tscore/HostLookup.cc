@@ -313,6 +313,7 @@ auto CharIndex::iterator::operator*() -> value_type &
 //      a pointer to it.  If there are no more elements, nullptr
 //      is returned
 //
+/*
 auto
 CharIndex::iterator::advance() -> self_type &
 {
@@ -395,7 +396,43 @@ CharIndex::iterator::advance() -> self_type &
   }
   return *this;
 }
-
+*/
+auto
+CharIndex::iterator::advance() -> self_type &
+{
+  bool check_branch_p{false}; // skip local branch on the first loop.
+  do {
+    // Check to see if we need to go back up a level
+    if (state.index >= numLegalChars) {
+      if (cur_level <= 0) {    // No more levels so bail out
+        state.block = nullptr; // carefully make this @c equal to the end iterator.
+        state.index = -1;
+        break;
+      } else { // Go back up to a stored level
+        state = q[--cur_level];
+        ++state.index; // did that one before descending.
+      }
+    } else if (check_branch_p && state.block->array[state.index].branch != nullptr) {
+      //  Note: we check for a branch on this level before a descending a level so that when we come back up
+      //  this level will be done with this index.
+      break;
+    } else if (state.block->array[state.index].block != nullptr) {
+      // There is a lower level block to iterate over, store our current state and descend
+        if (static_cast<int>(q.size()) <= cur_level) {
+            q.push_back(state);
+        } else {
+            q[cur_level] = state;
+        }
+        cur_level++;
+        state.block    = state.block->array[state.index].block.get();
+        state.index    = 0;
+    } else {
+      ++state.index;
+    }
+    check_branch_p = true;
+  } while (true);
+  return *this;
+}
 auto
 CharIndex::iterator::operator++() -> self_type &
 {

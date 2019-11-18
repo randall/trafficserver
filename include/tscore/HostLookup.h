@@ -262,7 +262,7 @@ public:
     self_type &operator++();
 
     // Current level.
-    int cur_level{-1};
+    int cur_level{0};
 
     // Where we got the last element from
     State state;
