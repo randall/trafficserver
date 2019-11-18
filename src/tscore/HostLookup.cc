@@ -276,7 +276,7 @@ CharIndex::Lookup(string_view match_data)
 auto
 CharIndex::begin() -> iterator
 {
-  printf("begin()\n");
+  //  printf("begin()\n");
   iterator zret;
   zret.state.block = &root;
   zret.state.index = 0;
@@ -290,7 +290,7 @@ CharIndex::begin() -> iterator
 auto
 CharIndex::end() -> iterator
 {
-  printf("end()\n");
+  //  printf("end()\n");
   return {};
 }
 
@@ -303,7 +303,7 @@ auto CharIndex::iterator::operator-> () -> value_type *
 auto CharIndex::iterator::operator*() -> value_type &
 {
   ink_assert(state.block != nullptr); // clang!
-    return *(state.block->array[state.index].branch);
+  return *(state.block->array[state.index].branch);
 }
 
 //
@@ -316,11 +316,11 @@ auto CharIndex::iterator::operator*() -> value_type &
 auto
 CharIndex::iterator::advance() -> self_type &
 {
-  printf("advance()\n");
+  // printf("advance()\n");
 
   int index;
   CharIndexBlock *current = state.block;
-  intptr_t level = cur_level;
+  intptr_t level          = cur_level;
   State stored_state;
   HostBranch *r = nullptr;
   bool first_element;
@@ -338,7 +338,7 @@ CharIndex::iterator::advance() -> self_type &
 
   while (true) {
     // Check to see if we need to go back up a level
-    printf("adv: %d\n", index);
+    //    printf("adv: %d\n", index);
     if (index >= numLegalChars) {
       if (level <= 0) {
         // No more levels so bail out
@@ -360,25 +360,25 @@ CharIndex::iterator::advance() -> self_type &
       //    be done with this index
       //
       if (current->array[index].branch != nullptr && first_element == false) {
-        r = current->array[index].branch;
-        cur_level = level;
+        r           = current->array[index].branch;
+        cur_level   = level;
         state.index = index;
         state.block = current;
         break;
       } else if (current->array[index].block != nullptr) {
-        // There is a lower level block to iterate over, 
+        // There is a lower level block to iterate over,
         //  store our current state and descend
         stored_state.block = current;
         stored_state.index = index;
-        printf("push: %d vs level: %d\n", q.size(), level);
+        //        printf("push: %d vs level: %d\n", q.size(), level);
 
         if (q.size() <= level) {
-            q.push_back(stored_state);
+          q.push_back(stored_state);
         } else {
-            q[level] = stored_state;
+          q[level] = stored_state;
         }
         current = current->array[index].block.get();
-        index = 0;
+        index   = 0;
         level++;
       } else {
         // Nothing here so advance to next index
@@ -389,7 +389,7 @@ CharIndex::iterator::advance() -> self_type &
   }
 
   if (r == nullptr) {
-    printf("advance(): r is nullptr\n");
+    //    printf("advance(): r is nullptr\n");
     state.block = {}; // carefully make this @c equal to the end iterator.
     state.index = -1;
   }
@@ -405,11 +405,11 @@ CharIndex::iterator::operator++() -> self_type &
 bool
 CharIndex::iterator::operator==(const self_type &that) const
 {
-  printf("operator==: this %p block %p index: %d\n", this, this->state.block, this->state.index);
-  printf("operator==: that %p block %p index: %d\n", &that, that.state.block, that.state.index);
+  //  printf("operator==: this %p block %p index: %d\n", this, this->state.block, this->state.index);
+  //  printf("operator==: that %p block %p index: %d\n", &that, that.state.block, that.state.index);
   bool val = this->state.block == that.state.block && this->state.index == that.state.index;
 
-  printf("operator==: val: %d\n", val);
+  //  printf("operator==: val: %d\n", val);
 
   return val;
 }
@@ -484,8 +484,9 @@ HostBranch::~HostBranch()
     break;
   case HOST_HASH: {
     HostTable *ht = next_level._table;
-    for (auto spot = ht->begin(), limit = ht->end(); spot != limit; delete &*(spot++)) {
-    } // empty
+    for (auto &item : *ht) {
+      delete item.second;
+    }
     delete ht;
   } break;
   case HOST_INDEX: {
@@ -649,7 +650,7 @@ HostLookup::FindNextLevel(HostBranch *from, string_view level_data, bool bNotPro
     break;
   case HostBranch::HOST_HASH: {
     auto table = from->next_level._table;
-    auto spot  = table->find(level_data);
+    auto spot  = table->find(std::string(level_data));
     r          = spot == table->end() ? nullptr : spot->second;
   } break;
   case HostBranch::HOST_INDEX:
