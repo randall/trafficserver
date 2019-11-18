@@ -255,8 +255,6 @@ public:
       CharIndexBlock *block{nullptr};
     };
 
-    //    iterator() { printf("wtf\n"); }
-
     value_type *operator->();
     value_type &operator*();
     bool operator==(self_type const &that) const;

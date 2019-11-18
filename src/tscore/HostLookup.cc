@@ -321,7 +321,7 @@ CharIndex::iterator::advance() -> self_type &
   int index;
   CharIndexBlock *current = state.block;
   intptr_t level = cur_level;
-  iterator stored_state;
+  State stored_state;
   HostBranch *r = nullptr;
   bool first_element;
 
@@ -345,12 +345,12 @@ CharIndex::iterator::advance() -> self_type &
         break;
       } else {
         // Go back up to a stored level
-        state = q[level - 1];
-        ink_assert(state.block != nullptr);
-        ink_assert(state.index >= 0);
+        stored_state = q[level - 1];
+        ink_assert(stored_state.block != nullptr);
+        ink_assert(stored_state.index >= 0);
         level--;
-        current = stored_state.state.block;
-        index = stored_state.state.index + 1;
+        current = stored_state.block;
+        index   = stored_state.index + 1;
       }
     } else {
       // Check to see if there is something to return
@@ -359,23 +359,25 @@ CharIndex::iterator::advance() -> self_type &
       //    a level so that when we come back up we will
       //    be done with this index
       //
-      if (current->array[state.index].branch != nullptr && first_element == false) {
-        r = current->array[state.index].branch;
+      if (current->array[index].branch != nullptr && first_element == false) {
+        r = current->array[index].branch;
         cur_level = level;
         state.index = index;
         state.block = current;
         break;
-      } else if (current->array[state.index].block != nullptr) {
-        // There is a lower level block to iterate over, store our current state and descend
-        stored_state.state.block = current;
-        stored_state.state.index = index;
+      } else if (current->array[index].block != nullptr) {
+        // There is a lower level block to iterate over, 
+        //  store our current state and descend
+        stored_state.block = current;
+        stored_state.index = index;
         printf("push: %d vs level: %d\n", q.size(), level);
-        if (q.size() < level) {
-            q.push_back(stored_state.state);
+
+        if (q.size() <= level) {
+            q.push_back(stored_state);
         } else {
-            q[level] = stored_state.state;
+            q[level] = stored_state;
         }
-        current = current->array[state.index].block.get();
+        current = current->array[index].block.get();
         index = 0;
         level++;
       } else {
@@ -387,6 +389,7 @@ CharIndex::iterator::advance() -> self_type &
   }
 
   if (r == nullptr) {
+    printf("advance(): r is nullptr\n");
     state.block = {}; // carefully make this @c equal to the end iterator.
     state.index = -1;
   }
