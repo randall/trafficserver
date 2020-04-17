@@ -432,7 +432,6 @@ UDPReadContinuation::readPollEvent(int event_, Event *e)
   (void)event_;
   (void)e;
 
-  // PollCont *pc = get_PollCont(e->ethread);
   Continuation *c;
 
   if (event->cancelled) {

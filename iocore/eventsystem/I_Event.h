@@ -197,9 +197,6 @@ public:
   */
   void schedule_every(ink_hrtime aperiod, int callback_event = EVENT_INTERVAL);
 
-  // inherited from Action::cancel
-  // virtual void cancel(Continuation * c = nullptr);
-
   void free();
 
   EThread *ethread = nullptr;

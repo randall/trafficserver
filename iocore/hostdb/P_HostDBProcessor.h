@@ -51,7 +51,6 @@ enum {
 extern int hostdb_ttl_mode;
 extern int hostdb_srv_enabled;
 
-// extern int hostdb_timestamp;
 extern int hostdb_sync_frequency;
 extern int hostdb_disable_reverse_lookup;
 
@@ -430,9 +429,9 @@ typedef int (HostDBContinuation::*HostDBContHandler)(int, void *);
 struct HostDBContinuation : public Continuation {
   Action action;
   HostDBHash hash;
-  //  IpEndpoint ip;
+
   unsigned int ttl = 0;
-  //  HostDBMark db_mark; ///< Target type.
+
   /// Original IP address family style. Note this will disagree with
   /// @a hash.db_mark when doing a retry on an alternate family. The retry
   /// logic depends on it to avoid looping.
@@ -443,11 +442,10 @@ struct HostDBContinuation : public Continuation {
   HostDBApplicationInfo app;
   int probe_depth            = 0;
   size_t current_iterate_pos = 0;
-  //  char name[MAXDNAME];
-  //  int namelen;
+
   char hash_host_name_store[MAXDNAME + 1]; // used as backing store for @a hash
   char srv_target_name[MAXDNAME];
-  //  void *m_pDS;
+
   Action *pending_action = nullptr;
 
   unsigned int missing : 1;

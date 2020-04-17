@@ -149,7 +149,6 @@ QUICPacketHandlerIn::clone() const
 int
 QUICPacketHandlerIn::acceptEvent(int event, void *data)
 {
-  // NetVConnection *netvc;
   ink_release_assert(event == NET_EVENT_DATAGRAM_OPEN || event == NET_EVENT_DATAGRAM_READ_READY ||
                      event == NET_EVENT_DATAGRAM_ERROR);
   ink_release_assert((event == NET_EVENT_DATAGRAM_OPEN) ? (data != nullptr) : (1));

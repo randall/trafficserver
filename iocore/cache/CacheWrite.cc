@@ -1784,7 +1784,7 @@ Cache::open_write(Continuation *cont, const CacheKey *key, CacheHTTPInfo *info, 
       }
       // If there are multiple writers, then this one cannot be an update.
       // Only the first writer can do an update. If that's the case, we can
-      // return success to the state machine now.;
+      // return success to the state machine now.
       if (c->od->has_multiple_writers()) {
         goto Lmiss;
       }

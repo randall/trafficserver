@@ -64,12 +64,10 @@ struct ShowNet : public ShowCont {
     forl_LL(NetEvent, ne, nh->open_list)
     {
       auto vc = dynamic_cast<UnixNetVConnection *>(ne);
-      //      uint16_t port = ats_ip_port_host_order(&addr.sa);
       if (vc == nullptr || (ats_is_ip(&addr) && !ats_ip_addr_port_eq(&addr.sa, vc->get_remote_addr()))) {
         continue;
       }
-      //      if (port && port != ats_ip_port_host_order(&vc->server_addr.sa) && port != vc->accept_port)
-      //        continue;
+
       char ipbuf[INET6_ADDRSTRLEN];
       ats_ip_ntop(vc->get_remote_addr(), ipbuf, sizeof(ipbuf));
       char opt_ipbuf[INET6_ADDRSTRLEN];
@@ -77,7 +75,6 @@ struct ShowNet : public ShowCont {
       snprintf(interbuf, sizeof(interbuf), "[%s] %s:%d", vc->options.toString(vc->options.addr_binding),
                vc->options.local_ip.toString(opt_ipbuf, sizeof(opt_ipbuf)), vc->options.local_port);
       CHECK_SHOW(show("<tr>"
-                      //"<td><a href=\"/connection/%d\">%d</a></td>"
                       "<td>%d</td>"          // ID
                       "<td>%s</td>"          // ipbuf
                       "<td>%d</td>"          // port
@@ -98,7 +95,6 @@ struct ShowNet : public ShowCont {
                       "<td>-%s</td>"         // comments
                       "</tr>\n",
                       vc->id, ipbuf, ats_ip_port_host_order(vc->get_remote_addr()), vc->con.fd, interbuf,
-                      //                      vc->accept_port,
                       (int)((now - vc->submit_time) / HRTIME_SECOND), ethread->id, vc->read.enabled, vc->read.vio.nbytes,
                       vc->read.vio.ndone, vc->write.enabled, vc->write.vio.nbytes, vc->write.vio.ndone,
                       (int)(vc->inactivity_timeout_in / HRTIME_SECOND), (int)(vc->active_timeout_in / HRTIME_SECOND),
@@ -166,7 +162,6 @@ struct ShowNet : public ShowCont {
       }
     }
     CHECK_SHOW(show("<tr><td>%s</td><td>%d</td></tr>\n", "Connections", connections));
-    // CHECK_SHOW(show("<tr><td>%s</td><td>%d</td></tr>\n", "Last Poll Size", pollDescriptor->nfds));
     CHECK_SHOW(show("<tr><td>%s</td><td>%d</td></tr>\n", "Last Poll Ready", pollDescriptor->result));
     CHECK_SHOW(show("</table>\n"));
     CHECK_SHOW(show("<table border=1>\n"));

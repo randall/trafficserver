@@ -50,7 +50,7 @@ public:
   // get this vc's thread
   virtual EThread *get_thread() = 0;
 
-  // Close when EventIO close;
+  // Close when EventIO close
   virtual int close() = 0;
 
   // get fd

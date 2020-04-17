@@ -146,7 +146,7 @@ CacheHostMatcher::NewEntry(matcher_line *line_info)
   ink_assert(num_el >= 0);
   ink_assert(array_len >= 0);
 
-  // Make sure we do not overrun the array;
+  // Make sure we do not overrun the array
   ink_assert(num_el < array_len);
 
   match_data = line_info->line[1][line_info->dest_entry];

@@ -524,7 +524,6 @@ ssl_callback_ocsp_stapling(SSL *ssl)
 {
   // Assume SSL_get_SSL_CTX() is the same as reaching into the ssl structure
   // Using the official call, to avoid leaking internal openssl knowledge
-  // originally was, cinf = stapling_get_cert_info(ssl->ctx);
   certinfo_map *map = stapling_get_cert_info(SSL_get_SSL_CTX(ssl));
   if (map == nullptr) {
     Debug("ssl_ocsp", "ssl_callback_ocsp_stapling: failed to get certificate map");

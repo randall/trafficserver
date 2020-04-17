@@ -152,7 +152,6 @@ CacheDisk::clearDone(int event, void * /* data ATS_UNUSED */)
     incrErrors(&io);
     SET_DISK_BAD(this);
   }
-  //  update_header();
 
   SET_HANDLER(&CacheDisk::openDone);
   return openDone(EVENT_IMMEDIATE, nullptr);

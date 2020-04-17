@@ -459,7 +459,7 @@ aio_thread_main(void *arg)
       current_req->queued--;
       ink_atomic_increment((int *)&current_req->pending, 1);
 #endif
-      // update the stats;
+      // update the stats
       if (op->aiocb.aio_lio_opcode == LIO_WRITE) {
         aio_num_write++;
         aio_bytes_written += op->aiocb.aio_nbytes;

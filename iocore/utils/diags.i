@@ -22,7 +22,6 @@
  */
 
 
-// Diags *diags;
 #define DIAGS_LOG_FILE "diags.log"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -40,7 +39,6 @@ reconfigure_diags()
   int i;
   DiagsConfigState c;
 
-
   // initial value set to 0 or 1 based on command line tags
   c.enabled[DiagsTagType_Debug] = (diags->base_debug_tags != nullptr);
   c.enabled[DiagsTagType_Action] = (diags->base_action_tags != nullptr);
@@ -48,7 +46,6 @@ reconfigure_diags()
   c.enabled[DiagsTagType_Debug] = 1;
   c.enabled[DiagsTagType_Action] = 1;
   diags->show_location = SHOW_LOCATION_ALL;
-
 
   // read output routing values
   for (i = 0; i < DiagsLevel_Count; i++) {

@@ -240,11 +240,6 @@ public:
   /// Schedule the function @a f to be called in a thread of type @a ev_type when it is spawned.
   Event *schedule_spawn(void (*f)(EThread *), EventType ev_type);
 
-  /// Schedule an @a event on continuation @a c to be called when a thread is spawned by this processor.
-  /// The @a cookie is attached to the event instance passed to the continuation.
-  /// @return The scheduled event.
-  //  Event *schedule_spawn(Continuation *c, int event, void *cookie = NULL);
-
   EventProcessor();
   ~EventProcessor() override;
   EventProcessor(const EventProcessor &) = delete;
@@ -284,16 +279,6 @@ public:
 
   */
   EThread *all_ethreads[MAX_EVENT_THREADS];
-
-  /**
-    An array of pointers, organized by thread group, to all of the
-    EThreads handled by the EventProcessor. An array of pointers to all of
-    the EThreads created throughout the existence of the EventProcessor
-    instance. It is a two-dimensional array whose first dimension is the
-    thread group id and the second the EThread pointers for that group.
-
-  */
-  //  EThread *eventthread[MAX_EVENT_TYPES][MAX_THREADS_IN_EACH_TYPE];
 
   /// Data kept for each thread group.
   /// The thread group ID is the index into an array of these and so is not stored explicitly.

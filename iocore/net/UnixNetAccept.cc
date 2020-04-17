@@ -371,7 +371,6 @@ NetAccept::acceptEvent(int event, void *ep)
 {
   (void)event;
   Event *e = static_cast<Event *>(ep);
-  // PollDescriptor *pd = get_PollDescriptor(e->ethread);
   Ptr<ProxyMutex> m;
 
   if (action_->mutex) {
