@@ -51,7 +51,7 @@ to further writes. This is useful to simulate the sending of partial data.
 """
 
 
-def main(argv):
+def main(_argv):
     parser = argparse.ArgumentParser(description=DESCRIPTION,\
             formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('host', help='the target host')

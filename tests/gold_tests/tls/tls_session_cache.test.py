@@ -59,7 +59,7 @@ ts.Disk.records_config.update({
 })
 
 # Check that Session-ID is the same on every connection
-def checkSession(ev) :
+def checkSession(_ev) :
   retval = False
   f = open(openssl_output, 'r')
   err = "Session ids match"

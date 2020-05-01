@@ -99,7 +99,7 @@ tr.StillRunningAfter = ts
 # To stall the test runs that check for the stats until the
 # stats have propagated and are ready to read.
 def make_done_stat_ready(tsenv):
-  def done_stat_ready(process, hasRunFor, **kw):
+  def done_stat_ready(_process, _hasRunFor, **kw):
     retval = subprocess.run("traffic_ctl metric get continuations_verify.test.done > done  2> /dev/null", shell=True, env=tsenv)
     if retval.returncode == 0:
       retval = subprocess.run("grep 1 done > /dev/null", shell = True, env=tsenv)

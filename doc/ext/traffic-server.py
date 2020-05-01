@@ -160,7 +160,7 @@ class TSConfVar(std.Target):
 
 
 class TSConfVarRef(XRefRole):
-    def process_link(self, env, ref_node, explicit_title_p, title, target):
+    def process_link(self, _env, _ref_node, _explicit_title_p, title, target):
         return title, target
 
 
@@ -288,7 +288,7 @@ class TSStat(std.Target):
 
 
 class TSStatRef(XRefRole):
-    def process_link(self, env, ref_node, explicit_title_p, title, target):
+    def process_link(self, _env, _ref_node, _explicit_title_p, title, target):
         return title, target
 
 
@@ -351,7 +351,7 @@ class TrafficServerDomain(Domain):
 
         return zret
 
-    def resolve_xref(self, env, src_doc, builder, obj_type, target, node, cont_node):
+    def resolve_xref(self, _env, src_doc, builder, obj_type, target, _node, cont_node):
         dst_doc = self.find_doc(target, obj_type)
         if (dst_doc):
             return sphinx.util.nodes.make_refnode(builder, src_doc, dst_doc, nodes.make_id(target), cont_node, 'records.config')
@@ -389,7 +389,7 @@ git_branch = subprocess.check_output(['git', '--git-dir', REPO_GIT_DIR,
                                       'rev-parse', '--abbrev-ref', 'HEAD'])
 
 
-def make_github_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
+def make_github_link(_name, rawtext, text, _lineno, _inliner, options={}, _content=[]):
     """
     This docutils role lets us link to source code via the handy :ts:git: markup.
     Link references are rooted at the top level source directory. All links resolve

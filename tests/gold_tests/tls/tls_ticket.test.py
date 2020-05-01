@@ -83,7 +83,7 @@ path1 = tr.Processes.Default.Streams.stdout.AbsPath
 tr.StillRunningAfter = server
 
 # Pull out session created in tr to test for session id in tr2
-def checkSession(ev) :
+def checkSession(_ev) :
   retval = False
   f1 = open(path1, 'r')
   f2 = open(path2, 'r')

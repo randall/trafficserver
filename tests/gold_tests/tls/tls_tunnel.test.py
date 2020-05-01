@@ -188,7 +188,7 @@ trreload.Processes.Default.ReturnCode = 0
 # Stall the test runs until the sni reload has completed
 # At that point the new sni settings are ready to go
 def sni_reload_done(tsenv):
-  def done_reload(process, hasRunFor, **kw):
+  def done_reload(_process, _hasRunFor, **kw):
     cmd = "grep 'sni.yaml finished loading' {0} | wc -l | sed -e 's/ //g' > {1}/test.out".format(ts.Disk.diags_log.Name, Test.RunDirectory)
     retval = subprocess.run(cmd, shell=True, env=tsenv)
     if retval.returncode == 0:

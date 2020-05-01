@@ -224,7 +224,7 @@ class Inliner(states.Inliner):
 
         self.implicit_dispatch.append((issue, self.issue_reference))
 
-    def issue_reference(self, match, lineno):
+    def issue_reference(self, match, _lineno):
         text = match.group(0)
 
         rawsource = unescape(text, True)
