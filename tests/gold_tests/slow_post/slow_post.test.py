@@ -20,7 +20,7 @@ import os
 
 
 class SlowPostAttack:
-    def __init__(cls):
+    def __init__(self, cls):
         Test.Summary = 'Test how ATS handles the slow-post attack'
         cls._origin_max_connections = 3
         cls._slow_post_client = 'slow_post_client.py'
