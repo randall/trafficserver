@@ -54,7 +54,7 @@ ts.Disk.remap_config.AddLine(
 )
 
 ts.Disk.remap_config.AddLine(
-    'map https://reallyreallyreallyreallylong.com http://127.0.0.1:{1}/ip'.format(ts.Variables.ssl_port, httpbin.Variables.Port)
+    'map https://reallyreallyreallyreallylong.com http://127.0.0.1:{0}/ip'.format(httpbin.Variables.Port)
 )
 
 ts.Disk.ssl_multicert_config.AddLine(

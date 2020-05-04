@@ -125,7 +125,7 @@ futurestr = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(futuretime))
 # 1 Test - Fetch range into cache
 tr = Test.AddTestRun("0- cache hit check")
 ps = tr.Processes.Default
-ps.Command = curl_and_args + ' http://www.example.com/path -r 0-'.format(futurestr)
+ps.Command = curl_and_args + ' http://www.example.com/path -r 0-'
 ps.ReturnCode = 0
 ps.Streams.stdout.Content = Testers.ContainsExpression("X-Cache: hit", "expected cache hit")
 tr.StillRunningAfter = ts

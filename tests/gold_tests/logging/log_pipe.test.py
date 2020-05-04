@@ -82,7 +82,7 @@ ts.Streams.All += Testers.ContainsExpression(
     "Verify that no readers for the pipe was detected.")
 
 ts.Streams.All += Testers.ExcludesExpression(
-    "New buffer size for pipe".format(pipe_name),
+    "New buffer size for pipe",
     "Verify that the default pipe size was used.")
 
 curl = tr.Processes.Process("client_request", 'curl "http://127.0.0.1:{0}" --verbose'.format(

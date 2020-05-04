@@ -46,7 +46,7 @@ ts.addSSLfile("ssl/server.pem")
 ts.addSSLfile("ssl/server.key")
 
 ts.Disk.remap_config.AddLine(
-    'map / https://foo.com:{1}'.format(ts.Variables.ssl_port, server.Variables.SSL_Port))
+    'map / https://foo.com:{0}'.format(server.Variables.SSL_Port))
 
 ts.Disk.ssl_multicert_config.AddLines([
     'ssl_cert_name=signed-foo-ec.pem,signed-foo.pem ssl_key_name=signed-foo-ec.key,signed-foo.key',

@@ -58,7 +58,7 @@ ts.Disk.remap_config.AddLine(
     'map http://www.example.com:8080 http://127.0.0.1:{0}'.format(server.Variables.Port)
 )
 ts.Disk.remap_config.AddLine(
-    'redirect http://test3.com http://httpbin.org'.format(server.Variables.Port)
+    'redirect http://test3.com http://httpbin.org'
 )
 ts.Disk.remap_config.AddLine(
     'map_with_referer http://test4.com http://127.0.0.1:{0} http://httpbin.org (.*[.])?persia[.]com'.format(server.Variables.Port)
