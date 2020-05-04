@@ -32,10 +32,11 @@ Test.SkipUnless(
 
 server = Test.MakeOriginServer("server", options={'--load': '{}/compress_observer.py'.format(Test.TestDirectory)})
 
-def repeat(str, count):
+
+def repeat(val, count):
     result = ""
     while count > 0:
-        result += str
+        result += val
         count -= 1
     return result
 
@@ -60,6 +61,7 @@ for i in range(3):
         "headers": "GET /obj{} HTTP/1.1\r\nHost: just.any.thing\r\n\r\n".format(i), "timestamp": "1469733493.993", "body": ""
     }
     server.addResponse("sessionfile.log", request_header, response_header)
+
 
 def curl(ts, idx, encodingList):
     return (

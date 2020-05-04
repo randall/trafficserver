@@ -128,8 +128,8 @@ def verify_transaction(transaction, fabricate_proxy_requests=False):
 
     if "client-request" not in transaction:
         raise VerifyRequestError('client-request not found in transaction')
-    else:
-        verify_request(transaction["client-request"])
+
+    verify_request(transaction["client-request"])
 
     if "proxy-request" not in transaction and fabricate_proxy_requests:
         if "proxy-response" not in transaction:
@@ -149,8 +149,8 @@ def verify_transaction(transaction, fabricate_proxy_requests=False):
 
         if "server-response" not in transaction:
             raise VerifyResponseError('server-response not found in transaction')
-        else:
-            verify_response(transaction["server-response"])
+
+        verify_response(transaction["server-response"])
 
 
 def verify_session(session, fabricate_proxy_requests=False):
