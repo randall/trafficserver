@@ -463,6 +463,8 @@ ssl_servername_callback(SSL *ssl, int *al, void *arg)
   return SSL_TLSEXT_ERR_OK;
 }
 
+#if TS_HAS_SET_TMP_DH
+
 #if TS_USE_GET_DH_2048_256 == 0
 /* Build 2048-bit MODP Group with 256-bit Prime Order Subgroup from RFC 5114 */
 static DH *
@@ -508,7 +510,7 @@ DH_get_2048_256()
   }
   return (dh);
 }
-#endif
+#endif // !TS_USE_GET_DH_2048_256
 
 static SSL_CTX *
 ssl_context_enable_dhe(const char *dhparams_file, SSL_CTX *ctx)
@@ -537,6 +539,7 @@ ssl_context_enable_dhe(const char *dhparams_file, SSL_CTX *ctx)
 
   return ctx;
 }
+#endif // !TS_HAS_SET_TMP_DH
 
 // SSL_CTX_set_ecdh_auto() is removed by OpenSSL v1.1.0 and ECDH is enabled in default.
 // TODO: remove this function when we drop support of OpenSSL v1.0.2* and lower.
@@ -1314,9 +1317,11 @@ SSLMultiCertConfigLoader::init_server_ssl_ctx(CertLoadData const &data, const SS
   }
 #endif
 
+#if TS_HAS_SET_TMP_DH
   if (!ssl_context_enable_dhe(params->dhparamsFile, ctx)) {
     goto fail;
   }
+#endif
 
   ssl_context_enable_ecdh(ctx);
 

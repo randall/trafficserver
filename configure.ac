@@ -1249,6 +1249,9 @@ TS_CHECK_CRYPTO_SET_RBIO
 # Check for DH_get_2048_256
 TS_CHECK_CRYPTO_DH_GET_2048_256
 
+# Check for SSL_CTX_set_tmp_dh
+TS_CHECK_SET_TMP_DH
+
 # Check for HKDF support
 TS_CHECK_CRYPTO_HKDF
 AM_CONDITIONAL([HAS_HKDF], [test "x$enable_hkdf" = "xyes"])

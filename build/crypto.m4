@@ -365,3 +365,30 @@ AC_DEFUN([TS_CHECK_SESSION_TICKET], [
 
   AC_SUBST(has_tls_session_ticket)
 ])
+
+dnl Weird versions of BoringSSL do not have SSL_CTX_set_tmp_dh
+dnl
+AC_DEFUN([TS_CHECK_SET_TMP_DH], [
+  _saved_LIBS=$LIBS
+
+  TS_ADDTO(LIBS, [$OPENSSL_LIBS])
+  AC_CHECK_HEADERS(openssl/ssl.h)
+  AC_CHECK_FUNCS(
+    SSL_CTX_set_tmp_dh,
+    [
+      has_set_tmp_dh=1
+      has_set_tmp_dh_check=yes
+    ],
+    [
+      has_set_tmp_dh=0
+      has_set_tmp_dh_check=no
+    ]
+  )
+
+  LIBS=$_saved_LIBS
+
+  AC_MSG_CHECKING([for SSL_CTX_set_tmp_dh])
+  AC_MSG_RESULT([$has_set_tmp_dh_check])
+
+  AC_SUBST(has_set_tmp_dh)
+])
