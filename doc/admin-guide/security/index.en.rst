@@ -328,7 +328,7 @@ To configure Split DNS:
 
 #. Specify the rules for performing DNS server selection based on the
    destination domain, the destination host, or a URL regular expression.
-   These rules are located in :file:`splitdns.config`.
+   These rules are located in :file:`splitdns.yaml`.
 
 #. Enable the *Split DNS* option by adjusting :ts:cv:`proxy.config.dns.splitDNS.enabled`
    in :file:`records.config`. ::

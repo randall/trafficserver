@@ -36,7 +36,7 @@ dist_sysconf_DATA =	\
 	remap.config.default \
 	sni.yaml.default \
 	socks.config.default \
-	splitdns.config.default \
+	splitdns.yaml.default \
 	ssl_multicert.config.default \
 	strategies.yaml.default \
 	volume.config.default

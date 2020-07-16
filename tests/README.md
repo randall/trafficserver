@@ -109,7 +109,7 @@ A number of file objects are defined to help with adding values to a given confi
  * remap.config
  * sni.yaml
  * socks.config
- * splitdns.config
+ * splitdns.yaml
  * ssl_multicert.config
  * storage.config
  * volume.config

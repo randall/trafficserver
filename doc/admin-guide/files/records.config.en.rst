@@ -2485,7 +2485,7 @@ DNS
 .. ts:cv:: CONFIG proxy.config.dns.splitDNS.enabled INT 0
    :reloadable:
 
-   Enables (``1``) or disables (``0``) DNS server selection. When enabled, |TS| refers to the :file:`splitdns.config` file for
+   Enables (``1``) or disables (``0``) DNS server selection. When enabled, |TS| refers to the :file:`splitdns.yaml` file for
    the selection specification. Refer to :ref:`Configuring DNS Server Selection <admin-split-dns>`.
 
 .. ts:cv:: CONFIG proxy.config.dns.resolv_conf STRING /etc/resolv.conf

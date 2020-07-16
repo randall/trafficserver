@@ -44,7 +44,7 @@ man_pages = [
     ('admin-guide/files/plugin.config.en', 'plugin.config', u'Traffic Server global plugin configuration file', None, '5'),
     ('admin-guide/files/records.config.en', 'records.config', u'Traffic Server configuration file', None, '5'),
     ('admin-guide/files/remap.config.en', 'remap.config', u'Traffic Server remap rules configuration file', None, '5'),
-    ('admin-guide/files/splitdns.config.en', 'splitdns.config', u'Traffic Server split DNS configuration file', None, '5'),
+    ('admin-guide/files/splitdns.yaml.en', 'splitdns.yaml', u'Traffic Server split DNS configuration file', None, '5'),
     ('admin-guide/files/ssl_multicert.config.en', 'ssl_multicert.config',
         u'Traffic Server SSL certificate configuration file', None, '5'),
     ('admin-guide/files/storage.config.en', 'storage.config', u'Traffic Server cache storage configuration file', None, '5'),

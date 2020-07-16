@@ -107,9 +107,9 @@ file_filter = locale/<lang>/LC_MESSAGES/admin-guide/files/remap.config.en.po
 source_file = _build/locale/pot/admin-guide/files/remap.config.en.pot
 source_lang = en
 
-[apache-traffic-server-6x.admin-guide--files--splitdns_config_en]
-file_filter = locale/<lang>/LC_MESSAGES/admin-guide/files/splitdns.config.en.po
-source_file = _build/locale/pot/admin-guide/files/splitdns.config.en.pot
+[apache-traffic-server-6x.admin-guide--files--splitdns_yaml_en]
+file_filter = locale/<lang>/LC_MESSAGES/admin-guide/files/splitdns.yaml.en.po
+source_file = _build/locale/pot/admin-guide/files/splitdns.yaml.en.pot
 source_lang = en
 
 [apache-traffic-server-6x.admin-guide--files--ssl_multicert_config_en]

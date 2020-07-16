@@ -71,7 +71,7 @@ AppVersionInfo::setup(const char *pkg_name, const char *app_name, const char *ap
 
   // If the builder set a build number, use that.
   // Otherwise take the build timestamp ("??????" if invalid).
-  if (0 != strlen(BUILD_NUMBER)) {
+  if (/* DISABLES CODE */ (0) != strlen(BUILD_NUMBER)) {
     snprintf(BldNumStr, sizeof(BldNumStr), "%s", BUILD_NUMBER);
   } else if (!invalid_datetime) {
     snprintf(BldNumStr, sizeof(BldNumStr), "%02d%02d%02d", month, day, hour);

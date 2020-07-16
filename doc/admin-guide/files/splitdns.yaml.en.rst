@@ -16,12 +16,12 @@
   under the License.
 
 ===============
-splitdns.config
+splitdns.yaml
 ===============
 
-.. configfile:: splitdns.config
+.. configfile:: splitdns.yaml
 
-The :file:`splitdns.config` file enables you to specify the DNS server that
+The :file:`splitdns.yaml` file enables you to specify the DNS server that
 Traffic Server should use for resolving hosts under specific conditions.
 For more information, refer to :ref:`admin-split-dns`.
 
@@ -40,40 +40,50 @@ server specification:
 -  A search list specifying the domain search order when multiple
    domains are specified
 
-After you modify the :file:`splitdns.config` file,
+After you modify the :file:`splitdns.yaml` file,
 run the :option:`traffic_ctl config reload` command to apply the changes.
 
 Format
 ======
 
-Each line in the :file:`splitdns.config` file uses one of the following
-formats: ::
+Each block in the :file:`splitdns.yaml` file uses needs to specify a ``type``:
 
-    dest_domain=dest_domain | dest_host | url_regex named=dns_server def_domain=def_domain search_list=search_list
+.. code:: yaml
+
+   splitdns:
+  - dest: internal.company.com
+    named: [255.255.255.255:212, 255.255.255.254]
+    def_domain: company.com
+    search_list: [ company.com, company1.com ]
+    type: domain
+  - dest: 'hostname1.company.com'
+    named: 255.255.255.253
+    type: host
+
 
 The following list describes each field.
 
-.. _splitdns-config-format-dest-domain:
+.. _splitdns-yaml-format-dest-domain:
 
 ``dest_domain``
     A valid domain name. This specifies that DNS server selection will
     be based on the destination domain. You can prefix the domain with
-    an exclamation mark (``!``) to indicate the NOT logical operator.
+    an exclamation mark (``!``) to indicate the ``NOT`` logical operator.
 
-.. _splitdns-config-format-dest-host:
+.. _splitdns-yaml-format-dest-host:
 
 ``dest_host``
     A valid hostname. This specifies that DNS server selection will be
     based on the destination host. You can prefix the host with an
     exclamation mark (``!``) to indicate the ``NOT`` logical operator.
 
-.. _splitdns-config-format-url-regex:
+.. _splitdns-yaml-format-url-regex:
 
 ``url_regex``
     A valid URL regular expression. This specifies that DNS server
     selection will be based on a regular expression.
 
-.. _splitdns-config-format-named:
+.. _splitdns-yaml-format-named:
 
 ``named``
     This is a required directive. It identifies the DNS server that
@@ -85,7 +95,7 @@ The following list describes each field.
     You must specify the domains with IP addresses in CIDR ("dot")
     notation.
 
-.. _splitdns-config-format-def-domain:
+.. _splitdns-yaml-format-def-domain:
 
 ``def_domain``
     A valid domain name. This optional directive specifies the default
@@ -93,7 +103,7 @@ The following list describes each field.
     If you do not provide the default domain, the system determines its
     value from ``/etc/resolv.conf``
 
-.. _splitdns-config-format-search-list:
+.. _splitdns-yaml-format-search-list:
 
 ``search_list``
     A list of domains separated by spaces or semicolons (;). This
@@ -105,8 +115,17 @@ Examples
 
 Consider the following DNS server selection specifications: ::
 
-      dest_domain=internal.company.com named="255.255.255.255:212 255.255.255.254" def_domain=company.com search_list="company.com company1.com"
-      dest_domain=!internal.company.com named=255.255.255.253
+      splitdns:
+        - dest: internal.company.com
+          named:
+            - 255.255.255.255:212
+            - 255.255.255.254
+          def_domain: company.com
+          search_list: [ company.com, company1.com]
+          type: domain
+        - dest: '!internal.company.com'
+          named: 255.255.255.253
+          type: domain
 
 Now consider the following two requests: ::
 

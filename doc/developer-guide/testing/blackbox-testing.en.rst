@@ -123,7 +123,7 @@ A number of file objects are also defined to help test TrafficServer. Files that
 - remap.config
 - sni.yaml
 - socks.config
-- splitdns.config
+- splitdns.yaml
 - ssl_multicert.config
 - storage.config
 - volume.config
