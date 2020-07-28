@@ -766,8 +766,7 @@ ControlMatcher<Data, MatchResult>::Match(RequestData *rdata, MatchResult *result
 
 // int ControlMatcher::BuildTable()
 //
-//    Reads the cache.config file and build the records array
-//      from it
+// Reads the x.config file and build the records array from it
 //
 template <class Data, class MatchResult>
 int

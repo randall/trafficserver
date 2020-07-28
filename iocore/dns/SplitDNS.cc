@@ -206,9 +206,6 @@ SplitDNS::getDNSRecord(const char *hostname)
 void
 SplitDNS::findServer(RequestData *rdata, SplitDNSResult *result)
 {
-  DNS_table *tablePtr = m_DNSSrvrTable;
-  SplitDNSRecord *rec;
-
   ink_assert(result->r == DNS_SRVR_UNDEFINED);
 
   if (m_SplitDNSlEnable == 0) {
@@ -259,16 +256,15 @@ SplitDNS::findServer(RequestData *rdata, SplitDNSResult *result)
       }
     }
   } else {
-    tablePtr->Match(rdata, result);
+    m_DNSSrvrTable->Match(rdata, result);
   }
 
-  rec = result->m_rec;
-  if (rec == nullptr) {
+  if (result->m_rec == nullptr) {
     result->r = DNS_SRVR_UNDEFINED;
     return;
-  } else {
-    result->r = DNS_SRVR_SPECIFIED;
   }
+
+  result->r = DNS_SRVR_SPECIFIED;
 
   if (is_debug_tag_set("splitdns_config")) {
     const char *host = rdata->get_host();
