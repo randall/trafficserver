@@ -175,7 +175,7 @@ NextHopStrategyFactory::strategyInstance(const char *name)
  * 'strategy' yaml file would then normally have the '#include hosts.yml' in it's begining.
  */
 void
-NextHopStrategyFactory::loadConfigFile(const std::string fileName, std::stringstream &doc,
+NextHopStrategyFactory::loadConfigFile(const std::string &fileName, std::stringstream &doc,
                                        std::unordered_set<std::string> &include_once)
 {
   const char *sep = " \t";

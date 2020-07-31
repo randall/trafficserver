@@ -94,7 +94,7 @@ struct AIOCallback : public Continuation {
   // set on return from aio_read/aio_write
   int64_t aio_result = 0;
 
-  int ok();
+  int ok() const;
   AIOCallback() {}
 };
 

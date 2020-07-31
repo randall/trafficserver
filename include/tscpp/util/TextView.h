@@ -507,7 +507,7 @@ public:
   /// Ordering functor, lexicographic comparison.
   struct LessThan {
     bool
-    operator()(self_type const &lhs, self_type const &rhs)
+    operator()(self_type const &lhs, self_type const &rhs) const
     {
       return -1 == strcmp(lhs, rhs);
     }
@@ -515,7 +515,7 @@ public:
   /// Ordering functor, case ignoring lexicographic comparison.
   struct LessThanNoCase {
     bool
-    operator()(self_type const &lhs, self_type const &rhs)
+    operator()(self_type const &lhs, self_type const &rhs) const
     {
       return -1 == strcasecmp(lhs, rhs);
     }

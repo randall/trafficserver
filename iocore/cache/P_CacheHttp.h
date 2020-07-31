@@ -49,7 +49,7 @@ struct CacheHTTPInfoVector {
   ~CacheHTTPInfoVector();
 
   int
-  count()
+  count() const
   {
     return xcount;
   }

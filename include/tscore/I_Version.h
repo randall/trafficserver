@@ -102,7 +102,7 @@ struct ModuleVersion {
    * @param that Version to check against.
    * @return @a true if @a that is compatible with @a this, @c false otherwise.
    */
-  bool check(ModuleVersion const &that);
+  bool check(ModuleVersion const &that) const;
 
   Type _type           = PUBLIC; ///< The numeric value of the module version.
   unsigned char _major = 0;      ///< Major version.
@@ -120,7 +120,7 @@ inline constexpr ModuleVersion::ModuleVersion(ModuleVersion const &base, ts::Mod
 }
 
 inline bool
-ModuleVersion::check(ModuleVersion const &that)
+ModuleVersion::check(ModuleVersion const &that) const
 {
   switch (_type) {
   case PUBLIC:

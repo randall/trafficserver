@@ -108,7 +108,7 @@ struct PriorityEventQueue {
   void check_ready(ink_hrtime now, EThread *t);
 
   ink_hrtime
-  earliest_timeout()
+  earliest_timeout() const
   {
     for (int i = 0; i < N_PQ_LIST; i++) {
       if (after[i].head) {

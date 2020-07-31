@@ -118,7 +118,7 @@ public:
 
   /// Check for intersection.
   bool
-  intersects(self_type const &that)
+  intersects(self_type const &that) const
   {
     return 0 != (m_bits & that.m_bits);
   }

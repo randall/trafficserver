@@ -225,7 +225,7 @@ template <class C, class L = typename C::Link_link> struct DLL {
   void remove(C *e);
   void insert(C *e, C *after);
   bool
-  in(C *e)
+  in(C *e) const
   {
     return head == e || next(e) || prev(e);
   }
@@ -702,7 +702,7 @@ template <class C, class L = typename C::Link_link> struct AtomicSLL {
     return (C *)ink_atomiclist_popall(&al);
   }
   bool
-  empty()
+  empty() const
   {
     return INK_ATOMICLIST_EMPTY(al);
   }

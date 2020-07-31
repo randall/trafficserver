@@ -43,7 +43,7 @@ public:
   int addEntry(void *entry);
   void sortWithFunction(int(sortFunc)(const void *, const void *));
   int
-  getNumEntries()
+  getNumEntries() const
   {
     return numValidValues;
   };

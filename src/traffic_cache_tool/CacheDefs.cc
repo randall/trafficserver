@@ -22,6 +22,7 @@
  */
 
 #include "CacheDefs.h"
+
 #include <iostream>
 #include <fcntl.h>
 
@@ -135,19 +136,19 @@ URLparser::getPort(std::string &fullURL, int &port_ptr, int &port_len)
 }
 
 uint32_t
-Doc::prefix_len()
+Doc::prefix_len() const
 {
   return sizeof(Doc) + hlen;
 }
 
 uint32_t
-Doc::data_len()
+Doc::data_len() const
 {
   return len - sizeof(Doc) - hlen;
 }
 
 int
-Doc::single_fragment()
+Doc::single_fragment() const
 {
   return data_len() == total_len;
 }

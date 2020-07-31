@@ -271,10 +271,10 @@ struct HTTPHdrImpl : public HdrHeapObjImpl {
   int marshal(MarshalXlate *ptr_xlate, int num_ptr, MarshalXlate *str_xlate, int num_str);
   void unmarshal(intptr_t offset);
   void move_strings(HdrStrHeap *new_heap);
-  size_t strings_length();
+  size_t strings_length() const;
 
   // Sanity Check Functions
-  void check_strings(HeapCheck *heaps, int num_heaps);
+  void check_strings(HeapCheck *heaps, int num_heaps) const;
 };
 
 struct HTTPValAccept {
@@ -531,7 +531,7 @@ public:
   void version_set(HTTPVersion version);
 
   const char *method_get(int *length);
-  int method_get_wksidx();
+  int method_get_wksidx() const;
   void method_set(const char *value, int length);
 
   URL *url_create(URL *url);
@@ -645,8 +645,8 @@ public:
 
 public:
   // Utility routines
-  bool is_cache_control_set(const char *cc_directive_wks);
-  bool is_pragma_no_cache_set();
+  bool is_cache_control_set(const char *cc_directive_wks) const;
+  bool is_pragma_no_cache_set() const;
   bool is_keep_alive_set() const;
   bool expect_final_response() const;
   HTTPKeepAlive keep_alive_get() const;
@@ -1049,7 +1049,7 @@ HTTPHdr::method_get(int *length)
 }
 
 inline int
-HTTPHdr::method_get_wksidx()
+HTTPHdr::method_get_wksidx() const
 {
   ink_assert(valid());
   ink_assert(m_http->m_polarity == HTTP_TYPE_REQUEST);
@@ -1274,7 +1274,7 @@ HTTPHdr::parse_resp(HTTPParser *parser, const char **start, const char *end, boo
   -------------------------------------------------------------------------*/
 
 inline bool
-HTTPHdr::is_cache_control_set(const char *cc_directive_wks)
+HTTPHdr::is_cache_control_set(const char *cc_directive_wks) const
 {
   ink_assert(valid());
   ink_assert(hdrtoken_is_wks(cc_directive_wks));
@@ -1293,7 +1293,7 @@ HTTPHdr::is_cache_control_set(const char *cc_directive_wks)
   -------------------------------------------------------------------------*/
 
 inline bool
-HTTPHdr::is_pragma_no_cache_set()
+HTTPHdr::is_pragma_no_cache_set() const
 {
   ink_assert(valid());
   return (get_cooked_pragma_no_cache());
@@ -1428,7 +1428,7 @@ public:
     return m_alt->m_id;
   }
   int32_t
-  rid_get()
+  rid_get() const
   {
     return m_alt->m_rid;
   }
@@ -1447,7 +1447,7 @@ public:
   CryptoHash object_key_get();
   void object_key_get(CryptoHash *);
   bool compare_object_key(const CryptoHash *);
-  int64_t object_size_get();
+  int64_t object_size_get() const;
 
   void
   request_get(HTTPHdr *hdr)
@@ -1478,12 +1478,12 @@ public:
   }
 
   time_t
-  request_sent_time_get()
+  request_sent_time_get() const
   {
     return m_alt->m_request_sent_time;
   }
   time_t
-  response_received_time_get()
+  response_received_time_get() const
   {
     return m_alt->m_response_received_time;
   }
@@ -1518,7 +1518,7 @@ public:
   /// Get the # of fragment offsets
   /// @note This is the size of the fragment offset table, and one less
   /// than the actual # of fragments.
-  int get_frag_offset_count();
+  int get_frag_offset_count() const;
   /// Add an @a offset to the end of the fragment offset table.
   void push_frag_offset(FragOffset offset);
 
@@ -1577,7 +1577,7 @@ HTTPInfo::compare_object_key(const CryptoHash *hash)
 }
 
 inline int64_t
-HTTPInfo::object_size_get()
+HTTPInfo::object_size_get() const
 {
   int64_t val = 0; // make gcc shut up.
   int32_t *pi = reinterpret_cast<int32_t *>(&val);
@@ -1609,7 +1609,7 @@ HTTPInfo::get_frag_table()
 }
 
 inline int
-HTTPInfo::get_frag_offset_count()
+HTTPInfo::get_frag_offset_count() const
 {
   return m_alt ? m_alt->m_frag_offset_count : 0;
 }

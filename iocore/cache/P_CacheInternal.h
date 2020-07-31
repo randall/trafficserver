@@ -356,7 +356,7 @@ struct CacheVC : public CacheVConnection {
   int scanRemoveDone(int event, Event *e);
 
   int
-  is_io_in_progress()
+  is_io_in_progress() const
   {
     return io.aiocb.aio_fildes != AIO_NOT_IN_PROGRESS;
   }

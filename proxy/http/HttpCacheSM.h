@@ -91,19 +91,19 @@ public:
 
   // Function to get the readwhilewrite_inprogress flag
   inline bool
-  is_readwhilewrite_inprogress()
+  is_readwhilewrite_inprogress() const
   {
     return readwhilewrite_inprogress;
   }
 
   bool
-  is_ram_cache_hit()
+  is_ram_cache_hit() const
   {
     return cache_read_vc ? (cache_read_vc->is_ram_cache_hit()) : false;
   }
 
   bool
-  is_compressed_in_ram()
+  is_compressed_in_ram() const
   {
     return cache_read_vc ? (cache_read_vc->is_compressed_in_ram()) : false;
   }
@@ -115,7 +115,7 @@ public:
   }
 
   int
-  get_open_read_tries()
+  get_open_read_tries() const
   {
     return open_read_tries;
   }
@@ -127,13 +127,13 @@ public:
   }
 
   int
-  get_open_write_tries()
+  get_open_write_tries() const
   {
     return open_write_tries;
   }
 
   int
-  get_volume_number()
+  get_volume_number() const
   {
     return cache_read_vc ? (cache_read_vc->get_volume_number()) : -1;
   }

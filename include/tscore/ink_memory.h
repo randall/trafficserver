@@ -627,7 +627,7 @@ path_join(ats_scoped_str const &lhs, ats_scoped_str const &rhs)
 
 struct ats_unique_buf_deleter {
   void
-  operator()(uint8_t *p)
+  operator()(uint8_t *p) const
   {
     ats_free(p);
   }

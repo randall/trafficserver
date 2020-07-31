@@ -47,8 +47,8 @@ template <typename T, class Comp = PriorityQueueLess<T>> class PriorityQueue
 public:
   PriorityQueue() {}
   ~PriorityQueue() {}
-  bool empty();
-  bool in(PriorityQueueEntry<T> *entry);
+  bool empty() const;
+  bool in(PriorityQueueEntry<T> *entry) const;
   PriorityQueueEntry<T> *top();
   void pop();
   void push(PriorityQueueEntry<T> *);
@@ -74,7 +74,7 @@ PriorityQueue<T, Comp>::dump() const
 
 template <typename T, typename Comp>
 bool
-PriorityQueue<T, Comp>::in(PriorityQueueEntry<T> *entry)
+PriorityQueue<T, Comp>::in(PriorityQueueEntry<T> *entry) const
 {
   ink_release_assert(entry != nullptr);
 
@@ -87,7 +87,7 @@ PriorityQueue<T, Comp>::in(PriorityQueueEntry<T> *entry)
 
 template <typename T, typename Comp>
 bool
-PriorityQueue<T, Comp>::empty()
+PriorityQueue<T, Comp>::empty() const
 {
   return _v.empty();
 }

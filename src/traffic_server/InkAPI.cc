@@ -2266,7 +2266,7 @@ TSUrlStringGet(TSMBuffer bufp, TSMLoc obj, int *length)
   return url_string_get(url_impl, nullptr, length, nullptr);
 }
 
-using URLPartGetF = const char *(URL::*)(int *);
+using URLPartGetF = const char *(URL::*)(int *) const;
 using URLPartSetF = void (URL::*)(const char *, int);
 
 static const char *

@@ -177,7 +177,7 @@ PluginDso::getSymbol(const char *symbol, void *&address, std::string &error) con
  * @return true - loaded, false - not loaded
  */
 bool
-PluginDso::isLoaded()
+PluginDso::isLoaded() const
 {
   return nullptr != _dlh;
 }
@@ -279,7 +279,7 @@ PluginDso::decInstanceCount()
 }
 
 int
-PluginDso::instanceCount()
+PluginDso::instanceCount() const
 {
   return _instanceCount.refcount();
 }

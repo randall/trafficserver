@@ -49,7 +49,7 @@ Http2FrequencyCounter::increment(uint16_t amount)
 }
 
 uint32_t
-Http2FrequencyCounter::get_count()
+Http2FrequencyCounter::get_count() const
 {
   return this->_count[0] + this->_count[1];
 }

@@ -77,8 +77,8 @@ public:
    *
    * The state of the iterator is not modified.
    */
-  TextView get_current();
-  const char *get_current(int *len);
+  TextView get_current() const;
+  const char *get_current(int *len) const;
 
   /** Get the @a nth sub-value in the field @a m.
    *
@@ -169,13 +169,13 @@ HdrCsvIter::get_next(int *len)
 }
 
 inline ts::TextView
-HdrCsvIter::get_current()
+HdrCsvIter::get_current() const
 {
   return m_csv;
 }
 
 inline const char *
-HdrCsvIter::get_current(int *len)
+HdrCsvIter::get_current(int *len) const
 {
   *len = static_cast<int>(m_csv.size());
   return m_csv.data();

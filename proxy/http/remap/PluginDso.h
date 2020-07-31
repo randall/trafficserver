@@ -65,7 +65,7 @@ public:
   /* DSO Load, unload, get symbols from DSO */
   virtual bool load(std::string &error);
   virtual bool unload(std::string &error);
-  bool isLoaded();
+  bool isLoaded() const;
   bool getSymbol(const char *symbol, void *&address, std::string &error) const;
 
   /* Accessors for effective and runtime paths */
@@ -92,7 +92,7 @@ public:
 
   void incInstanceCount();
   void decInstanceCount();
-  int instanceCount();
+  int instanceCount() const;
   bool isDynamicReloadEnabled() const;
 
   class LoadedPlugins : public RefCountObj

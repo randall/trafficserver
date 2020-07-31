@@ -122,8 +122,9 @@ public:
   }
 
   ~BaseMetaInfo() { ats_free(_filename); }
+
   bool
-  get_creation_time(time_t *time)
+  get_creation_time(time_t *time) const
   {
     if (_flags & VALID_CREATION_TIME) {
       *time = _creation_time;
@@ -134,7 +135,7 @@ public:
   }
 
   bool
-  get_log_object_signature(uint64_t *signature)
+  get_log_object_signature(uint64_t *signature) const
   {
     if (_flags & VALID_SIGNATURE) {
       *signature = _log_object_signature;
@@ -151,7 +152,7 @@ public:
   }
 
   bool
-  file_open_successful()
+  file_open_successful() const
   {
     return (_flags & FILE_OPEN_SUCCESSFUL ? true : false);
   }
@@ -186,7 +187,7 @@ public:
     return m_name;
   }
   bool
-  is_open()
+  is_open() const
   {
     return (m_fp != nullptr);
   }
@@ -196,7 +197,7 @@ public:
     return m_bytes_written;
   }
   bool
-  is_init()
+  is_init() const
   {
     return m_is_init;
   }

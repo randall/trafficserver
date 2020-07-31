@@ -162,7 +162,7 @@ struct HostStatRec {
   }
 
   inline unsigned int
-  getReasonState(unsigned int reason)
+  getReasonState(unsigned int reason) const
   {
     unsigned int r = 0;
     if (reasons == 0) {

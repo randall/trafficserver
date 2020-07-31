@@ -115,7 +115,7 @@ struct MIMEField {
   }
 
   bool
-  is_cooked()
+  is_cooked() const
   {
     return (m_flags & MIME_FIELD_SLOT_FLAGS_COOKED) ? true : false;
   }
@@ -1013,7 +1013,7 @@ public:
   MIMEField *iter_get(MIMEFieldIter *iter);
   MIMEField *iter_get_next(MIMEFieldIter *iter);
 
-  uint64_t presence(uint64_t mask);
+  uint64_t presence(uint64_t mask) const;
 
   int print(char *buf, int bufsize, int *bufindex, int *chars_to_skip);
 
@@ -1050,23 +1050,23 @@ public:
                           const char separator = ',');
   void value_append_or_set(const char *name, const int name_length, char *value, int value_length);
   void field_combine_dups(MIMEField *field, bool prepend_comma = false, const char separator = ',');
-  time_t get_age();
+  time_t get_age() const;
   int64_t get_content_length() const;
-  time_t get_date();
-  time_t get_expires();
-  time_t get_if_modified_since();
-  time_t get_if_unmodified_since();
-  time_t get_last_modified();
-  time_t get_if_range_date();
-  int32_t get_max_forwards();
+  time_t get_date() const;
+  time_t get_expires() const;
+  time_t get_if_modified_since() const;
+  time_t get_if_unmodified_since() const;
+  time_t get_last_modified() const;
+  time_t get_if_range_date() const;
+  int32_t get_max_forwards() const;
   int32_t get_warning(int idx = 0);
 
-  uint32_t get_cooked_cc_mask();
-  int32_t get_cooked_cc_max_age();
-  int32_t get_cooked_cc_s_maxage();
-  int32_t get_cooked_cc_max_stale();
-  int32_t get_cooked_cc_min_fresh();
-  bool get_cooked_pragma_no_cache();
+  uint32_t get_cooked_cc_mask() const;
+  int32_t get_cooked_cc_max_age() const;
+  int32_t get_cooked_cc_s_maxage() const;
+  int32_t get_cooked_cc_max_stale() const;
+  int32_t get_cooked_cc_min_fresh() const;
+  bool get_cooked_pragma_no_cache() const;
 
   /** Get the value of the host field.
       This parses the host field for brackets and port value.
@@ -1281,7 +1281,7 @@ MIMEHdr::iter_get_next(MIMEFieldIter *iter)
   -------------------------------------------------------------------------*/
 
 inline uint64_t
-MIMEHdr::presence(uint64_t mask)
+MIMEHdr::presence(uint64_t mask) const
 {
   return (m_mime->m_presence_bits & mask);
 }
@@ -1559,7 +1559,7 @@ MIMEHdr::value_append(const char *name, int name_length, const char *value, int 
 /*-------------------------------------------------------------------------
   -------------------------------------------------------------------------*/
 inline time_t
-MIMEHdr::get_age()
+MIMEHdr::get_age() const
 {
   int64_t age = value_get_int64(MIME_FIELD_AGE, MIME_LEN_AGE);
 
@@ -1585,7 +1585,7 @@ MIMEHdr::get_content_length() const
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_date()
+MIMEHdr::get_date() const
 {
   return value_get_date(MIME_FIELD_DATE, MIME_LEN_DATE);
 }
@@ -1594,7 +1594,7 @@ MIMEHdr::get_date()
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_expires()
+MIMEHdr::get_expires() const
 {
   return value_get_date(MIME_FIELD_EXPIRES, MIME_LEN_EXPIRES);
 }
@@ -1603,7 +1603,7 @@ MIMEHdr::get_expires()
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_if_modified_since()
+MIMEHdr::get_if_modified_since() const
 {
   return value_get_date(MIME_FIELD_IF_MODIFIED_SINCE, MIME_LEN_IF_MODIFIED_SINCE);
 }
@@ -1612,7 +1612,7 @@ MIMEHdr::get_if_modified_since()
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_if_unmodified_since()
+MIMEHdr::get_if_unmodified_since() const
 {
   return value_get_date(MIME_FIELD_IF_UNMODIFIED_SINCE, MIME_LEN_IF_UNMODIFIED_SINCE);
 }
@@ -1621,7 +1621,7 @@ MIMEHdr::get_if_unmodified_since()
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_last_modified()
+MIMEHdr::get_last_modified() const
 {
   return value_get_date(MIME_FIELD_LAST_MODIFIED, MIME_LEN_LAST_MODIFIED);
 }
@@ -1630,7 +1630,7 @@ MIMEHdr::get_last_modified()
   -------------------------------------------------------------------------*/
 
 inline time_t
-MIMEHdr::get_if_range_date()
+MIMEHdr::get_if_range_date() const
 {
   return value_get_date(MIME_FIELD_IF_RANGE, MIME_LEN_IF_RANGE);
 }
@@ -1639,7 +1639,7 @@ MIMEHdr::get_if_range_date()
   -------------------------------------------------------------------------*/
 
 inline int32_t
-MIMEHdr::get_max_forwards()
+MIMEHdr::get_max_forwards() const
 {
   return value_get_int(MIME_FIELD_MAX_FORWARDS, MIME_LEN_MAX_FORWARDS);
 }
@@ -1660,7 +1660,7 @@ MIMEHdr::get_warning(int idx)
   -------------------------------------------------------------------------*/
 
 inline uint32_t
-MIMEHdr::get_cooked_cc_mask()
+MIMEHdr::get_cooked_cc_mask() const
 {
   return m_mime->m_cooked_stuff.m_cache_control.m_mask;
 }
@@ -1669,7 +1669,7 @@ MIMEHdr::get_cooked_cc_mask()
   -------------------------------------------------------------------------*/
 
 inline int32_t
-MIMEHdr::get_cooked_cc_max_age()
+MIMEHdr::get_cooked_cc_max_age() const
 {
   return m_mime->m_cooked_stuff.m_cache_control.m_secs_max_age;
 }
@@ -1678,7 +1678,7 @@ MIMEHdr::get_cooked_cc_max_age()
   -------------------------------------------------------------------------*/
 
 inline int32_t
-MIMEHdr::get_cooked_cc_s_maxage()
+MIMEHdr::get_cooked_cc_s_maxage() const
 {
   return m_mime->m_cooked_stuff.m_cache_control.m_secs_s_maxage;
 }
@@ -1687,7 +1687,7 @@ MIMEHdr::get_cooked_cc_s_maxage()
   -------------------------------------------------------------------------*/
 
 inline int32_t
-MIMEHdr::get_cooked_cc_max_stale()
+MIMEHdr::get_cooked_cc_max_stale() const
 {
   return m_mime->m_cooked_stuff.m_cache_control.m_secs_max_stale;
 }
@@ -1696,7 +1696,7 @@ MIMEHdr::get_cooked_cc_max_stale()
   -------------------------------------------------------------------------*/
 
 inline int32_t
-MIMEHdr::get_cooked_cc_min_fresh()
+MIMEHdr::get_cooked_cc_min_fresh() const
 {
   return m_mime->m_cooked_stuff.m_cache_control.m_secs_min_fresh;
 }
@@ -1705,7 +1705,7 @@ MIMEHdr::get_cooked_cc_min_fresh()
   -------------------------------------------------------------------------*/
 
 inline bool
-MIMEHdr::get_cooked_pragma_no_cache()
+MIMEHdr::get_cooked_pragma_no_cache() const
 {
   return m_mime->m_cooked_stuff.m_pragma.m_no_cache;
 }

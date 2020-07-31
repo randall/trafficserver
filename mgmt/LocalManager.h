@@ -91,7 +91,7 @@ public:
   void hostStatusSetDown(const char *marshalled_req, int len);
   void hostStatusSetUp(const char *marshalled_req, int len);
 
-  bool processRunning();
+  bool processRunning() const;
 
   bool run_proxy;
   bool listen_for_proxy;

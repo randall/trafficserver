@@ -68,7 +68,7 @@ HeaderFieldName::length()
 }
 
 const char *
-HeaderFieldName::c_str()
+HeaderFieldName::c_str() const
 {
   return name_.c_str();
 }

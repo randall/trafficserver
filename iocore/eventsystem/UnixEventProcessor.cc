@@ -500,7 +500,7 @@ EventProcessor::spawn_thread(Continuation *cont, const char *thr_name, size_t st
 }
 
 bool
-EventProcessor::has_tg_started(int etype)
+EventProcessor::has_tg_started(int etype) const
 {
   return thread_group[etype]._started == thread_group[etype]._count;
 }

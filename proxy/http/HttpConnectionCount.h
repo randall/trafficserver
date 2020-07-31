@@ -156,7 +156,7 @@ public:
     bool _queued_p{false};   ///< Set if the connection is delayed / queued.
 
     /// Check if tracking is active.
-    bool is_active();
+    bool is_active() const;
 
     /// Reserve a connection.
     int reserve();
@@ -323,7 +323,7 @@ OutboundConnTrack::Group::hash(const Key &key)
 }
 
 inline bool
-OutboundConnTrack::TxnState::is_active()
+OutboundConnTrack::TxnState::is_active() const
 {
   return nullptr != _g;
 }

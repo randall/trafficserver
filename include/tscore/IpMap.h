@@ -51,8 +51,8 @@ namespace detail
 
     Interval() {} ///< Default constructor.
     /// Construct with values.
-    Interval(ArgType min, ///< Minimum value in span.
-             ArgType max  ///< Maximum value in span.
+    Interval(ArgType &min, ///< Minimum value in span.
+             ArgType &max  ///< Maximum value in span.
              )
       : _min(min), _max(max)
     {

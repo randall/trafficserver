@@ -187,10 +187,10 @@ struct Doc {
 #if TS_ENABLE_FIPS == 1
   CryptoHash key; ///< Key for this doc.
 #endif
-  uint32_t data_len();
-  uint32_t prefix_len();
-  int single_fragment();
-  int no_data_in_fragment();
+  uint32_t data_len() const;
+  uint32_t prefix_len() const;
+  int single_fragment() const;
+
   char *hdr();
   char *data();
 };

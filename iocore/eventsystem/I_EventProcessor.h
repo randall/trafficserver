@@ -321,7 +321,7 @@ public:
   */
   int n_ethreads = 0;
 
-  bool has_tg_started(int etype);
+  bool has_tg_started(int etype) const;
 
   /*------------------------------------------------------*\
   | Unix & non NT Interface                                |

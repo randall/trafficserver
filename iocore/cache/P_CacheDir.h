@@ -239,7 +239,7 @@ struct OpenDirEntry {
   int wait(CacheVC *c, int msec);
 
   bool
-  has_multiple_writers()
+  has_multiple_writers() const
   {
     return num_writers > 1;
   }

@@ -77,7 +77,7 @@ public:
   /**
    * @return a const char * which points to the name of this HeaderFieldName
    */
-  const char *c_str();
+  const char *c_str() const;
 
   /**
    * Case insensitive comparison of this HeaderFieldName

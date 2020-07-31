@@ -135,7 +135,7 @@ public:
   }
 
   bool
-  test_override_ip(IpEndpoint const &test_ip)
+  test_override_ip(IpEndpoint const &test_ip) const
   {
     return this->debug_client_ip == test_ip;
   }
@@ -192,7 +192,7 @@ public:
   }
 
   void
-  log_va(const char *tag, DiagsLevel level, const SourceLocation *loc, const char *fmt, va_list ap)
+  log_va(const char *tag, DiagsLevel level, const SourceLocation *loc, const char *fmt, va_list ap) const
   {
     if (on(tag)) {
       print_va(tag, level, loc, fmt, ap);

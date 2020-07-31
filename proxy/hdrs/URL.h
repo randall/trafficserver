@@ -250,33 +250,33 @@ public:
   void hash_get(CryptoHash *hash, cache_generation_t generation = -1) const;
   void host_hash_get(CryptoHash *hash) const;
 
-  const char *scheme_get(int *length);
-  const std::string_view scheme_get();
+  const char *scheme_get(int *length) const;
+  const std::string_view scheme_get() const;
   int scheme_get_wksidx() const;
   void scheme_set(const char *value, int length);
 
-  const char *user_get(int *length);
+  const char *user_get(int *length) const;
   void user_set(const char *value, int length);
-  const char *password_get(int *length);
+  const char *password_get(int *length) const;
   void password_set(const char *value, int length);
-  const char *host_get(int *length);
+  const char *host_get(int *length) const;
   void host_set(const char *value, int length);
 
   int port_get() const;
   int port_get_raw() const;
   void port_set(int port);
 
-  const char *path_get(int *length);
+  const char *path_get(int *length) const;
   void path_set(const char *value, int length);
 
-  int type_get();
+  int type_get() const;
   void type_set(int type);
 
-  const char *params_get(int *length);
+  const char *params_get(int *length) const;
   void params_set(const char *value, int length);
-  const char *query_get(int *length);
+  const char *query_get(int *length) const;
   void query_set(const char *value, int length);
-  const char *fragment_get(int *length);
+  const char *fragment_get(int *length) const;
   void fragment_set(const char *value, int length);
 
   ParseResult parse(const char **start, const char *end);
@@ -449,7 +449,7 @@ URL::host_hash_get(CryptoHash *hash) const
   -------------------------------------------------------------------------*/
 
 inline const std::string_view
-URL::scheme_get()
+URL::scheme_get() const
 {
   ink_assert(valid());
 
@@ -462,7 +462,7 @@ URL::scheme_get()
 }
 
 inline const char *
-URL::scheme_get(int *length)
+URL::scheme_get(int *length) const
 {
   std::string_view ret = this->scheme_get();
   *length              = ret.size();
@@ -491,7 +491,7 @@ URL::scheme_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::user_get(int *length)
+URL::user_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_user;
@@ -512,7 +512,7 @@ URL::user_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::password_get(int *length)
+URL::password_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_password;
@@ -533,7 +533,7 @@ URL::password_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::host_get(int *length)
+URL::host_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_host;
@@ -584,7 +584,7 @@ URL::port_set(int port)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::path_get(int *length)
+URL::path_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_path;
@@ -605,7 +605,7 @@ URL::path_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline int
-URL::type_get()
+URL::type_get() const
 {
   ink_assert(valid());
   return m_url_impl->m_type_code;
@@ -625,7 +625,7 @@ URL::type_set(int type)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::params_get(int *length)
+URL::params_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_params;
@@ -646,7 +646,7 @@ URL::params_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::query_get(int *length)
+URL::query_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_query;
@@ -667,7 +667,7 @@ URL::query_set(const char *value, int length)
   -------------------------------------------------------------------------*/
 
 inline const char *
-URL::fragment_get(int *length)
+URL::fragment_get(int *length) const
 {
   ink_assert(valid());
   *length = m_url_impl->m_len_fragment;

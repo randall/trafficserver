@@ -307,7 +307,7 @@ public:
 
   */
   int64_t
-  size()
+  size() const
   {
     return (int64_t)(_end - _start);
   }
@@ -332,7 +332,7 @@ public:
     @return space available for writing in this IOBufferBlock.
   */
   int64_t
-  write_avail()
+  write_avail() const
   {
     return (int64_t)(_buf_end - _end);
   }
@@ -348,7 +348,7 @@ public:
 
   */
   int64_t
-  block_size()
+  block_size() const
   {
     return data->block_size();
   }

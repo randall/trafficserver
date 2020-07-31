@@ -39,7 +39,7 @@
 static constexpr ts::ModuleVersion AIO_MODULE_INTERNAL_VERSION{AIO_MODULE_PUBLIC_VERSION, ts::ModuleVersion::PRIVATE};
 
 TS_INLINE int
-AIOCallback::ok()
+AIOCallback::ok() const
 {
   return (off_t)aiocb.aio_nbytes == (off_t)aio_result;
 }

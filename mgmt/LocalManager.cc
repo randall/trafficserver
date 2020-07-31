@@ -177,7 +177,7 @@ LocalManager::clearStats(const char *name)
 }
 
 bool
-LocalManager::processRunning()
+LocalManager::processRunning() const
 {
   if (watched_process_fd != ts::NO_FD && watched_process_pid != -1) {
     return true;

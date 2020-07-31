@@ -91,11 +91,7 @@ public:
   self &setSessionProtocolPreference(SessionProtocolSet const &);
 };
 
-inline HttpSessionAcceptOptions::HttpSessionAcceptOptions()
-
-{
-  host_res_preference = host_res_default_preference_order;
-}
+inline HttpSessionAcceptOptions::HttpSessionAcceptOptions() : host_res_preference(host_res_default_preference_order) {}
 
 inline HttpSessionAcceptOptions &
 HttpSessionAcceptOptions::setTransportType(int type)

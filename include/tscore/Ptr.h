@@ -120,25 +120,25 @@ public:
   explicit operator bool() const { return m_ptr != nullptr; }
 
   int
-  operator==(const T *p)
+  operator==(const T *p) const
   {
     return (m_ptr == p);
   }
 
   int
-  operator==(const Ptr<T> &p)
+  operator==(const Ptr<T> &p) const
   {
     return (m_ptr == p.m_ptr);
   }
 
   int
-  operator!=(const T *p)
+  operator!=(const T *p) const
   {
     return (m_ptr != p);
   }
 
   int
-  operator!=(const Ptr<T> &p)
+  operator!=(const Ptr<T> &p) const
   {
     return (m_ptr != p.m_ptr);
   }

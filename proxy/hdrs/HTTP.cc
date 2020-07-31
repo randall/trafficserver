@@ -1861,7 +1861,7 @@ HTTPHdrImpl::move_strings(HdrStrHeap *new_heap)
 }
 
 size_t
-HTTPHdrImpl::strings_length()
+HTTPHdrImpl::strings_length() const
 {
   size_t ret = 0;
 
@@ -1874,7 +1874,7 @@ HTTPHdrImpl::strings_length()
 }
 
 void
-HTTPHdrImpl::check_strings(HeapCheck *heaps, int num_heaps)
+HTTPHdrImpl::check_strings(HeapCheck *heaps, int num_heaps) const
 {
   if (m_polarity == HTTP_TYPE_REQUEST) {
     CHECK_STR(u.req.m_ptr_method, u.req.m_len_method, heaps, num_heaps);
