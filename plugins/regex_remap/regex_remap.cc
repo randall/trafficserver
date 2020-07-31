@@ -157,7 +157,7 @@ public:
   }
 
   // Substitutions
-  int get_lengths(const int ovector[], int lengths[], TSRemapRequestInfo *rri, UrlComponents *req_url);
+  int get_lengths(const int ovector[], int lengths[], TSRemapRequestInfo *rri, UrlComponents *req_url) const;
   int substitute(char dest[], const char *src, const int ovector[], const int lengths[], TSHttpTxn txnp, TSRemapRequestInfo *rri,
                  UrlComponents *req_url, bool lowercase_substitutions);
 
@@ -474,7 +474,7 @@ RemapRegex::compile(const char *&error, int &erroffset)
 // We also calculate a total length for the new string, which is the max length the
 // substituted string can have (use it to allocate a buffer before calling substitute() ).
 int
-RemapRegex::get_lengths(const int ovector[], int lengths[], TSRemapRequestInfo *rri, UrlComponents *req_url)
+RemapRegex::get_lengths(const int ovector[], int lengths[], TSRemapRequestInfo *rri, UrlComponents *req_url) const
 {
   int len = _subst_len + 1; // Bigger then necessary
 

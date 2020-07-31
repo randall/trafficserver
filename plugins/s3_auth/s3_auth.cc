@@ -302,19 +302,19 @@ public:
   }
 
   const StringSet &
-  v4includeHeaders()
+  v4includeHeaders() const
   {
     return _v4includeHeaders;
   }
 
   const StringSet &
-  v4excludeHeaders()
+  v4excludeHeaders() const
   {
     return _v4excludeHeaders;
   }
 
   const StringMap &
-  v4RegionMap()
+  v4RegionMap() const
   {
     return _region_map;
   }

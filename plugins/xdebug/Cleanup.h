@@ -56,7 +56,7 @@ namespace atscppapi
 #define Y(NAME_SEGMENT)                                       \
   struct TS##NAME_SEGMENT##Deleter {                          \
     void                                                      \
-    operator()(TS##NAME_SEGMENT ptr)                          \
+    operator()(TS##NAME_SEGMENT ptr) const                    \
     {                                                         \
       TSAssert(TS##NAME_SEGMENT##Destroy(ptr) == TS_SUCCESS); \
     }                                                         \
