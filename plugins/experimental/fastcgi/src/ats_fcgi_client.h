@@ -95,7 +95,7 @@ public:
   ~FCGIClientRequest();
 
   std::map<std::string, std::string> GenerateFcgiRequestHeaders();
-  void printFCGIRequestHeaders();
+  void printFCGIRequestHeaders() const;
 
   // Request Creation
   FCGI_BeginRequest *createBeginRequest();

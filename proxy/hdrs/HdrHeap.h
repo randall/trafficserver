@@ -255,7 +255,7 @@ public:
 
   // Sanity Check Functions
   void sanity_check_strs();
-  bool check_marshalled(uint32_t buf_length);
+  bool check_marshalled(uint32_t buf_length) const;
 
   // Debugging functions
   void dump_heap(int len = -1);

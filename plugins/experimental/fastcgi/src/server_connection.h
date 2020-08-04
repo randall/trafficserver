@@ -57,7 +57,7 @@ public:
   }
 
   State
-  getState()
+  getState() const
   {
     return _state;
   }
@@ -69,19 +69,19 @@ public:
   }
 
   uint
-  requestId()
+  requestId() const
   {
     return _requestId;
   }
 
   uint
-  maxRequests()
+  maxRequests() const
   {
     return _max_requests;
   }
 
   uint
-  requestCount()
+  requestCount() const
   {
     return _req_count;
   }

@@ -177,7 +177,7 @@ FCGIClientRequest::GenerateFcgiRequestHeaders()
 }
 
 void
-FCGIClientRequest::printFCGIRequestHeaders()
+FCGIClientRequest::printFCGIRequestHeaders() const
 {
   for (const auto &it : state_->requestHeaders) {
     cout << it.first << " => " << it.second << endl;

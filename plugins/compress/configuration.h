@@ -56,7 +56,7 @@ public:
   }
 
   bool
-  enabled()
+  enabled() const
   {
     return enabled_;
   }
@@ -66,7 +66,7 @@ public:
     enabled_ = x;
   }
   bool
-  cache()
+  cache() const
   {
     return cache_;
   }
@@ -76,7 +76,7 @@ public:
     cache_ = x;
   }
   bool
-  flush()
+  flush() const
   {
     return flush_;
   }
@@ -86,7 +86,7 @@ public:
     flush_ = x;
   }
   bool
-  remove_accept_encoding()
+  remove_accept_encoding() const
   {
     return remove_accept_encoding_;
   }
@@ -96,7 +96,7 @@ public:
     remove_accept_encoding_ = x;
   }
   std::string
-  host()
+  host() const
   {
     return host_;
   }
@@ -125,7 +125,7 @@ public:
   bool is_content_type_compressible(const char *content_type, int content_type_length);
   bool is_status_code_compressible(const TSHttpStatus status_code) const;
   void add_compression_algorithms(std::string &algorithms);
-  int compression_algorithms();
+  int compression_algorithms() const;
 
 private:
   std::string host_;

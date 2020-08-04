@@ -127,7 +127,7 @@ Pattern::init(const String &config)
  * @brief get the pattern string.
  */
 inline String
-Pattern::getPattern()
+Pattern::getPattern() const
 {
   return _pattern;
 }

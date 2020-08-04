@@ -73,7 +73,7 @@ struct MCCacheHeader {
     return ((char *)this) + sizeof(MCCacheHeader);
   }
   int
-  len()
+  len() const
   {
     return sizeof(MCCacheHeader) + nkey;
   }

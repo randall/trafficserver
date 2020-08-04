@@ -829,7 +829,7 @@ Failed:
 //     to be sane.  Returns true is sane.  Returns false if corrupt
 //
 bool
-HdrHeap::check_marshalled(uint32_t buf_length)
+HdrHeap::check_marshalled(uint32_t buf_length) const
 {
   if (this->m_magic != HDR_BUF_MAGIC_MARSHALED) {
     return false;

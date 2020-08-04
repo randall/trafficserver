@@ -95,7 +95,7 @@ public:
 
   /** returns packed version of document currently being processed */
   void
-  packNodeList(std::string &buffer, bool retain_buffer_data)
+  packNodeList(std::string &buffer, bool retain_buffer_data) const
   {
     return _node_list.pack(buffer, retain_buffer_data);
   }

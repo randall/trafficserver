@@ -165,17 +165,17 @@ public:
   /**
    * @brief Tells the caller if the prefix is to be removed (not processed at all).
    */
-  bool prefixToBeRemoved();
+  bool prefixToBeRemoved() const;
 
   /**
    * @brief Tells the caller if the path is to be removed (not processed at all).
    */
-  bool pathToBeRemoved();
+  bool pathToBeRemoved() const;
 
   /**
    * @brief keep URI scheme and authority elements.
    */
-  bool canonicalPrefix();
+  bool canonicalPrefix() const;
 
   /**
    * @brief set the cache key elements separator string.
@@ -185,7 +185,7 @@ public:
   /**
    * @brief get the cache key elements separator string.
    */
-  const String &getSeparator();
+  const String &getSeparator() const;
 
   /**
    * @brief sets the URI Type.

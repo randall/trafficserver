@@ -400,7 +400,7 @@ EventProcessor::spawn_event_threads(EventType ev_type, int n_threads, size_t sta
 // This is called from inside a thread as the @a start_event for that thread.  It chains to the
 // startup events for the appropriate thread group start events.
 void
-EventProcessor::initThreadState(EThread *t)
+EventProcessor::initThreadState(EThread *t) const
 {
   // Run all thread type initialization continuations that match the event types for this thread.
   for (int i = 0; i < MAX_EVENT_TYPES; ++i) {

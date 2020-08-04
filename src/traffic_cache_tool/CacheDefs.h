@@ -561,10 +561,10 @@ struct Stripe {
     return vol_dir_segment(s);
   }
 
-  Bytes stripe_offset(CacheDirEntry *e); // offset w.r.t the stripe content
+  Bytes stripe_offset(CacheDirEntry *e) const; // offset w.r.t the stripe content
   size_t vol_dirlen();
   inline int
-  vol_headerlen()
+  vol_headerlen() const
   {
     return ROUND_TO_STORE_BLOCK(sizeof(StripeMeta) + sizeof(uint16_t) * (this->_segments - 1));
   }
@@ -573,10 +573,10 @@ struct Stripe {
   void dir_init_segment(int s);
   void dir_free_entry(CacheDirEntry *e, int s);
   CacheDirEntry *dir_delete_entry(CacheDirEntry *e, CacheDirEntry *p, int s);
-  //  int dir_bucket_length(CacheDirEntry *b, int s);
+
   int dir_probe(CryptoHash *key, CacheDirEntry *result, CacheDirEntry **last_collision);
   bool dir_valid(CacheDirEntry *e);
-  bool validate_sync_serial();
+  bool validate_sync_serial() const;
   Errata updateHeaderFooter();
   Errata InitializeMeta();
   void init_dir();

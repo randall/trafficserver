@@ -327,10 +327,11 @@ KvpAccessTokenBuilder::sign(const StringView kid, const StringView hf)
 }
 
 const char *
-KvpAccessTokenBuilder::get()
+KvpAccessTokenBuilder::get() const
 {
   return _buffer.c_str();
 }
+
 /* Crypto related ********************************************************************************************** */
 
 /* OpenSSL library hash function names */

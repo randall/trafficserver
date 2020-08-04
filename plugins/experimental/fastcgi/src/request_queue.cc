@@ -34,7 +34,7 @@ RequestQueue::~RequestQueue()
 }
 
 uint
-RequestQueue::isQueueFull()
+RequestQueue::isQueueFull() const
 {
   if (pending_list.size() >= max_queue_size) {
     return 1;
@@ -44,13 +44,13 @@ RequestQueue::isQueueFull()
 }
 
 uint
-RequestQueue::getSize()
+RequestQueue::getSize() const
 {
   return pending_list.size();
 }
 
 uint
-RequestQueue::isQueueEmpty()
+RequestQueue::isQueueEmpty() const
 {
   if (pending_list.empty()) {
     return 1;

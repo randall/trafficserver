@@ -126,15 +126,15 @@ public:
   void setFcgiParams(FCGIParams *params);
   TSMgmtString getDocumentRootDir();
   void setDocumentRootDir(char *str);
-  TSMgmtString getHtml();
+  TSMgmtString getHtml() const;
   void setHtml(char *str);
-  TSMgmtInt getMinConnLength();
+  TSMgmtInt getMinConnLength() const;
   void setMinConnLength(int64_t minLen);
-  TSMgmtInt getMaxConnLength();
+  TSMgmtInt getMaxConnLength() const;
   void setMaxConnLength(int64_t maxLen);
-  TSMgmtInt getMaxReqLength();
+  TSMgmtInt getMaxReqLength() const;
   void setMaxReqLength(int64_t maxLen);
-  TSMgmtInt getRequestQueueSize();
+  TSMgmtInt getRequestQueueSize() const;
   void setRequestQueueSize(int64_t queueSize);
 };
 

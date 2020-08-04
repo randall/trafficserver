@@ -50,7 +50,7 @@ public:
   bool capture(const String &subject, StringVector &result);
   bool replace(const String &subject, String &result);
   bool process(const String &subject, StringVector &result);
-  String getPattern();
+  String getPattern() const;
 
 private:
   bool compile();

@@ -537,7 +537,7 @@ Acl::eval_country(MMDB_entry_data_s *entry_data, const char *path, int path_len)
 // UNKNOWN_IP if it does not exist in either, this is then used to determine
 //  action based on the default allow action
 ipstate
-Acl::eval_ip(const sockaddr *sock)
+Acl::eval_ip(const sockaddr *sock) const
 {
 #if 0
   for (auto &spot : allow_ip_map) {

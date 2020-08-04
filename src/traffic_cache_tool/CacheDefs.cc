@@ -174,7 +174,7 @@ int OPEN_RW_FLAG = O_RDONLY;
 namespace ct
 {
 bool
-Stripe::validate_sync_serial()
+Stripe::validate_sync_serial() const
 {
   // check if A sync_serials match and A is at least as updated as B
   return (_meta[0][0].sync_serial == _meta[0][1].sync_serial &&
@@ -435,7 +435,7 @@ Stripe::dir_valid(CacheDirEntry *_e)
 }
 
 Bytes
-Stripe::stripe_offset(CacheDirEntry *e)
+Stripe::stripe_offset(CacheDirEntry *e) const
 {
   return this->_content + Bytes((dir_offset(e) * CACHE_BLOCK_SIZE) - CACHE_BLOCK_SIZE);
 }

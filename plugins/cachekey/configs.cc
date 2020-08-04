@@ -537,19 +537,19 @@ Configs::finalize()
 }
 
 bool
-Configs::prefixToBeRemoved()
+Configs::prefixToBeRemoved() const
 {
   return _prefixToBeRemoved;
 }
 
 bool
-Configs::pathToBeRemoved()
+Configs::pathToBeRemoved() const
 {
   return _pathToBeRemoved;
 }
 
 bool
-Configs::canonicalPrefix()
+Configs::canonicalPrefix() const
 {
   return _canonicalPrefix;
 }
@@ -563,7 +563,7 @@ Configs::setSeparator(const char *arg)
 }
 
 const String &
-Configs::getSeparator()
+Configs::getSeparator() const
 {
   return _separator;
 }

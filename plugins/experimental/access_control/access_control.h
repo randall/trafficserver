@@ -236,7 +236,7 @@ public:
   void addVersion(const StringView ver);
   void addScope(const StringView scope);
   void sign(const StringView kid, const StringView hf);
-  const char *get();
+  const char *get() const;
 
 private:
   const KvpAccessTokenConfig &_config;

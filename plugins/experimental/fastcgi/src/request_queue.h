@@ -35,9 +35,10 @@ public:
   RequestQueue();
   ~RequestQueue();
 
-  uint isQueueFull();
-  uint isQueueEmpty();
-  uint getSize();
+  uint isQueueFull() const;
+  uint isQueueEmpty() const;
+  uint getSize() const;
+
   uint addToQueue(ServerIntercept *);
   ServerIntercept *popFromQueue();
 };

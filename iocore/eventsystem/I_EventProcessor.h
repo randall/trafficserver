@@ -381,7 +381,7 @@ public:
   }
 
 private:
-  void initThreadState(EThread *);
+  void initThreadState(EThread *) const;
 
   /// Used to generate a callback at the start of thread execution.
   class ThreadInit : public Continuation

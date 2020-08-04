@@ -197,7 +197,7 @@ struct Cache {
 
   enum class SpanDumpDepth { SPAN, STRIPE, DIRECTORY };
   void dumpSpans(SpanDumpDepth depth);
-  void dumpVolumes();
+  void dumpVolumes() const;
   void build_stripe_hash_table();
   Stripe *key_to_stripe(CryptoHash *key, const char *hostname, int host_len);
   //  ts::CacheStripeBlocks calcTotalSpanPhysicalSize();
@@ -278,7 +278,7 @@ public:
   Errata fillEmptySpans();
   Errata fillAllSpans();
   Errata allocateSpan(ts::file::path const &spanFile);
-  void dumpVolumes();
+  void dumpVolumes() const;
 
 protected:
   /// Update the allocation for a span.
@@ -321,7 +321,7 @@ VolumeAllocator::load(ts::file::path const &spanFile, ts::file::path const &volu
 }
 
 void
-VolumeAllocator::dumpVolumes()
+VolumeAllocator::dumpVolumes() const
 {
   _cache.dumpVolumes();
 }
@@ -647,7 +647,7 @@ Cache::dumpSpans(SpanDumpDepth depth)
 }
 
 void
-Cache::dumpVolumes()
+Cache::dumpVolumes() const
 {
   for (auto const &elt : _volumes) {
     size_t size = 0;
