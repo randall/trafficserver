@@ -44,7 +44,7 @@ public:
   }
 
   const char *
-  GetLockfileName()
+  GetLockfileName() const
   {
     return fname;
   }

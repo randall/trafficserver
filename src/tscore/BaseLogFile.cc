@@ -375,7 +375,7 @@ BaseLogFile::change_name(const char *new_name)
 }
 
 void
-BaseLogFile::display(FILE *fd)
+BaseLogFile::display(FILE *fd) const
 {
   fprintf(fd, "Logfile: %s, %s\n", get_name(), (is_open()) ? "file is open" : "file is not open");
 }

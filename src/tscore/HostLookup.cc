@@ -821,7 +821,7 @@ HostLookup::TableInsert(string_view match_data, int index, bool domain_record)
 //
 
 bool
-HostLookup::MatchArray(HostLookupState *s, void **opaque_ptr, LeafIndices &array, bool host_done)
+HostLookup::MatchArray(HostLookupState *s, void **opaque_ptr, LeafIndices &array, bool host_done) const
 {
   size_t i;
 

@@ -648,7 +648,7 @@ public:
   /** Check if there is more than @a size bytes available to read.
       @return @c true if more than @a size byte are available.
   */
-  bool is_read_avail_more_than(int64_t size);
+  bool is_read_avail_more_than(int64_t size) const;
 
   /**
     Number of IOBufferBlocks with data in the block list. Returns the

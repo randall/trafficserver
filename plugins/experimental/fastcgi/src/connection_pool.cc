@@ -39,7 +39,7 @@ ConnectionPool::~ConnectionPool()
 }
 
 int
-ConnectionPool::checkAvailability()
+ConnectionPool::checkAvailability() const
 {
   return _available_connections.size();
 }

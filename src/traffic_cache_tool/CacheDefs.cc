@@ -356,7 +356,7 @@ Stripe::updateHeaderFooter()
 }
 
 size_t
-Stripe::vol_dirlen()
+Stripe::vol_dirlen() const
 {
   return vol_headerlen() + ROUND_TO_STORE_BLOCK(((size_t)this->_buckets) * DIR_DEPTH * this->_segments * SIZEOF_DIR) +
          ROUND_TO_STORE_BLOCK(sizeof(StripeMeta));

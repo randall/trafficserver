@@ -573,7 +573,7 @@ Classifier::add(MultiPattern *pattern)
 }
 
 bool
-Classifier::empty()
+Classifier::empty() const
 {
   return _list.empty();
 }

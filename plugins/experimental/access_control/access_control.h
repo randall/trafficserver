@@ -171,7 +171,7 @@ public:
   }
 
   AccessTokenStatus
-  getState()
+  getState() const
   {
     return _state;
   }

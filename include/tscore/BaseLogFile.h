@@ -180,7 +180,7 @@ public:
   int open_file(int perm = -1);
   int close_file();
   void change_name(const char *new_name);
-  void display(FILE *fd = stdout);
+  void display(FILE *fd = stdout) const;
   const char *
   get_name() const
   {

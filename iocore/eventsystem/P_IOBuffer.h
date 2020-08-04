@@ -533,7 +533,7 @@ IOBufferReader::read_avail()
 }
 
 TS_INLINE bool
-IOBufferReader::is_read_avail_more_than(int64_t size)
+IOBufferReader::is_read_avail_more_than(int64_t size) const
 {
   int64_t t        = -start_offset;
   IOBufferBlock *b = block.get();

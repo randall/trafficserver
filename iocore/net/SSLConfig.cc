@@ -34,6 +34,7 @@
 #include <cstring>
 #include <cmath>
 
+#include "tscore/ink_cap.h"
 #include "tscore/ink_platform.h"
 #include "tscore/I_Layout.h"
 #include "records/I_RecHttp.h"

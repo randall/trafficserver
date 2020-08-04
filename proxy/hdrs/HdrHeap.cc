@@ -1099,17 +1099,17 @@ HdrHeap::inherit_string_heaps(const HdrHeap *inherit_from)
 //
 //   Debugging function to dump the heap in hex
 void
-HdrHeap::dump_heap(int len)
+HdrHeap::dump_heap(int len) const
 {
-  int count = 0;
-  char *tmp = reinterpret_cast<char *>(this);
-  char *end;
+  int count       = 0;
+  const char *tmp = reinterpret_cast<const char *>(this);
+  const char *end;
   uint32_t content;
 
   if (len < 0) {
     len = m_size;
   }
-  end = (reinterpret_cast<char *>(this)) + len;
+  end = (reinterpret_cast<const char *>(this)) + len;
 
   fprintf(stderr, "---- Dumping header heap @ 0x%" PRIx64 " - len %d ------", static_cast<uint64_t>((ptrdiff_t)this), len);
 
@@ -1121,7 +1121,7 @@ HdrHeap::dump_heap(int len)
 
     // Load the content
     if (end - tmp > 4) {
-      content = *(reinterpret_cast<uint32_t *>(tmp));
+      content = *(reinterpret_cast<const uint32_t *>(tmp));
     } else {
       // Less than 4 bytes available so just
       //   grab the bytes we need

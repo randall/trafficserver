@@ -54,7 +54,7 @@ str_to_datatype(char *str)
   return type;
 }
 bool
-FcgiPluginConfig::getFcgiEnabledStatus()
+FcgiPluginConfig::getFcgiEnabledStatus() const
 {
   return enabled;
 }

@@ -24,7 +24,7 @@
 #include "ParentSelection.h"
 
 void
-ParentSelectionStrategy::markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time)
+ParentSelectionStrategy::markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time) const
 {
   time_t now;
   pRecord *pRec, *parents = result->rec->selection_strategy->getParents(result);
@@ -96,7 +96,7 @@ ParentSelectionStrategy::markParentDown(ParentResult *result, unsigned int fail_
 }
 
 void
-ParentSelectionStrategy::markParentUp(ParentResult *result)
+ParentSelectionStrategy::markParentUp(ParentResult *result) const
 {
   pRecord *pRec, *parents = result->rec->selection_strategy->getParents(result);
   int num_parents = result->rec->selection_strategy->numParents(result);

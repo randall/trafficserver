@@ -150,7 +150,7 @@ public:
   }
 
   int
-  size()
+  size() const
   {
     ink_assert(nPackets >= 0);
     return nPackets;
@@ -258,7 +258,7 @@ public:
   }
 
   ink_hrtime
-  earliest_timeout()
+  earliest_timeout() const
   {
     int s = now_slot;
     for (int i = 0; i < N_SLOTS; i++) {

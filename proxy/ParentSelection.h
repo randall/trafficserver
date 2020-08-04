@@ -348,8 +348,8 @@ public:
   // Returns the number of parent records in a strategy.
   //
   virtual uint32_t numParents(ParentResult *result) const = 0;
-  void markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time);
-  void markParentUp(ParentResult *result);
+  void markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time) const;
+  void markParentUp(ParentResult *result) const;
 
   // virtual destructor.
   virtual ~ParentSelectionStrategy(){};
@@ -377,7 +377,7 @@ public:
   }
 
   void
-  markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time)
+  markParentDown(ParentResult *result, unsigned int fail_threshold, unsigned int retry_time) const
   {
     if (!result->is_api_result()) {
       ink_release_assert(result->rec->selection_strategy != nullptr);
@@ -386,7 +386,7 @@ public:
   }
 
   void
-  markParentUp(ParentResult *result)
+  markParentUp(ParentResult *result) const
   {
     if (!result->is_api_result()) {
       ink_release_assert(result != nullptr);

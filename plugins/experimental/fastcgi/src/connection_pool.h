@@ -37,7 +37,7 @@ public:
   ~ConnectionPool();
 
   ServerConnection *getAvailableConnection();
-  int checkAvailability();
+  int checkAvailability() const;
 
   void addConnection(ServerConnection *);
   void reuseConnection(ServerConnection *connection);

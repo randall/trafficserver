@@ -258,7 +258,7 @@ public:
   bool check_marshalled(uint32_t buf_length) const;
 
   // Debugging functions
-  void dump_heap(int len = -1);
+  void dump_heap(int len = -1) const;
 
   uint32_t m_magic;
   char *m_free_start;

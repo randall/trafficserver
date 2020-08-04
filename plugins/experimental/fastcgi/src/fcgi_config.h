@@ -111,7 +111,7 @@ public:
   }
 
   FcgiPluginConfig *initConfig(const char *fn);
-  bool getFcgiEnabledStatus();
+  bool getFcgiEnabledStatus() const;
   void setFcgiEnabledStatus(bool val);
 
   TSMgmtString getHostname();

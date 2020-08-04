@@ -147,7 +147,7 @@ private:
   HostBranch *TableNewLevel(HostBranch *from, std::string_view level_data);
   HostBranch *InsertBranch(HostBranch *insert_in, std::string_view level_data);
   HostBranch *FindNextLevel(HostBranch *from, std::string_view level_data, bool bNotProcess = false);
-  bool MatchArray(HostLookupState *s, void **opaque_ptr, LeafIndices &array, bool host_done);
+  bool MatchArray(HostLookupState *s, void **opaque_ptr, LeafIndices &array, bool host_done) const;
 
   void PrintHostBranch(const HostBranch *hb, PrintFunc const &f) const;
 

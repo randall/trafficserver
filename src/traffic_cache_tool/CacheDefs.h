@@ -562,7 +562,7 @@ struct Stripe {
   }
 
   Bytes stripe_offset(CacheDirEntry *e) const; // offset w.r.t the stripe content
-  size_t vol_dirlen();
+  size_t vol_dirlen() const;
   inline int
   vol_headerlen() const
   {

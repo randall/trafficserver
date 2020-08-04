@@ -137,7 +137,7 @@ public:
   bool matchAll(const String &subject, String &name, String &pattern) const;
 
   void add(MultiPattern *pattern);
-  bool empty();
+  bool empty() const;
 
   // noncopyable
   Classifier(const Classifier &) = delete;            // disallow
