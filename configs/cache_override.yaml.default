@@ -1,5 +1,5 @@
 #
-# cache.config
+# cache_override.yaml
 #
 # Documentation:
 #    https://docs.trafficserver.apache.org/en/latest/admin-guide/files/cache.config.en.html

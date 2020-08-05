@@ -27,7 +27,7 @@ nodist_sysconf_DATA = \
 	storage.config.default
 
 dist_sysconf_DATA =	\
-	cache.config.default \
+	cache_override.yaml.default \
 	hosting.config.default \
 	ip_allow.yaml.default \
 	logging.yaml.default \
