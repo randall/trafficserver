@@ -136,6 +136,7 @@ libinknet_a_SOURCES = \
 	ProxyProtocol.h \
 	ProxyProtocol.cc \
 	Socks.cc \
+	SSLCertConfigLoader.cc \
 	SSLCertLookup.cc \
 	SSLClientUtils.cc \
 	SSLConfig.cc \
