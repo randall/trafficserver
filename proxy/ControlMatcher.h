@@ -91,6 +91,8 @@ namespace YAML
 class Node;
 };
 
+static constexpr char YAML_TAG_TYPE[] = "type";
+
 #define SignalError(_buf, _already)                         \
   {                                                         \
     if (_already == false)                                  \

@@ -225,14 +225,14 @@ HostMatcher<Data, MatchResult>::NewEntry(const YAML::Node &node)
   // Make sure we do not overrun the array;
   ink_assert(num_el < array_len);
 
-  if (!node["type"]) {
-    return Result::failure("%s No 'type' specified at %s line %d", matcher_name, file_name, node.Mark().line);
+  if (!node[YAML_TAG_TYPE]) {
+    return Result::failure("%s No '%s' specified at %s line %d", matcher_name, YAML_TAG_TYPE, file_name, node.Mark().line);
   }
   if (!node["dest"]) {
     return Result::failure("%s No 'dest' specified at %s line %d", matcher_name, file_name, node.Mark().line);
   }
 
-  std::string nodeType = node["type"].as<std::string>();
+  std::string nodeType = node[YAML_TAG_TYPE].as<std::string>();
   std::string dest     = node["dest"].as<std::string>();
 
   // Fill in the parameter info
@@ -535,7 +535,6 @@ RegexMatcher<Data, MatchResult>::NewEntry(const YAML::Node &node)
     return Result::failure("%s No 'dest' specified at %s line %d", matcher_name, file_name, node.Mark().line);
   }
 
-  //  std::string nodeType = node["type"].as<std::string>();
   std::string pattern = node["dest"].as<std::string>();
   if (pattern.empty()) {
     return Result::failure("%s Empty 'dest' specified at %s line %d", matcher_name, file_name, node.Mark().line);
@@ -1086,7 +1085,7 @@ ControlMatcher<Data, MatchResult>::BuildTableFromString(char *file_buf)
 TsEnumDescriptor CFG_TYPE_TEXT = {
   {{"none", 0}, {"host", 1}, {"domain", 2}, {"ip", 3}, {"regex", 4}, {"url", 5}, {"host_regex", 6}}};
 
-static std::set<std::string> valid_object_keys = {"regex", "named", "def_domain", "search_list", "type"};
+static std::set<std::string> valid_object_keys = {"regex", "named", "def_domain", "search_list", YAML_TAG_TYPE};
 
 // Walks the YAML::Node and builds the records array from it
 template <class Data, class MatchResult>
@@ -1112,16 +1111,17 @@ ControlMatcher<Data, MatchResult>::BuildTable(const YAML::Node &in)
     //      continue;
     //    }
 
-    if (!node["type"]) {
-      Result error = Result::failure("discarding entry at line %d : missing 'type' argument", node.Mark().line);
+    if (!node[YAML_TAG_TYPE]) {
+      Result error = Result::failure("discarding entry at line %d : missing '%s' argument", node.Mark().line, YAML_TAG_TYPE);
       SignalError(error.message(), alarmAlready);
       continue;
     }
 
-    std::string value = node["type"].as<std::string>();
+    std::string value = node[YAML_TAG_TYPE].as<std::string>();
     int ival          = CFG_TYPE_TEXT.get(value);
     if (ival < 0) {
-      Result error = Result::failure("discarding entry at line %d : %s is invalid 'type'", node.Mark().line, value.c_str());
+      Result error =
+        Result::failure("discarding entry at line %d : %s is invalid '%s'", node.Mark().line, value.c_str(), YAML_TAG_TYPE);
       SignalError(error.message(), alarmAlready);
       continue;
     }
@@ -1187,7 +1187,7 @@ ControlMatcher<Data, MatchResult>::BuildTable(const YAML::Node &in)
   // Traverse the valid nodes and build the records table
   for (auto const &node : validNodes) {
     Result error      = Result::ok();
-    std::string value = node["type"].as<std::string>();
+    std::string value = node[YAML_TAG_TYPE].as<std::string>();
     int ival          = CFG_TYPE_TEXT.get(value);
 
     switch (ival) {
