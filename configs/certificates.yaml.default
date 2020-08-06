@@ -1,8 +1,8 @@
 #
-# ssl_multicert.config
+# certificates.yaml
 #
 # Documentation:
-#    https://docs.trafficserver.apache.org/en/latest/admin-guide/files/ssl_multicert.config.en.html
+#    https://docs.trafficserver.apache.org/en/latest/admin-guide/files/certificates.yaml.en.html
 #
 # Allows a TLS certificate and private key to be tied to a specific
 # hostname or IP address. At load time, the certificate is parsed to
@@ -63,4 +63,18 @@
 #   dest_ip=10.0.0.1:99 ssl_cert_name=port99.pem
 #   ssl_cert_name=foo.pem ssl_key_dialog="exec:/usr/bin/mypass foo 'ba r'"
 #   ssl_cert_name=foo.pem action=tunnel
-#   ssl_cert_name=wildcardcert.pem ssl_key_name=privkey.pem
+
+#certificates:
+#  - cert_filename: foo.pem
+#  - cert_filename: bar.pem
+#    key_filename: barKey.pem
+#    ca_name: cafile.pem
+#  - dest_ip: 209.131.48.79
+#    cert_filename: server.pem
+#    key_filename: serverKey.pem
+#  - dest_ip:10.0.0.1:99
+#    cert_filename: port99.pem
+#  - cert_filename: foo.pem
+#    key_dialog: "exec:/usr/bin/mypass foo 'ba r'"
+#  - cert_filename: foo.pem
+#    action: tunnel

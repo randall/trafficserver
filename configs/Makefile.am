@@ -37,7 +37,7 @@ dist_sysconf_DATA =	\
 	sni.yaml.default \
 	socks.config.default \
 	splitdns.yaml.default \
-	ssl_multicert.config.default \
+	certificates.yaml.default \
 	strategies.yaml.default \
 	volume.config.default
 

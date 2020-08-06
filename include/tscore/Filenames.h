@@ -38,7 +38,7 @@ namespace filename
   constexpr const char *SOCKS         = "socks.config";
   constexpr const char *PARENT        = "parent.config";
   constexpr const char *REMAP         = "remap.config";
-  constexpr const char *SSL_MULTICERT = "ssl_multicert.config";
+  constexpr const char *SSL_MULTICERT = "certificates.yaml";
   constexpr const char *SPLITDNS      = "splitdns.yaml";
   constexpr const char *SNI           = "sni.yaml";
 
