@@ -17,12 +17,12 @@
 
 .. include:: ../../common.defs
 
-.. configfile:: cache.config
+.. configfile:: cache_override.yaml
 
-cache.config
+cache_override.yaml
 ************
 
-The :file:`cache.config` file allows you to overrule the origin's cache
+The :file:`cache_override.yaml` file allows you to overrule the origin's cache
 policies. You can add caching rules to specify the following:
 
 - Not to cache objects from specific IP addresses.
@@ -41,13 +41,13 @@ policies. You can add caching rules to specify the following:
    Cache-Control: header value per object. This file allows for some overrides
    but, is relatively crude compared to what the origin can provide.
 
-   After modifying :file:`cache.config`, run :option:`traffic_ctl config reload`
+   After modifying :file:`cache_override.yaml`, run :option:`traffic_ctl config reload`
    to apply changes.
 
 Format
 ======
 
-Each line in the :file:`cache.config` file contains a caching rule. |TS|
+Each line in the :file:`cache_override.yaml` file contains a caching rule. |TS|
 recognizes three space-delimited tags::
 
    primary_destination=value secondary_specifier=value action=value
@@ -62,30 +62,30 @@ Primary Destinations
 The primary destination field on each line is used to restrict the requests to
 which the caching rule will apply.
 
-.. _cache-config-format-dest-domain:
+.. _cache_override.yaml-format-dest-domain:
 
 ``dest_domain``
    A requested domain name. |TS| matches the host name of the destination from
    the URL in the request.
 
-.. _cache-config-format-dest-host:
+.. _cache_override.yaml-format-dest-host:
 
 ``dest_host``
    Alias for ``dest_domain``.
 
-.. _cache-config-format-dest-ip:
+.. _cache_override.yaml-format-dest-ip:
 
 ``dest_ip``
    A requested IP address. |TS| matches the IP address of the destination in
    the request.
 
-.. _cache-config-format-dest-host-regex:
+.. _cache_override.yaml-format-dest-host-regex:
 
 ``host_regex``
    A regular expression to be tested against the destination host name in the
    request.
 
-.. _cache-config-format-url-regex:
+.. _cache_override.yaml-format-url-regex:
 
 ``url_regex``
    A regular expression to be tested against the URL in the request.
@@ -99,43 +99,43 @@ may be used within a single rule, though each type of specifier can appear at
 most one time. In other words, you may have both a ``port`` and ``scheme`` in
 the same rule, but you may not have two ``port``\ s.
 
-.. _cache-config-format-port:
+.. _cache_override.yaml-format-port:
 
 ``port``
    Request URL port.
 
-.. _cache-config-format-scheme:
+.. _cache_override.yaml-format-scheme:
 
 ``scheme``
    Request URL protocol (http or https).
 
-.. _cache-config-format-prefix:
+.. _cache_override.yaml-format-prefix:
 
 ``prefix``
    Prefix in the path part of a URL.
 
-.. _cache-config-format-suffix:
+.. _cache_override.yaml-format-suffix:
 
 ``suffix``
    File suffix in the URL.
 
-.. _cache-config-format-method:
+.. _cache_override.yaml-format-method:
 
 ``method``
    Request URL method (get, put, post, trace, etc.).
 
-.. _cache-config-format-time:
+.. _cache_override.yaml-format-time:
 
 ``time``
    A time range, such as 08:00-14:00. Specified using a 24-hour clock in the
    timezone of the |TS| server.
 
-.. _cache-config-format-src-ip:
+.. _cache_override.yaml-format-src-ip:
 
 ``src_ip``
    Client IP address.
 
-.. _cache-config-format-internal:
+.. _cache_override.yaml-format-internal:
 
 ``internal``
     A boolean value, ``true`` or ``false``, specifying if the rule should
@@ -149,7 +149,7 @@ The final component of a caching rule is the action, which determines what |TS|
 will do with all objects matching the primary destinations and secondary
 specifiers of the rule in question.
 
-.. _cache-config-format-action:
+.. _cache_override.yaml-format-action:
 
 ``action``
    One of the following values:
@@ -175,7 +175,7 @@ specifiers of the rule in question.
    and uses the same values with the same semantics. The override happens
    only for requests that match.
 
-.. _cache-config-format-pin-in-cache:
+.. _cache_override.yaml-format-pin-in-cache:
 
 ``pin-in-cache``
    Preserves objects in cache, preventing them from being overwritten.
@@ -195,13 +195,13 @@ specifiers of the rule in question.
    -  ``s`` for seconds; for example: 20s
    -  mixed units; for example: 1h15m20s
 
-.. _cache-config-format-revalidate:
+.. _cache_override.yaml-format-revalidate:
 
 ``revalidate``
    For objects that are in cache, overrides the amount of time the object(s)
    are to be considered fresh. Use the same time formats as ``pin-in-cache``.
 
-.. _cache-config-format-ttl-in-cache:
+.. _cache_override.yaml-format-ttl-in-cache:
 
 ``ttl-in-cache``
    Forces object(s) to become cached, as if they had a
@@ -213,7 +213,7 @@ specifiers of the rule in question.
 Matching Multiple Rules
 =======================
 
-When multiple rules are specified in :file:`cache.config`, |TS| will check all
+When multiple rules are specified in :file:`cache_override.yaml`, |TS| will check all
 of them in order for each request. Thus, two rules which match the same request
 but have conflicting actions will result in their actions being compounded. In
 other words, |TS| does not stop on the first match.
