@@ -20,6 +20,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
+
 #include "P_EventSystem.h"
 #include "ParentSelection.h"
 #include "ParentConsistentHash.h"
@@ -1030,6 +1031,11 @@ request_to_data(HttpRequestData *req, sockaddr const *srcip, sockaddr const *dst
 
 static int passes;
 static int fails;
+
+// Unit Test Functions
+void show_result(ParentResult *aParentResult);
+void br(HttpRequestData *h, const char *os_hostname, sockaddr const *dest_ip = nullptr); // short for build request
+int verify(ParentResult *r, ParentResultType e, const char *h, int p);
 
 // Parenting Tests
 EXCLUSIVE_REGRESSION_TEST(PARENTSELECTION)(RegressionTest * /* t ATS_UNUSED */, int /* intensity_level ATS_UNUSED */, int *pstatus)
