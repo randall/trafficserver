@@ -30,12 +30,12 @@ namespace filename
   constexpr const char *VOLUME  = "volume.config";
   constexpr const char *PLUGIN  = "plugin.config";
 
-  // These still need to have their corrensponding records.config settings remove
+  // These still need to have their corresponding records.config settings remove
   constexpr const char *LOGGING       = "logging.yaml";
   constexpr const char *CACHE         = "cache_override.yaml";
   constexpr const char *IP_ALLOW      = "ip_allow.yaml";
   constexpr const char *HOSTING       = "hosting.config";
-  constexpr const char *SOCKS         = "socks.config";
+  constexpr const char *SOCKS         = "socks.yaml";
   constexpr const char *PARENT        = "parent.config";
   constexpr const char *REMAP         = "remap.config";
   constexpr const char *SSL_MULTICERT = "certificates.yaml";
