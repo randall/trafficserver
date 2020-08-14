@@ -25,6 +25,25 @@ namespace ts
 {
 namespace filename
 {
+  constexpr const char *RECORDS = "records.config";
+
+  // These still need to have their corresponding records.config settings removed
+  constexpr const char *LOGGING  = "logging.yaml";  // YAML-current
+  constexpr const char *IP_ALLOW = "ip_allow.yaml"; // YAML-current
+  constexpr const char *PARENT   = "parent.config"; // YAML-experimental
+  constexpr const char *SNI      = "sni.yaml";      // YAML-current
+  constexpr const char *REMAP    = "remap.config";
+
+#if 0
+  constexpr const char *PLUGIN  = "plugin.config"; // YAML-new
+  constexpr const char *CACHE         = "cache.config";  // YAML-new
+  constexpr const char *HOSTING       = "hosting.config";  // YAML-new
+  constexpr const char *SOCKS         = "socks.config";  // YAML-new
+  constexpr const char *SSL_MULTICERT = "ssl_multicert.config"; // YAML-new
+  constexpr const char *SPLITDNS      = "splitdns.config";      // YAML-new
+  constexpr const char *STORAGE =     "storage.config"; // YAML-new
+  constexpr const char *VOLUME        = "volume.config";  // YAML-new
+#else
   // new/renamed files
   constexpr const char *CACHE_OVERRIDE      = "cache_override.yaml";
   constexpr const char *CERTIFICATES_YAML   = "certificates.yaml";
@@ -32,25 +51,17 @@ namespace filename
   constexpr const char *SOCKS_YAML          = "socks.yaml";
   constexpr const char *SPLITDNS_YAML       = "splitdns.yaml";
   constexpr const char *HOSTING_YAML        = "hosting.yaml";
-  // combined storage and volume
-  constexpr const char *VOLUMES_YAML = "volumes.yaml";
+  constexpr const char *VOLUMES_YAML        = "volumes.yaml"; // combined storage and volume
 
-  constexpr const char *STORAGE = "storage.config"; // YAML-new
-  constexpr const char *RECORDS = "records.config";
-  constexpr const char *PLUGIN  = "plugin.config"; // YAML-new
-
-  // These still need to have their corresponding records.config settings remove
-  constexpr const char *LOGGING       = "logging.yaml";   // YAML-current
-  constexpr const char *CACHE         = "cache.config";   // YAML-new
-  constexpr const char *IP_ALLOW      = "ip_allow.yaml";  // YAML-current
-  constexpr const char *HOSTING       = "hosting.config"; // YAML-new
-  constexpr const char *SOCKS         = "socks.config";   // YAML-new
-  constexpr const char *PARENT        = "parent.config";  // YAML-experimental
-  constexpr const char *REMAP         = "remap.config";
-  constexpr const char *SSL_MULTICERT = "ssl_multicert.config"; // YAML-new
-  constexpr const char *SPLITDNS      = "splitdns.config";      // YAML-new
-  constexpr const char *SNI           = "sni.yaml";             // YAML-current
-  constexpr const char *VOLUME        = VOLUMES_YAML;           //"volume.config";  // YAML-new
+  constexpr const char *PLUGIN        = GLOBAL_PLUGINS_YAML;
+  constexpr const char *CACHE         = CACHE_OVERRIDE;    // YAML-new
+  constexpr const char *HOSTING       = HOSTING_YAML;      // YAML-new
+  constexpr const char *SOCKS         = SOCKS_YAML;        // YAML-new
+  constexpr const char *SSL_MULTICERT = CERTIFICATES_YAML; // YAML-new
+  constexpr const char *SPLITDNS      = SPLITDNS_YAML;     // YAML-new
+  constexpr const char *STORAGE       = VOLUMES_YAML;      // YAML-new
+  constexpr const char *VOLUME        = VOLUMES_YAML;      // YAML-new
+#endif
 
   ///////////////////////////////////////////////////////////////////
   // Various other file names

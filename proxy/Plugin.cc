@@ -36,6 +36,7 @@
 #include "tscore/Filenames.h"
 #include "tscore/ts_file.h"
 #include "tscpp/util/TextView.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -265,27 +266,18 @@ not_found:
 }
 
 bool
-plugin_init_YAML(bool validateOnly, std::string const &content)
+plugin_init_YAML(bool validateOnly, std::string const &contents)
 {
-  YAML::Node config{YAML::Load(content)};
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::PLUGIN);
-    return true;
-  }
-
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::PLUGIN);
+  auto rv = YAMLConfig::Load(contents, "global_plugins");
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::PLUGIN, rv.errata().top().text().c_str());
     return false;
   }
 
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::PLUGIN, YAML_TAG_ROOT);
-    return false;
-  }
-  config = config[YAML_TAG_ROOT];
+  YAML::Node config = rv;
 
   const char *argv[MAX_PLUGIN_ARGS];
-  //  char *vars[MAX_PLUGIN_ARGS];
+
   for (auto const &node : config) {
     int argc = 0;
     if (!node["name"]) {

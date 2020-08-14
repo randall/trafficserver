@@ -30,6 +30,7 @@
 #include "tscore/Regression.h"
 #include "tscore/Filenames.h"
 #include "tscore/ts_file.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -443,29 +444,15 @@ CacheHostTable::BuildTableFromString(const char *config_file_path, char *file_bu
 int
 CacheHostTable::BuildTableFromString(const char *config_file_path, const std::string &contents)
 {
-  Note("%s loading ...", ts::filename::HOSTING);
+  Note("%s as YAML ...", ts::filename::HOSTING);
 
-  YAML::Node config{YAML::Load(contents)};
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::HOSTING);
+  auto rv = YAMLConfig::Load(contents, YAML_TAG_HOSTING_ROOT);
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::HOSTING, rv.errata().top().text().c_str());
     return 0;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::HOSTING);
-    return 0;
-  }
-
-  if (!config[YAML_TAG_HOSTING_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::HOSTING, YAML_TAG_HOSTING_ROOT);
-    return 0;
-  }
-
-  config = config[YAML_TAG_HOSTING_ROOT];
-  if (!config.IsSequence()) {
-    Error("malformed %s file; expected a sequence at line %d", ts::filename::HOSTING, config.Mark().line);
-    return 0;
-  }
+  YAML::Node config = rv;
 
   int hostDomainCount = config.size();
   if (hostDomainCount == 0) {
@@ -1016,28 +1003,15 @@ ConfigVolumes::BuildListFromString(char *config_file_path, char *file_buf)
 }
 
 void
-ConfigVolumes::BuildListFromYAMLString(char *config_file_path, const std::string &content)
+ConfigVolumes::BuildListFromYAMLString(char *config_file_path, const std::string &contents)
 {
-  YAML::Node config{YAML::Load(content)};
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::VOLUME);
-  }
-
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::VOLUME);
+  auto rv = YAMLConfig::Load(contents, YAML_TAG_VOLUMES_ROOT);
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::VOLUME, rv.errata().top().text().c_str());
     return;
   }
 
-  if (!config[YAML_TAG_VOLUMES_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::VOLUME, YAML_TAG_VOLUMES_ROOT);
-    return;
-  }
-
-  config = config[YAML_TAG_VOLUMES_ROOT];
-  if (!config.IsSequence()) {
-    Error("malformed %s file; expected a sequence at line %d", ts::filename::VOLUME, config.Mark().line);
-    return;
-  }
+  YAML::Node config = rv;
 
   int total                            = 0;
   static constexpr char matcher_name[] = "[CacheVolition]";

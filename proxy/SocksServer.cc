@@ -26,6 +26,7 @@
 #include "ParentSelection.h"
 #include "tscore/Filenames.h"
 #include "tscore/ts_file.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -80,30 +81,14 @@ static P_table *
 buildTable(const std::string &contents)
 {
   Note("%s as YAML ...", ts::filename::SOCKS);
-  YAML::Node config{YAML::Load(contents)};
 
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::SOCKS);
-
+  auto rv = YAMLConfig::LoadMap(contents, YAML_TAG_ROOT);
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::SOCKS, rv.errata().top().text().c_str());
     return nullptr;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::SOCKS);
-    return nullptr;
-  }
-
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::SOCKS, std::string(YAML_TAG_ROOT).c_str());
-    return nullptr;
-  }
-
-  config = config[YAML_TAG_ROOT];
-
-  if (!config[YAML_TAG_DESTINATIONS]) {
-    Error("malformed %s file; expected '%s' node", ts::filename::SOCKS, std::string(YAML_TAG_DESTINATIONS).c_str());
-    return nullptr;
-  }
+  YAML::Node config = rv;
 
   config = config[YAML_TAG_DESTINATIONS];
 

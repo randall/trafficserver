@@ -32,26 +32,23 @@
 #include "tscore/EnumDescriptor.h"
 #include "tscore/Errata.h"
 #include "tscore/ink_assert.h"
+#include "tscore/YAMLConf.h"
+
 #include "P_SNIActionPerformer.h"
 #include "records/I_RecCore.h"
 
 ts::Errata
 YamlSNIConfig::loader(const char *cfgFilename)
 {
+  Note("%s as YAML ...", cfgFilename);
+
   try {
-    YAML::Node config = YAML::LoadFile(cfgFilename);
-    if (config.IsNull()) {
-      return ts::Errata();
+    auto rv = YAMLConfig::LoadFile(cfgFilename, "sni:");
+    if (!rv.isOK()) {
+      return rv.errata();
     }
 
-    if (!config["sni"]) {
-      return ts::Errata::Message(1, 1, "expected a toplevel 'sni' node");
-    }
-
-    config = config["sni"];
-    if (!config.IsSequence()) {
-      return ts::Errata::Message(1, 1, "expected sequence");
-    }
+    YAML::Node config = rv;
 
     for (auto it = config.begin(); it != config.end(); ++it) {
       items.push_back(it->as<YamlSNIConfig::Item>());

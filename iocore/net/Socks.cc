@@ -35,6 +35,7 @@
 #include "tscore/ts_file.h"
 #include "tscore/Filenames.h"
 #include "tscore/BufferWriter.h"
+#include "tscore/YAMLConf.h"
 
 static constexpr char YAML_TAG_SKIP_IP_RANGES[] = "skip_ip_ranges";
 static constexpr char YAML_TAG_AUTH[]           = "auth";
@@ -464,24 +465,15 @@ SocksEntry::mainEvent(int event, void *data)
 bool
 Load_From_YAML(socks_conf_struct *socks_conf, const std::string &contents)
 {
-  YAML::Node config{YAML::Load(contents)};
+  Note("%s as YAML ...", ts::filename::SOCKS);
 
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::SOCKS);
-    return true;
+  auto rv = YAMLConfig::LoadMap(contents, "socks");
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::SOCKS, rv.errata().top().text().c_str());
+    return 0;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::SOCKS);
-    return false;
-  }
-
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::SOCKS, YAML_TAG_ROOT);
-    return false;
-  }
-
-  config = config[YAML_TAG_ROOT];
+  YAML::Node config = rv;
 
   if (config[YAML_TAG_SKIP_IP_RANGES]) {
     const auto ranges = config[YAML_TAG_SKIP_IP_RANGES];
@@ -819,5 +811,4 @@ socks_conf_struct::print()
 
   printf("  username len: %d\n", username_len);
   printf("  password len: %d\n", password_len);
-  printf("  username and password: %s\n", this->user_name_n_passwd);
 }

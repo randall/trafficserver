@@ -36,10 +36,10 @@
 #include "tscore/ink_platform.h"
 #include "tscore/Tokenizer.h"
 #include "tscore/Filenames.h"
-
 #include "tscore/MatcherUtils.h"
 #include "tscore/HostLookup.h"
 #include "tscore/ts_file.h"
+#include "tscore/YAMLConf.h"
 
 using ts::TextView;
 
@@ -105,32 +105,14 @@ static DNS_table *
 buildTable(const std::string &contents)
 {
   Note("%s as YAML ...", ts::filename::SPLITDNS);
-  YAML::Node config{YAML::Load(contents)};
 
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::SPLITDNS);
-
+  auto rv = YAMLConfig::Load(contents, "splitdns");
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::SPLITDNS, rv.errata().top().text().c_str());
     return nullptr;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::SPLITDNS);
-    return nullptr;
-  }
-
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::SPLITDNS, std::string(YAML_TAG_ROOT).c_str());
-    return nullptr;
-  }
-
-  config = config[YAML_TAG_ROOT];
-
-  if (!config.IsSequence()) {
-    Error("malformed %s file; expected a toplevel sequence/array", ts::filename::SPLITDNS);
-    return nullptr;
-  }
-
-  return new DNS_table("proxy.config.dns.splitdns.filename", modulePrefix, config);
+  return new DNS_table("proxy.config.dns.splitdns.filename", modulePrefix, rv);
 }
 
 void

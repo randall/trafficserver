@@ -28,6 +28,7 @@
 #include "tscore/ink_cap.h"
 #include "tscore/Filenames.h"
 #include "tscore/ts_file.h"
+#include "tscore/YAMLConf.h"
 
 #include "P_Net.h"
 #include "InkAPIInternal.h"
@@ -1422,29 +1423,14 @@ bool
 SSLMultiCertConfigLoader::_loadYAML(SSLCertLookup *lookup, const std::string &contents)
 {
   Note("%s as YAML ...", ts::filename::SSL_MULTICERT);
-  YAML::Node config{YAML::Load(contents)};
 
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::SSL_MULTICERT);
-    return false;
+  auto rv = YAMLConfig::Load(contents, YAML_TAG_ROOT);
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::SSL_MULTICERT, rv.errata().top().text().c_str());
+    return 0;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", ts::filename::SPLITDNS);
-    return false;
-  }
-
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::SPLITDNS, std::string(YAML_TAG_ROOT).c_str());
-    return false;
-  }
-
-  config = config[YAML_TAG_ROOT];
-
-  if (!config.IsSequence()) {
-    Error("malformed %s file; expected a toplevel sequence/array", ts::filename::SSL_MULTICERT);
-    return false;
-  }
+  YAML::Node config = rv;
 
   for (auto const &node : config) {
     shared_SSLMultiCertConfigParams sslMultiCertSettings = std::make_shared<SSLMultiCertConfigParams>();

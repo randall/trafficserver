@@ -25,13 +25,15 @@
  */
 
 #include <sstream>
+
 #include "IPAllow.h"
 #include "tscore/BufferWriter.h"
 #include "tscore/ts_file.h"
 #include "tscore/ink_memory.h"
 #include "tscore/Filenames.h"
+#include "tscore/YAMLConf.h"
 
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 using ts::TextView;
 
@@ -433,16 +435,14 @@ IpAllow::YAMLLoadEntry(const YAML::Node &entry)
 int
 IpAllow::YAMLBuildTable(std::string const &content)
 {
-  YAML::Node root{YAML::Load(content)};
-  if (!root.IsMap()) {
-    ParseError("{} - top level object was not a map. All IP Addresses will be blocked", this);
+  auto rv = YAMLConfig::LoadMap(content, YAML_TAG_ROOT.data());
+  if (!rv.isOK()) {
+    ParseError("{} - {}; all IP Addresses will be blocked", this, rv.errata().top().text());
     return 1;
   }
 
-  YAML::Node data{root[YAML_TAG_ROOT]};
-  if (!data) {
-    ParseError("{} - root tag '{}' not found. All IP Addresses will be blocked", this, YAML_TAG_ROOT);
-  } else if (data.IsSequence()) {
+  YAML::Node data = rv;
+  if (data.IsSequence()) {
     for (auto const &entry : data) {
       if (!this->YAMLLoadEntry(entry)) {
         return 1;

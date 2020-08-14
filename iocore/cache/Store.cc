@@ -31,6 +31,7 @@
 #include "tscore/runroot.h"
 #include "tscpp/util/TextView.h"
 #include "tscore/ts_file.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -476,24 +477,12 @@ Store::BuildTableFromString(const char *config_file_path)
 Result
 Store::BuildTableFromString(const char *config_file_path, const std::string &contents)
 {
-  YAML::Node config{YAML::Load(contents)};
-  if (config.IsNull()) {
-    Warning("malformed %s file; config is empty?", ts::filename::STORAGE);
-    return Result::ok();
+  auto rv = YAMLConfig::Load(contents, YAML_TAG_STORAGE_ROOT);
+  if (!rv.isOK()) {
+    return Result::failure("malformed %s file; %s", ts::filename::STORAGE, rv.errata().top().text().c_str());
   }
 
-  if (!config.IsMap()) {
-    return Result::failure("malformed %s file; expected a map", ts::filename::STORAGE);
-  }
-
-  if (!config[YAML_TAG_STORAGE_ROOT]) {
-    return Result::failure("malformed %s file; expected a toplevel '%s' node", ts::filename::STORAGE, YAML_TAG_STORAGE_ROOT);
-  }
-
-  config = config[YAML_TAG_STORAGE_ROOT];
-  if (!config.IsSequence()) {
-    return Result::failure("malformed %s file; expected a sequence at line %d", ts::filename::STORAGE, config.Mark().line);
-  }
+  YAML::Node config = rv;
 
   int n_dsstore   = 0;
   int i           = 0;

@@ -26,6 +26,7 @@
 #include "LogObject.h"
 
 #include "tscore/EnumDescriptor.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 #include <algorithm>
@@ -47,23 +48,13 @@ YamlLogConfig::parse(const char *cfgFilename)
 bool
 YamlLogConfig::loadLogConfig(const char *cfgFilename)
 {
-  YAML::Node config = YAML::LoadFile(cfgFilename);
-
-  if (config.IsNull()) {
+  auto rv = YAMLConfig::LoadFile(cfgFilename, "logging");
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", cfgFilename, rv.errata().top().text().c_str());
     return false;
   }
 
-  if (!config.IsMap()) {
-    Error("malformed %s file; expected a map", cfgFilename);
-    return false;
-  }
-
-  if (config["logging"]) {
-    config = config["logging"];
-  } else {
-    Error("malformed %s file; expected a toplevel 'logging' node", cfgFilename);
-    return false;
-  }
+  YAML::Node config = rv;
 
   auto formats = config["formats"];
   for (auto const &node : formats) {
