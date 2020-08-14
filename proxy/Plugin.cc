@@ -21,18 +21,26 @@
   limitations under the License.
  */
 
+#include "Plugin.h"
+
 #include <cstdio>
+
 #include "tscore/ink_platform.h"
 #include "tscore/ink_file.h"
 #include "tscore/ParseRules.h"
+
 #include "records/I_RecCore.h"
 #include "tscore/I_Layout.h"
 #include "InkAPIInternal.h"
-#include "Plugin.h"
 #include "tscore/ink_cap.h"
 #include "tscore/Filenames.h"
+#include "tscore/ts_file.h"
+#include "tscpp/util/TextView.h"
 
-#define MAX_PLUGIN_ARGS 64
+#include <yaml-cpp/yaml.h>
+
+static constexpr int MAX_PLUGIN_ARGS = 64;
+static const char *plugin_dir        = ".";
 
 static PluginDynamicReloadMode plugin_dynamic_reload_mode = PluginDynamicReloadMode::RELOAD_ON;
 
@@ -63,9 +71,7 @@ parsePluginConfig()
   parsePluginDynamicReloadConfig();
 }
 
-static const char *plugin_dir = ".";
-
-using init_func_t = void (*)(int, char **);
+using init_func_t = void (*)(int, const char **);
 
 // Plugin registration vars
 //
@@ -121,7 +127,7 @@ plugin_dso_load(const char *path, void *&handle, void *&init, std::string &error
 }
 
 static bool
-single_plugin_init(int argc, char *argv[], bool validateOnly)
+single_plugin_init(int argc, const char *argv[], bool validateOnly)
 {
   char path[PATH_NAME_MAX];
   init_func_t init;
@@ -194,7 +200,7 @@ single_plugin_init(int argc, char *argv[], bool validateOnly)
 }
 
 static char *
-plugin_expand(char *arg)
+plugin_expand(const char *arg)
 {
   RecDataT data_type;
   char *str = nullptr;
@@ -259,15 +265,76 @@ not_found:
 }
 
 bool
+plugin_init_YAML(bool validateOnly, std::string const &content)
+{
+  YAML::Node config{YAML::Load(content)};
+  if (config.IsNull()) {
+    Warning("malformed %s file; config is empty?", ts::filename::PLUGIN);
+    return true;
+  }
+
+  if (!config.IsMap()) {
+    Error("malformed %s file; expected a map", ts::filename::PLUGIN);
+    return false;
+  }
+
+  if (!config[YAML_TAG_ROOT]) {
+    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::PLUGIN, YAML_TAG_ROOT);
+    return false;
+  }
+  config = config[YAML_TAG_ROOT];
+
+  const char *argv[MAX_PLUGIN_ARGS];
+  //  char *vars[MAX_PLUGIN_ARGS];
+  for (auto const &node : config) {
+    int argc = 0;
+    if (!node["name"]) {
+      Warning("In %s, missing 'name' key in at %d", ts::filename::PLUGIN, node.Mark().line);
+      continue;
+    }
+
+    std::string name = node["name"].as<std::string>();
+    argv[argc++]     = name.c_str();
+
+    std::unique_ptr<SimpleTokenizer> tok;
+    if (node["commandline"]) {
+      std::string commandline = node["commandline"].as<std::string>();
+      tok.reset(new SimpleTokenizer(commandline.c_str(), ' '));
+      for (char *arg = tok->getNext(); arg; arg = tok->getNext()) {
+        argv[argc++] = arg;
+      }
+    }
+
+    //    for (int i = 0; i < argc; i++) {
+    //      vars[i] = plugin_expand(argv[i]);
+    //      if (vars[i]) {
+    //        argv[i] = vars[i];
+    //      }
+    //    }
+
+    if (argc < MAX_PLUGIN_ARGS) {
+      argv[argc] = nullptr;
+    } else {
+      argv[MAX_PLUGIN_ARGS - 1] = nullptr;
+    }
+
+    bool retVal = single_plugin_init(argc, argv, validateOnly);
+
+    //    for (int i = 0; i < argc; i++) {
+    //      ats_free(vars[i]);
+    //    }
+
+    if (!retVal) {
+      return retVal;
+    }
+  }
+  return true;
+}
+
+bool
 plugin_init(bool validateOnly)
 {
   ats_scoped_str path;
-  char line[1024], *p;
-  char *argv[MAX_PLUGIN_ARGS];
-  char *vars[MAX_PLUGIN_ARGS];
-  int argc;
-  int fd;
-  int i;
   bool retVal           = true;
   static bool INIT_ONCE = true;
 
@@ -278,84 +345,100 @@ plugin_init(bool validateOnly)
   }
 
   Note("%s loading ...", ts::filename::PLUGIN);
+
   path = RecConfigReadConfigPath(nullptr, ts::filename::PLUGIN);
-  fd   = open(path, O_RDONLY);
-  if (fd < 0) {
-    Warning("%s failed to load: %d, %s", ts::filename::PLUGIN, errno, strerror(errno));
-    return false;
-  }
+  ts::file::path config_file{path};
 
-  while (ink_file_fd_readline(fd, sizeof(line) - 1, line) > 0) {
-    argc = 0;
-    p    = line;
+  if (ts::TextView{config_file.view()}.take_suffix_at('.') == "yaml") {
+    std::error_code ec;
+    std::string content{ts::file::load(config_file.view(), ec)};
+    retVal = plugin_init_YAML(validateOnly, content);
+  } else {
+    char line[1024], *p;
+    const char *argv[MAX_PLUGIN_ARGS];
+    char *vars[MAX_PLUGIN_ARGS];
+    int argc;
+    int i;
 
-    // strip leading white space and test for comment or blank line
-    while (*p && ParseRules::is_wslfcr(*p)) {
-      ++p;
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+      Warning("%s failed to load: %d, %s", ts::filename::PLUGIN, errno, strerror(errno));
+      return false;
     }
-    if ((*p == '\0') || (*p == '#')) {
-      continue;
-    }
 
-    // not comment or blank, so rip line into tokens
-    while (true) {
-      if (argc >= MAX_PLUGIN_ARGS) {
-        Warning("Exceeded max number of args (%d) for plugin: [%s]", MAX_PLUGIN_ARGS, argc > 0 ? argv[0] : "???");
-        break;
-      }
+    while (ink_file_fd_readline(fd, sizeof(line) - 1, line) > 0) {
+      argc = 0;
+      p    = line;
 
+      // strip leading white space and test for comment or blank line
       while (*p && ParseRules::is_wslfcr(*p)) {
         ++p;
       }
       if ((*p == '\0') || (*p == '#')) {
-        break; // EOL
+        continue;
       }
 
-      if (*p == '\"') {
-        p += 1;
-
-        argv[argc++] = p;
-
-        while (*p && (*p != '\"')) {
-          p += 1;
-        }
-        if (*p == '\0') {
+      // not comment or blank, so rip line into tokens
+      while (true) {
+        if (argc >= MAX_PLUGIN_ARGS) {
+          Warning("Exceeded max number of args (%d) for plugin: [%s]", MAX_PLUGIN_ARGS, argc > 0 ? argv[0] : "???");
           break;
         }
-        *p++ = '\0';
-      } else {
-        argv[argc++] = p;
 
-        while (*p && !ParseRules::is_wslfcr(*p) && (*p != '#')) {
-          p += 1;
+        while (*p && ParseRules::is_wslfcr(*p)) {
+          ++p;
         }
         if ((*p == '\0') || (*p == '#')) {
-          break;
+          break; // EOL
         }
-        *p++ = '\0';
+
+        if (*p == '\"') {
+          p += 1;
+
+          argv[argc++] = p;
+
+          while (*p && (*p != '\"')) {
+            p += 1;
+          }
+          if (*p == '\0') {
+            break;
+          }
+          *p++ = '\0';
+        } else {
+          argv[argc++] = p;
+
+          while (*p && !ParseRules::is_wslfcr(*p) && (*p != '#')) {
+            p += 1;
+          }
+          if ((*p == '\0') || (*p == '#')) {
+            break;
+          }
+          *p++ = '\0';
+        }
+      }
+
+      for (i = 0; i < argc; i++) {
+        vars[i] = plugin_expand(argv[i]);
+        if (vars[i]) {
+          argv[i] = vars[i];
+        }
+      }
+
+      if (argc < MAX_PLUGIN_ARGS) {
+        argv[argc] = nullptr;
+      } else {
+        argv[MAX_PLUGIN_ARGS - 1] = nullptr;
+      }
+      retVal = single_plugin_init(argc, argv, validateOnly);
+
+      for (i = 0; i < argc; i++) {
+        ats_free(vars[i]);
       }
     }
 
-    for (i = 0; i < argc; i++) {
-      vars[i] = plugin_expand(argv[i]);
-      if (vars[i]) {
-        argv[i] = vars[i];
-      }
-    }
-
-    if (argc < MAX_PLUGIN_ARGS) {
-      argv[argc] = nullptr;
-    } else {
-      argv[MAX_PLUGIN_ARGS - 1] = nullptr;
-    }
-    retVal = single_plugin_init(argc, argv, validateOnly);
-
-    for (i = 0; i < argc; i++) {
-      ats_free(vars[i]);
-    }
+    close(fd);
   }
 
-  close(fd);
   if (retVal) {
     Note("%s finished loading", ts::filename::PLUGIN);
   } else {
