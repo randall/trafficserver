@@ -37,8 +37,8 @@
 //
 // Store
 //
-const char Store::VOLUME_KEY[]           = "volume";
-const char Store::HASH_BASE_STRING_KEY[] = "id";
+static constexpr char VOLUME_KEY[]           = "volume";
+static constexpr char HASH_BASE_STRING_KEY[] = "id";
 
 static span_error_t
 make_span_error(int error)
@@ -399,7 +399,7 @@ Store::read_config()
     std::string pp = Layout::get()->relative(path);
 
     ns = new Span;
-    Debug("cache_init", "Store::read_config - ns = new Span; ns->init(\"%s\",%" PRId64 "), forced volume=%d%s%s", pp.c_str(), size,
+    Debug("cache_init", "Store::read_config - ns = new Span; ns->init(\"%s\", %" PRId64 "), forced volume=%d%s%s", pp.c_str(), size,
           volume_num, seed ? " id=" : "", seed ? seed : "");
     if ((err = ns->init(pp.c_str(), size))) {
       RecSignalWarning(REC_SIGNAL_SYSTEM_ERROR, "could not initialize storage \"%s\" [%s]", pp.c_str(), err);

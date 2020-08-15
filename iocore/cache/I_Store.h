@@ -267,10 +267,6 @@ struct Store {
   Result read_config();
 
   int write_config_data(int fd) const;
-
-  /// Additional configuration key values.
-  static const char VOLUME_KEY[];
-  static const char HASH_BASE_STRING_KEY[];
 };
 
 // store either free or in the cache, can be stolen for reconfiguration

@@ -29,3 +29,13 @@
 # To direct all other requests to volumes 3 and 4
 # hostname=*	volume=3,4
 #
+#
+hosting:
+  - hostname: '*'
+    volumes: [3, 4]
+  - hostname: www.example.com
+    volumes: 2
+  - hostname: linear-stream.example.com
+    volumes: 6
+  - domain: example.com
+    volumes: 1

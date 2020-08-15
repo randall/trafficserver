@@ -22,12 +22,20 @@
  */
 
 #include "P_Cache.h"
+
+#include "tscpp/util/TextView.h"
 #include "tscore/I_Layout.h"
 #include "tscore/HostLookup.h"
 #include "tscore/Tokenizer.h"
 #include "tscore/Regression.h"
 #include "tscore/Filenames.h"
 #include "tscore/ts_file.h"
+
+#include <yaml-cpp/yaml.h>
+
+static constexpr char YAML_TAG_ROOT[]     = "hosting";
+static constexpr char YAML_TAG_HOSTNAME[] = "hostname";
+static constexpr char YAML_TAG_DOMAIN[]   = "domain";
 
 extern int gndisks;
 
@@ -171,9 +179,44 @@ CacheHostMatcher::NewEntry(matcher_line *line_info)
     memset(static_cast<void *>(cur_d), 0, sizeof(CacheHostRecord));
     return;
   }
+
   Debug("cache_hosting", "hostname: %s, host record: %p", match_data, cur_d);
+
   // Fill in the matching info
   host_lookup->NewEntry(match_data, (line_info->type == MATCH_DOMAIN) ? true : false, cur_d);
+
+  num_el++;
+  return;
+}
+
+void
+CacheHostMatcher::NewEntry(const YAML::Node &node)
+{
+  CacheHostRecord *cur_d = data_array + num_el;
+  int errNo              = cur_d->Init(node, type);
+
+  if (errNo) {
+    // There was a problem so undo the effects this function
+    memset(static_cast<void *>(cur_d), 0, sizeof(CacheHostRecord));
+    return;
+  }
+
+  matcher_type matcherType;
+  std::string key;
+  if (node["hostname"]) {
+    matcherType = MATCH_HOST;
+    key         = node["hostname"].as<std::string>();
+  } else if (node["domain"]) {
+    matcherType = MATCH_DOMAIN;
+    key         = node["domain"].as<std::string>();
+  } else {
+    Error("Unhandled node type at line %d", node.Mark().line);
+    memset(static_cast<void *>(cur_d), 0, sizeof(CacheHostRecord));
+    return;
+  }
+
+  // Fill in the matching info
+  host_lookup->NewEntry(std::string_view(key), (matcherType == MATCH_DOMAIN) ? true : false, cur_d);
 
   num_el++;
   return;
@@ -390,17 +433,89 @@ CacheHostTable::BuildTableFromString(const char *config_file_path, char *file_bu
 
   ink_assert(second_pass == numEntries);
 
-  if (is_debug_tag_set("matcher")) {
+  if (is_debug_tag_set("hosting")) {
     Print();
   }
   return numEntries;
 }
 
 int
+CacheHostTable::BuildTableFromString(const char *config_file_path, const std::string &contents)
+{
+  Note("%s loading ...", ts::filename::HOSTING);
+
+  YAML::Node config{YAML::Load(contents)};
+  if (config.IsNull()) {
+    Warning("malformed %s file; config is empty?", ts::filename::HOSTING);
+    return 0;
+  }
+
+  if (!config.IsMap()) {
+    Error("malformed %s file; expected a map", ts::filename::HOSTING);
+    return 0;
+  }
+
+  if (!config[YAML_TAG_ROOT]) {
+    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::HOSTING, YAML_TAG_ROOT);
+    return 0;
+  }
+
+  config = config[YAML_TAG_ROOT];
+  if (!config.IsSequence()) {
+    Error("malformed %s file; expected a sequence at line %d", ts::filename::HOSTING, config.Mark().line);
+    return 0;
+  }
+
+  int hostDomainCount = config.size();
+  if (hostDomainCount == 0) {
+    return 0;
+  }
+  hostMatch = new CacheHostMatcher(matcher_name, type);
+  hostMatch->AllocateSpace(hostDomainCount);
+
+  int generic_rec_initd = 0;
+
+  // Traverse the list and build the records table
+  for (const auto &node : config) {
+    std::string hostOrDomainName;
+    if (node[YAML_TAG_HOSTNAME]) {
+      hostOrDomainName = node[YAML_TAG_HOSTNAME].as<std::string>();
+    } else if (node[YAML_TAG_DOMAIN]) {
+      hostOrDomainName = node[YAML_TAG_DOMAIN].as<std::string>();
+    } else {
+      Error("Problems encountered while initializing the Generic Volume");
+      return 0;
+    }
+
+    if (hostOrDomainName == "*") {
+      if (!gen_host_rec.Init(node, type)) {
+        generic_rec_initd = 1;
+      } else {
+        Warning("Problems encountered while initializing the Generic Volume");
+      }
+    } else {
+      hostMatch->NewEntry(node);
+    }
+  }
+
+  Note("%s finished loading", ts::filename::HOSTING);
+
+  if (!generic_rec_initd) {
+    RecSignalWarning(REC_SIGNAL_CONFIG_ERROR, "No Volumes specified for All Hostnames; cache will be disabled");
+  }
+
+  if (is_debug_tag_set("hosting")) {
+    Print();
+  }
+  return hostDomainCount;
+}
+
+int
 CacheHostTable::BuildTable(const char *config_file_path)
 {
   std::error_code ec;
-  std::string content{ts::file::load(ts::file::path{config_file_path}, ec)};
+  ts::file::path config_file = ts::file::path{config_file_path};
+  std::string content{ts::file::load(config_file, ec)};
 
   if (ec) {
     switch (ec.value()) {
@@ -414,6 +529,16 @@ CacheHostTable::BuildTable(const char *config_file_path)
     }
   }
 
+  if (ts::TextView{config_file.view()}.take_suffix_at('.') == "yaml") {
+    int count = BuildTableFromString(config_file_path, content);
+    if (count == 0) {
+      /* no hosting customers -- put all the volumes in the generic table */
+      if (gen_host_rec.Init(type)) {
+        Warning("Problems encountered while initializing the Generic Volume");
+      }
+    }
+    return count;
+  }
   return BuildTableFromString(config_file_path, content.data());
 }
 
@@ -579,6 +704,88 @@ CacheHostRecord::Init(matcher_line *line_info, CacheType typ)
   ink_assert(counter == num_vols);
 
   build_vol_hash_table(this);
+  return 0;
+}
+
+int
+CacheHostRecord::Init(const YAML::Node &node, CacheType typ)
+{
+  int i, j;
+  extern Queue<CacheVol> cp_list;
+  int is_vol_present = 0;
+  char config_file[PATH_NAME_MAX];
+
+  REC_ReadConfigString(config_file, "proxy.config.cache.hosting_filename", PATH_NAME_MAX);
+
+  type = typ;
+
+  if (!node["volumes"]) {
+    const char *errptr = "A volume number expected";
+    RecSignalWarning(REC_SIGNAL_CONFIG_ERROR, "%s discarding %s entry at line %d :%s", "[CacheHosting]", config_file,
+                     node.Mark().line, errptr);
+    return -1;
+  }
+
+  YAML::Node volumes;
+  auto volumesNode = node["volumes"];
+  if (volumesNode.IsSequence()) {
+    for (auto const &v : volumesNode) {
+      volumes.push_back(v);
+    }
+  } else {
+    volumes.push_back(volumesNode);
+  }
+
+  num_cachevols = volumes.size();
+
+  cp = static_cast<CacheVol **>(ats_malloc(num_cachevols * sizeof(CacheVol *)));
+  memset(cp, 0, num_cachevols * sizeof(CacheVol *));
+  num_cachevols = 0;
+
+  for (auto volume : volumes) {
+    int volume_number = volume.as<int>();
+
+    CacheVol *cachep = cp_list.head;
+
+    for (; cachep; cachep = cachep->link.next) {
+      if (cachep->vol_number == volume_number) {
+        is_vol_present = 1;
+        if (cachep->scheme == type) {
+          Debug("cache_hosting", "Host Record: %p, Volume: %d, size: %ld", this, volume_number,
+                (long)(cachep->size * STORE_BLOCK_SIZE));
+          cp[num_cachevols] = cachep;
+          num_cachevols++;
+          num_vols += cachep->num_vols;
+          break;
+        }
+      }
+    }
+
+    if (!is_vol_present) {
+      RecSignalWarning(REC_SIGNAL_CONFIG_ERROR, "%s discarding %s entry at line %d : bad volume number [%d]", "[CacheHosting]",
+                       config_file, volume.Mark().line, volume_number);
+      return -1;
+    }
+  }
+
+  if (!num_vols) {
+    return -1;
+  }
+
+  vols        = static_cast<Vol **>(ats_malloc(num_vols * sizeof(Vol *)));
+  int counter = 0;
+  for (i = 0; i < num_cachevols; i++) {
+    CacheVol *cachep = cp[i];
+    for (j = 0; j < cp[i]->num_vols; j++) {
+      vols[counter++] = cachep->vols[j];
+    }
+  }
+
+  // YAML PAth
+  ink_assert(counter == num_vols);
+
+  build_vol_hash_table(this);
+
   return 0;
 }
 

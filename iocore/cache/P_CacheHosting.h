@@ -44,6 +44,7 @@ struct Cache;
 struct CacheHostRecord {
   int Init(CacheType typ);
   int Init(matcher_line *line_info, CacheType typ);
+  int Init(const YAML::Node &node, CacheType typ);
 
   void UpdateMatch(CacheHostResult *r, char *rd);
   void Print() const;
@@ -83,6 +84,7 @@ public:
 
   void AllocateSpace(int num_entries);
   void NewEntry(matcher_line *line_info);
+  void NewEntry(const YAML::Node &node);
 
   void Match(const char *rdata, int rlen, CacheHostResult *result) const;
   void Print() const;
@@ -121,7 +123,9 @@ public:
   ~CacheHostTable();
 
   int BuildTable(const char *config_file_path);
+
   int BuildTableFromString(const char *config_file_path, char *str);
+  int BuildTableFromString(const char *config_file_path, const std::string &contents);
 
   void Match(const char *rdata, int rlen, CacheHostResult *result) const;
   void Print() const;

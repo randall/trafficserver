@@ -28,15 +28,22 @@ namespace filename
   constexpr const char *STORAGE = "storage.config";
   constexpr const char *RECORDS = "records.config";
   constexpr const char *VOLUME  = "volume.config";
-  constexpr const char *PLUGIN  = "plugin.config";
+  constexpr const char *PLUGIN  = "plugin.config"; // YAML-new
+
+  constexpr const char *CACHE_OVERRIDE      = "cache_override.yaml";
+  constexpr const char *CERTIFICATES_YAML   = "certificates.yaml";
+  constexpr const char *GLOBAL_PLUGINS_YAML = "global_plugins.yaml";
+  constexpr const char *SOCKS_YAML          = "socks.yaml";
+  constexpr const char *SPLITDNS_YAML       = "splitdns.yaml";
+  constexpr const char *HOSTING_YAML        = "hosting.yaml";
 
   // These still need to have their corresponding records.config settings remove
-  constexpr const char *LOGGING       = "logging.yaml";
-  constexpr const char *CACHE         = "cache.config";
-  constexpr const char *IP_ALLOW      = "ip_allow.yaml";
-  constexpr const char *HOSTING       = "hosting.config";
-  constexpr const char *SOCKS         = "socks.config";
-  constexpr const char *PARENT        = "parent.config";
+  constexpr const char *LOGGING       = "logging.yaml";   // YAML-current
+  constexpr const char *CACHE         = "cache.config";   // YAML-new
+  constexpr const char *IP_ALLOW      = "ip_allow.yaml";  // YAML-current
+  constexpr const char *HOSTING       = "hosting.config"; // YAML-new
+  constexpr const char *SOCKS         = "socks.config";   // YAML-new
+  constexpr const char *PARENT        = "parent.config";  // YAML-experimental
   constexpr const char *REMAP         = "remap.config";
   constexpr const char *SSL_MULTICERT = "ssl_multicert.config";
   constexpr const char *SPLITDNS      = "splitdns.config";
