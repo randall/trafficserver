@@ -16,7 +16,7 @@
 #  Volume number 0 is reserved for the special free volume.
 #  Each line MUST have a distinct volume number.
 #
-#  The only scheme currently supported is 'http.
+#  The only scheme currently supported is 'http'.
 #
 #  volume_size can either be specified in percentage of the total
 #  cache space or absolute value. It must be a multiple of 128 Megabytes,
@@ -29,6 +29,6 @@
 #  disk (assuming each disk has enough free space available).
 #
 # To create one volume of size 10% of the total cache space and
-# another 1 Gig  volume,
+# another 1 Gig volume:
 #  volume=1 scheme=http size=10%
 #  volume=2 scheme=http size=1024

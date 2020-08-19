@@ -33,9 +33,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-static constexpr char YAML_TAG_ROOT[]     = "hosting";
-static constexpr char YAML_TAG_HOSTNAME[] = "hostname";
-static constexpr char YAML_TAG_DOMAIN[]   = "domain";
+static constexpr char YAML_TAG_HOSTING_ROOT[] = "hosting";
+static constexpr char YAML_TAG_VOLUMES_ROOT[] = "volumes";
+static constexpr char YAML_TAG_HOSTNAME[]     = "hostname";
+static constexpr char YAML_TAG_DOMAIN[]       = "domain";
 
 extern int gndisks;
 
@@ -455,12 +456,12 @@ CacheHostTable::BuildTableFromString(const char *config_file_path, const std::st
     return 0;
   }
 
-  if (!config[YAML_TAG_ROOT]) {
-    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::HOSTING, YAML_TAG_ROOT);
+  if (!config[YAML_TAG_HOSTING_ROOT]) {
+    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::HOSTING, YAML_TAG_HOSTING_ROOT);
     return 0;
   }
 
-  config = config[YAML_TAG_ROOT];
+  config = config[YAML_TAG_HOSTING_ROOT];
   if (!config.IsSequence()) {
     Error("malformed %s file; expected a sequence at line %d", ts::filename::HOSTING, config.Mark().line);
     return 0;
@@ -811,7 +812,8 @@ ConfigVolumes::read_config_file()
   Note("%s loading ...", ts::filename::VOLUME);
 
   std::error_code ec;
-  std::string content{ts::file::load(ts::file::path{config_path}, ec)};
+  ts::file::path config_file = ts::file::path{config_path};
+  std::string content{ts::file::load(config_file, ec)};
 
   if (ec) {
     switch (ec.value()) {
@@ -824,8 +826,12 @@ ConfigVolumes::read_config_file()
     }
   }
 
-  BuildListFromString(config_path, content.data());
-  Note("volume.config finished loading");
+  if (ts::TextView{config_file.view()}.take_suffix_at('.') == "yaml") {
+    BuildListFromYAMLString(config_path, content);
+  } else {
+    BuildListFromString(config_path, content.data());
+  }
+  Note("%s finished loading", ts::filename::VOLUME);
 
   return;
 }
@@ -841,6 +847,7 @@ ConfigVolumes::BuildListFromString(char *config_file_path, char *file_buf)
   int total    = 0; // added by YTS Team, yamsat for bug id 59632
 
   char volume_seen[256];
+
   const char *matcher_name = "[CacheVolition]";
 
   memset(volume_seen, 0, sizeof(volume_seen));
@@ -1003,6 +1010,138 @@ ConfigVolumes::BuildListFromString(char *config_file_path, char *file_buf)
     }
 
     tmp = bufTok.iterNext(&i_state);
+  }
+
+  return;
+}
+
+void
+ConfigVolumes::BuildListFromYAMLString(char *config_file_path, const std::string &content)
+{
+  YAML::Node config{YAML::Load(content)};
+  if (config.IsNull()) {
+    Warning("malformed %s file; config is empty?", ts::filename::VOLUME);
+  }
+
+  if (!config.IsMap()) {
+    Error("malformed %s file; expected a map", ts::filename::VOLUME);
+    return;
+  }
+
+  if (!config[YAML_TAG_VOLUMES_ROOT]) {
+    Error("malformed %s file; expected a toplevel '%s' node", ts::filename::VOLUME, YAML_TAG_VOLUMES_ROOT);
+    return;
+  }
+
+  config = config[YAML_TAG_VOLUMES_ROOT];
+  if (!config.IsSequence()) {
+    Error("malformed %s file; expected a sequence at line %d", ts::filename::VOLUME, config.Mark().line);
+    return;
+  }
+
+  int total                            = 0;
+  static constexpr char matcher_name[] = "[CacheVolition]";
+  char volume_seen[256];
+
+  memset(volume_seen, 0, sizeof(volume_seen));
+  num_volumes      = 0;
+  num_http_volumes = 0;
+
+  int i = 0;
+  for (const auto &node : config) {
+    i++;
+    const char *err   = nullptr;
+    CacheType scheme  = CACHE_NONE_TYPE;
+    int size          = 0;
+    int volume_number = 0;
+
+    bool in_percent       = false;
+    bool ramcache_enabled = true;
+
+    if (node["volume"]) {
+      volume_number = node["volume"].as<int>();
+      if (volume_seen[volume_number]) {
+        err = "Volume Already Specified";
+        break;
+      }
+      if (volume_number < 1 || volume_number > 255) {
+        err = "Bad Volume Number";
+        break;
+      }
+      volume_seen[volume_number] = 1;
+    } else {
+      // implicit volume number
+      volume_number = i;
+      if (volume_seen[volume_number]) {
+        err = "Volume Already Specified";
+        break;
+      }
+      volume_seen[volume_number] = 1;
+    }
+
+    if (node["scheme"]) {
+      std::string val = node["scheme"].as<std::string>();
+      if (val == "http") {
+        scheme = CACHE_HTTP_TYPE;
+      } else {
+        err = "Unhandled scheme type";
+        break;
+      }
+    }
+
+    if (node["cache_size"]) {
+      std::string val = node["cache_size"].as<std::string>();
+      const char *tmp = val.c_str();
+      size            = atoi(tmp);
+
+      while (ParseRules::is_digit(*tmp)) {
+        tmp++;
+      }
+
+      if (*tmp == '%') {
+        in_percent = true;
+        total += size;
+        if (size > 100 || total > 100) {
+          err = "Total volume size added up to more than 100 percent, No volumes created";
+          break;
+        }
+      }
+    }
+
+    if (node["ramcache"]) {
+      ramcache_enabled = node["ramcache"].as<bool>();
+    }
+
+    if (err) {
+      RecSignalWarning(REC_SIGNAL_CONFIG_ERROR, "%s discarding %s entry at line %d : %s", matcher_name, config_file_path,
+                       node.Mark().line, err);
+      return;
+    }
+
+    if (volume_number && size && scheme) {
+      ConfigVol *configp = new ConfigVol;
+      configp->number    = volume_number;
+      if (in_percent) {
+        configp->percent    = size;
+        configp->in_percent = true;
+      } else {
+        configp->in_percent = false;
+      }
+      configp->scheme           = scheme;
+      configp->size             = size;
+      configp->cachep           = nullptr;
+      configp->ramcache_enabled = ramcache_enabled;
+      cp_queue.enqueue(configp);
+      num_volumes++;
+
+      if (scheme == CACHE_HTTP_TYPE) {
+        num_http_volumes++;
+      } else {
+        ink_release_assert(!"Unexpected non-HTTP cache volume");
+      }
+      Debug("cache_hosting", "added volume=%d, scheme=%d, size=%d percent=%d, ramcache enabled=%d", volume_number, scheme, size,
+            in_percent, ramcache_enabled);
+    }
   }
 
   return;

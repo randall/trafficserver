@@ -199,6 +199,7 @@ struct ConfigVolumes {
   Queue<ConfigVol> cp_queue;
   void read_config_file();
   void BuildListFromString(char *config_file_path, char *file_buf);
+  void BuildListFromYAMLString(char *config_file_path, const std::string &content);
 
   void
   clear_all()
