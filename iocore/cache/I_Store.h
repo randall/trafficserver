@@ -265,6 +265,8 @@ struct Store {
   Span **disk      = nullptr;
 
   Result read_config();
+  Result BuildTableFromString(const char *config_file_path);
+  Result BuildTableFromString(const char *config_file_path, const std::string &contents);
 
   int write_config_data(int fd) const;
 };

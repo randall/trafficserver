@@ -29,6 +29,10 @@
 #include "tscore/Tokenizer.h"
 #include "tscore/SimpleTokenizer.h"
 #include "tscore/runroot.h"
+#include "tscpp/util/TextView.h"
+#include "tscore/ts_file.h"
+
+#include <yaml-cpp/yaml.h>
 
 #if HAVE_LINUX_MAJOR_H
 #include <linux/major.h>
@@ -39,6 +43,8 @@
 //
 static constexpr char VOLUME_KEY[]           = "volume";
 static constexpr char HASH_BASE_STRING_KEY[] = "id";
+
+static constexpr char YAML_TAG_STORAGE_ROOT[] = "volumes"; // YES volumes
 
 static span_error_t
 make_span_error(int error)
@@ -318,16 +324,36 @@ Lagain:
 Result
 Store::read_config()
 {
+  Note("%s loading ...", ts::filename::STORAGE);
+
+  ats_scoped_str path(RecConfigReadConfigPath(nullptr, ts::filename::STORAGE));
+  ts::file::path config_file_path{path};
+
+  std::error_code ec;
+  ts::file::path config_file = ts::file::path{config_file_path};
+  std::string content{ts::file::load(config_file, ec)};
+  if (ts::TextView{config_file.view()}.take_suffix_at('.') == "yaml") {
+    std::error_code ec;
+    std::string content{ts::file::load(config_file.view(), ec)};
+    return BuildTableFromString(path, content);
+  } else {
+    return BuildTableFromString(path.get());
+  }
+}
+
+Result
+Store::BuildTableFromString(const char *config_file_path)
+{
   int n_dsstore   = 0;
   int ln          = 0;
   int i           = 0;
   const char *err = nullptr;
   Span *sd = nullptr, *cur = nullptr;
   Span *ns;
+
   ats_scoped_fd fd;
   ats_scoped_str storage_path(RecConfigReadConfigPath(nullptr, ts::filename::STORAGE));
 
-  Note("%s loading ...", ts::filename::STORAGE);
   Debug("cache_init", "Store::read_config, fd = -1, \"%s\"", (const char *)storage_path);
   fd = ::open(storage_path, O_RDONLY);
   if (fd < 0) {
@@ -414,6 +440,111 @@ Store::read_config()
     if (seed) {
       ns->hash_base_string_set(seed);
     }
+    if (volume_num > 0) {
+      ns->volume_number_set(volume_num);
+    }
+
+    // new Span
+    {
+      Span *prev = cur;
+      cur        = ns;
+      if (!sd) {
+        sd = cur;
+      } else {
+        prev->link.next = cur;
+      }
+    }
+  }
+
+  // count the number of disks
+  extend(n_dsstore);
+  cur = sd;
+  while (cur) {
+    Span *next     = cur->link.next;
+    cur->link.next = nullptr;
+    disk[i++]      = cur;
+    cur            = next;
+  }
+  sd = nullptr; // these are all used.
+  sort();
+
+  Note("%s finished loading", ts::filename::STORAGE);
+
+  return Result::ok();
+}
+
+Result
+Store::BuildTableFromString(const char *config_file_path, const std::string &contents)
+{
+  YAML::Node config{YAML::Load(contents)};
+  if (config.IsNull()) {
+    Warning("malformed %s file; config is empty?", ts::filename::STORAGE);
+    return Result::ok();
+  }
+
+  if (!config.IsMap()) {
+    return Result::failure("malformed %s file; expected a map", ts::filename::STORAGE);
+  }
+
+  if (!config[YAML_TAG_STORAGE_ROOT]) {
+    return Result::failure("malformed %s file; expected a toplevel '%s' node", ts::filename::STORAGE, YAML_TAG_STORAGE_ROOT);
+  }
+
+  config = config[YAML_TAG_STORAGE_ROOT];
+  if (!config.IsSequence()) {
+    return Result::failure("malformed %s file; expected a sequence at line %d", ts::filename::STORAGE, config.Mark().line);
+  }
+
+  int n_dsstore   = 0;
+  int i           = 0;
+  const char *err = nullptr;
+  Span *sd = nullptr, *cur = nullptr;
+  Span *ns;
+
+  for (const auto &node : config) {
+    std::string path;
+    std::string seed;
+    int64_t size   = -1;
+    int volume_num = -1;
+
+    if (node["path"]) {
+      path = node["path"].as<std::string>();
+      ++n_disks_in_config;
+    }
+
+    if (node["id"]) {
+      ++n_disks_in_config;
+      seed = node["id"].as<std::string>(); // ???
+    }
+
+    if (node["size"]) {
+      std::string val = node["size"].as<std::string>();
+      size            = ink_atoi64(val.c_str());
+    }
+
+    if (node["volume"]) {
+      volume_num = node["volume"].as<int>();
+    }
+
+    std::string pp = Layout::get()->relative(path);
+
+    ns = new Span;
+    Debug("cache_init", "Store::read_config - ns = new Span; ns->init(\"%s\", %" PRId64 "), forced volume=%d%s%s", pp.c_str(), size,
+          volume_num, !seed.empty() ? " id=" : "", !seed.empty() ? seed.c_str() : "");
+    if ((err = ns->init(pp.c_str(), size))) {
+      RecSignalWarning(REC_SIGNAL_SYSTEM_ERROR, "could not initialize storage \"%s\" [%s]", pp.c_str(), err);
+      Debug("cache_init", "Store::read_config - could not initialize storage \"%s\" [%s]", pp.c_str(), err);
+      delete ns;
+      continue;
+    }
+
+    n_dsstore++;
+
+    // Set side values if present.
+    if (!seed.empty()) {
+      ns->hash_base_string_set(seed.c_str());
+    }
+
     if (volume_num > 0) {
       ns->volume_number_set(volume_num);
     }
