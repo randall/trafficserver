@@ -26,7 +26,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "SocksServer.h"
 #include "tscpp/util/TextView.h"
 #include "tscore/I_Layout.h"
 #include "tscore/ink_sock.h"

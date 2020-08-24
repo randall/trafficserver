@@ -20,6 +20,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
+
 #include "P_EventSystem.h"
 #include "ParentSelection.h"
 #include "ParentConsistentHash.h"
@@ -31,6 +32,7 @@
 #include "HttpTransact.h"
 #include "I_Machine.h"
 #include "tscore/Filenames.h"
+#include "tscore/YAMLConf.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -50,7 +52,8 @@ static const char *default_var   = "proxy.config.http.parent_proxies";
 static const char *retry_var     = "proxy.config.http.parent_proxy.retry_time";
 static const char *threshold_var = "proxy.config.http.parent_proxy.fail_threshold";
 
-static constexpr char YAML_TAG_IP[] = "ip";
+static constexpr char YAML_TAG_DESTINATIONS[] = "destinations";
+static constexpr char YAML_TAG_IP[]           = "ip";
 
 //
 //  Config Callback Prototypes
@@ -981,6 +984,152 @@ createDefaultParent(char *val)
   }
 }
 
+//
+// ParentConfig equivalent functions for SocksServerConfig
+//
+
+int SocksServerConfig::m_id = 0;
+
+static Ptr<ProxyMutex> socks_server_reconfig_mutex;
+void
+SocksServerConfig::startup()
+{
+  socks_server_reconfig_mutex = new_ProxyMutex();
+
+  // Load the initial configuration
+  reconfigure();
+
+  /* Handle update functions later. Socks does not yet support config update */
+}
+
+static int
+setup_socks_servers(ParentRecord *rec_arr, int len)
+{
+  /* This changes hostnames into ip addresses and sets go_direct to false */
+  for (int j = 0; j < len; j++) {
+    rec_arr[j].go_direct = false;
+
+    pRecord *pr   = rec_arr[j].parents;
+    int n_parents = rec_arr[j].num_parents;
+
+    for (int i = 0; i < n_parents; i++) {
+      IpEndpoint ip4, ip6;
+      if (0 == ats_ip_getbestaddrinfo(pr[i].hostname, &ip4, &ip6)) {
+        IpEndpoint *ip = ats_is_ip6(&ip6) ? &ip6 : &ip4;
+        ats_ip_ntop(ip, pr[i].hostname, MAXDNAME + 1);
+      } else {
+        Warning("Could not resolve socks server name \"%s\". "
+                "Please correct it",
+                pr[i].hostname);
+        snprintf(pr[i].hostname, MAXDNAME + 1, "255.255.255.255");
+      }
+    }
+  }
+
+  return 0;
+}
+
+static P_table *
+buildTable(const std::string &contents)
+{
+  Note("%s as YAML ...", ts::filename::SOCKS);
+
+  auto rv = YAMLConfig::LoadMap(contents, "socks");
+  if (!rv.isOK()) {
+    Error("malformed %s file; %s", ts::filename::SOCKS, rv.errata().top().text().c_str());
+    return nullptr;
+  }
+
+  YAML::Node config = rv;
+
+  config = config[YAML_TAG_DESTINATIONS];
+
+  if (!config.IsSequence()) {
+    Error("malformed %s file; expected a toplevel sequence/array", ts::filename::SOCKS);
+    return nullptr;
+  }
+
+  return new P_table("proxy.config.socks.socks_config_file", modulePrefix, config);
+}
+
+void
+SocksServerConfig::reconfigure()
+{
+  Note("%s loading ...", ts::filename::SOCKS);
+
+  char *default_val = nullptr;
+  int retry_time    = 30;
+  int fail_threshold;
+
+  ats_scoped_str path(RecConfigReadConfigPath("proxy.config.socks.socks_config_file", ts::filename::SOCKS));
+
+  ParentConfigParams *params = nullptr;
+
+  ts::file::path config_file{path};
+
+  std::error_code ec;
+  std::string content{ts::file::load(config_file, ec)};
+
+  P_table *pTable = nullptr;
+  if (ec.value() == 0) {
+    if (ts::TextView{config_file.view()}.take_suffix_at('.') == "yaml") {
+      pTable = buildTable(content);
+    } else {
+      pTable = new P_table("proxy.config.socks.socks_config_file", "[Socks Server Selection]", &socks_server_tags);
+    }
+  }
+
+  params = new ParentConfigParams(pTable);
+  ink_assert(params != nullptr);
+
+  // Handle default parent
+  REC_ReadConfigStringAlloc(default_val, "proxy.config.socks.default_servers");
+  params->DefaultParent = createDefaultParent(default_val);
+  ats_free(default_val);
+
+  if (params->DefaultParent) {
+    setup_socks_servers(params->DefaultParent, 1);
+  }
+  if (params->parent_table->ipMatch) {
+    setup_socks_servers(params->parent_table->ipMatch->data_array, params->parent_table->ipMatch->array_len);
+  }
+
+  // Handle parent timeout
+  REC_ReadConfigInteger(retry_time, "proxy.config.socks.server_retry_time");
+  params->policy.ParentRetryTime = retry_time;
+
+  // Handle the fail threshold
+  REC_ReadConfigInteger(fail_threshold, "proxy.config.socks.server_fail_threshold");
+  params->policy.FailThreshold = fail_threshold;
+
+  m_id = configProcessor.set(m_id, params);
+
+  if (is_debug_tag_set("Socks")) {
+    SocksServerConfig::print();
+  }
+
+  Note("%s finished loading", ts::filename::SOCKS);
+}
+
+void
+SocksServerConfig::print()
+{
+  ParentConfigParams *params = SocksServerConfig::acquire();
+
+  printf("Parent Selection Config for Socks Server\n");
+  printf("\tRetryTime %d\n", params->policy.ParentRetryTime);
+  if (params->DefaultParent == nullptr) {
+    printf("\tNo Default Parent\n");
+  } else {
+    printf("\tDefault Parent:\n");
+    params->DefaultParent->Print();
+  }
+  printf("  ");
+  params->parent_table->Print();
+
+  SocksServerConfig::release(params);
+}
+
 #define TEST_FAIL(str)                \
   {                                   \
     printf("%d: %s\n", test_id, str); \
@@ -1008,11 +1157,6 @@ request_to_data(HttpRequestData *req, sockaddr const *srcip, sockaddr const *dst
 
 static int passes;
 static int fails;
-
-// Unit Test Functions
-void show_result(ParentResult *aParentResult);
-void br(HttpRequestData *h, const char *os_hostname, sockaddr const *dest_ip = nullptr); // short for build request
-int verify(ParentResult *r, ParentResultType e, const char *h, int p);
 
 // Parenting Tests
 EXCLUSIVE_REGRESSION_TEST(PARENTSELECTION)(RegressionTest * /* t ATS_UNUSED */, int /* intensity_level ATS_UNUSED */, int *pstatus)
