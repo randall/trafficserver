@@ -20,11 +20,18 @@
  */
 
 #include "P_OCSPStapling.h"
+
 #if TS_USE_TLS_OCSP
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
+
+#ifdef TS_HAS_BORINGOCSP
+#include "boringocsp/ocsp.h"
+#else
 #include <openssl/ocsp.h>
+#endif
+
 #include "P_Net.h"
 #include "P_SSLConfig.h"
 #include "P_SSLUtils.h"
@@ -213,6 +220,7 @@ ssl_stapling_init_cert(SSL_CTX *ctx, X509 *cert, const char *certname, const cha
   cinf->is_expire     = true;
   cinf->expire_time   = 0;
 
+#ifndef OPENSSL_IS_BORINGSSL
   if (cinf->is_prefetched) {
     Debug("ssl_ocsp", "using OCSP prefetched response file %s", rsp_file);
     rsp_bio = BIO_new_file(rsp_file, "r");
@@ -236,6 +244,7 @@ ssl_stapling_init_cert(SSL_CTX *ctx, X509 *cert, const char *certname, const cha
       rsp_bio = nullptr;
     }
   }
+#endif
 
   issuer = stapling_get_issuer(ctx, cert);
   if (issuer == nullptr) {
@@ -261,10 +270,14 @@ ssl_stapling_init_cert(SSL_CTX *ctx, X509 *cert, const char *certname, const cha
     goto err;
   }
 
+#ifdef OPENSSL_IS_BORINGSSL
+  X509_up_ref(cert);
+#endif
+
   map->insert(std::make_pair(cert, cinf));
   SSL_CTX_set_ex_data(ctx, ssl_stapling_index, map);
 
-  Note("successfully initialized stapling for %s into SSL_CTX: %p", certname, ctx);
+  Note("successfully initialized stapling for %s into SSL_CTX: %p uri=%s", certname, ctx, cinf->uri);
   return true;
 
 err:
@@ -458,7 +471,7 @@ stapling_refresh_response(certinfo *cinf, OCSP_RESPONSE **prsp)
   if (!stapling_cache_response(*prsp, cinf)) {
     Error("stapling_refresh_response: can not cache response");
   } else {
-    Debug("ssl_ocsp", "stapling_refresh_response: successful refresh OCSP response");
+    Debug("ssl_ocsp", "stapling_refresh_response: successfully refreshed OCSP response");
   }
   goto done;
 
@@ -523,7 +536,11 @@ ocsp_update()
 
 // RFC 6066 Section-8: Certificate Status Request
 int
+#ifndef OPENSSL_IS_BORINGSSL
 ssl_callback_ocsp_stapling(SSL *ssl)
+#else
+ssl_callback_ocsp_stapling(SSL *ssl, void *)
+#endif
 {
   // Assume SSL_get_SSL_CTX() is the same as reaching into the ssl structure
   // Using the official call, to avoid leaking internal openssl knowledge
@@ -533,18 +550,43 @@ ssl_callback_ocsp_stapling(SSL *ssl)
     Debug("ssl_ocsp", "ssl_callback_ocsp_stapling: failed to get certificate map");
     return SSL_TLSEXT_ERR_NOACK;
   }
+
+  if (map->empty()) {
+    Debug("ssl_ocsp", "ssl_callback_ocsp_stapling: certificate map empty");
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
   // Fetch the specific certificate used in this negotiation
   X509 *cert = SSL_get_certificate(ssl);
   if (!cert) {
     Error("ssl_callback_ocsp_stapling: failed to get certificate");
     return SSL_TLSEXT_ERR_NOACK;
   }
+
+  certinfo *cinf = nullptr;
+#ifndef OPENSSL_IS_BORINGSSL
   certinfo_map::iterator iter = map->find(cert);
-  if (iter == map->end()) {
-    Error("ssl_callback_ocsp_stapling: failed to get certificate information");
+  if (iter != map->end()) {
+    cinf = iter->second;
+  }
+#else
+  for (certinfo_map::iterator iter = map->begin(); iter != map->end(); ++iter) {
+    X509 *key = iter->first;
+    if (key == nullptr) {
+      continue;
+    }
+
+    if (X509_cmp(key, cert) == 0) {
+      cinf = iter->second;
+      break;
+    }
+  }
+#endif
+
+  if (cinf == nullptr) {
+    Error("ssl_callback_ocsp_stapling: failed to get certificate information for ssl=%p", ssl);
     return SSL_TLSEXT_ERR_NOACK;
   }
-  certinfo *cinf = iter->second;
 
   ink_mutex_acquire(&cinf->stapling_mutex);
   time_t current_time = time(nullptr);
@@ -554,11 +596,13 @@ ssl_callback_ocsp_stapling(SSL *ssl)
     return SSL_TLSEXT_ERR_NOACK;
   } else {
     unsigned char *p = static_cast<unsigned char *>(OPENSSL_malloc(cinf->resp_derlen));
-    unsigned int len = cinf->resp_derlen;
+
     memcpy(p, cinf->resp_der, cinf->resp_derlen);
     ink_mutex_release(&cinf->stapling_mutex);
-    SSL_set_tlsext_status_ocsp_resp(ssl, p, len);
+    SSL_set_tlsext_status_ocsp_resp(ssl, p, cinf->resp_derlen);
+
     Debug("ssl_ocsp", "ssl_callback_ocsp_stapling: successfully got certificate status for %s", cinf->certname);
+
     return SSL_TLSEXT_ERR_OK;
   }
 }

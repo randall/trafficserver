@@ -466,6 +466,7 @@ ssl_servername_callback(SSL *ssl, int *al, void *arg)
 #if TS_HAS_SET_TMP_DH
 
 #if TS_USE_GET_DH_2048_256 == 0
+
 /* Build 2048-bit MODP Group with 256-bit Prime Order Subgroup from RFC 5114 */
 static DH *
 DH_get_2048_256()
