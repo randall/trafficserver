@@ -70,6 +70,7 @@ TSDECL(http2_max_continuation_frames_per_minute);
 TSDECL(quic);
 TSDECL(host_sni_policy);
 TSDECL(http2_initial_window_size_in);
+TSDECL(http2_flow_control_policy_in);
 TSDECL(server_max_early_data);
 #undef TSDECL
 
@@ -115,6 +116,7 @@ struct YamlSNIConfig {
     std::optional<int>  http2_max_continuation_frames_per_minute;
     uint32_t            server_max_early_data = 0;
     std::optional<int>  http2_initial_window_size_in;
+    std::optional<int>  http2_flow_control_policy_in;
 
     bool          tunnel_prewarm_srv              = false;
     uint32_t      tunnel_prewarm_min              = 0;

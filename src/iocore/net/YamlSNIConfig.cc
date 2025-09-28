@@ -163,6 +163,9 @@ YamlSNIConfig::Item::populate_sni_actions(action_vector_t &actions)
   if (http2_initial_window_size_in.has_value()) {
     actions.push_back(std::make_unique<HTTP2InitialWindowSizeIn>(http2_initial_window_size_in.value()));
   }
+  if (http2_flow_control_policy_in.has_value()) {
+    actions.push_back(std::make_unique<HTTP2FlowControlPolicyIn>(http2_flow_control_policy_in.value()));
+  }
   if (http2_max_settings_frames_per_minute.has_value()) {
     actions.push_back(std::make_unique<HTTP2MaxSettingsFramesPerMinute>(http2_max_settings_frames_per_minute.value()));
   }
@@ -221,6 +224,7 @@ std::set<std::string> valid_sni_config_keys = {TS_fqdn,
                                                TS_http2,
                                                TS_http2_buffer_water_mark,
                                                TS_http2_initial_window_size_in,
+                                               TS_http2_flow_control_policy_in,
                                                TS_http2_max_settings_frames_per_minute,
                                                TS_http2_max_ping_frames_per_minute,
                                                TS_http2_max_priority_frames_per_minute,
@@ -268,6 +272,9 @@ template <> struct convert<YamlSNIConfig::Item> {
     }
     if (node[TS_http2_initial_window_size_in]) {
       item.http2_initial_window_size_in = node[TS_http2_initial_window_size_in].as<int>();
+    }
+    if (node[TS_http2_flow_control_policy_in]) {
+      item.http2_flow_control_policy_in = node[TS_http2_flow_control_policy_in].as<int>();
     }
     if (node[TS_http2_max_settings_frames_per_minute]) {
       item.http2_max_settings_frames_per_minute = node[TS_http2_max_settings_frames_per_minute].as<int>();

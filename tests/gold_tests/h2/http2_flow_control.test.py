@@ -59,7 +59,9 @@ class Http2FlowControlTest:
             description: str,
             initial_window_size: Optional[int] = None,
             max_concurrent_streams: Optional[int] = None,
-            flow_control_policy: Optional[int] = None):
+            flow_control_policy: Optional[int] = None,
+            sni_flow_control_policy: Optional[int] = None,
+            sni_domain: Optional[str] = None):
         """Declare the various test Processes.
 
         :param description: A description of the test.
@@ -79,6 +81,13 @@ class Http2FlowControlTest:
         records.yaml file. If the paramenter is None, then no policy
         configuration will be explicitly set and ATS will use the default
         value.
+
+        :param sni_flow_control_policy: The value with which to configure the
+        http2_flow_control_policy_in parameter in the sni.yaml file for the
+        specified SNI domain. If None, no SNI-specific policy is configured.
+
+        :param sni_domain: The SNI domain name to use for SNI-specific
+        configuration. If None, no SNI configuration is used.
         """
         self._description = description
 
@@ -91,11 +100,21 @@ class Http2FlowControlTest:
             max_concurrent_streams if max_concurrent_streams is not None else self._default_max_concurrent_streams)
 
         self._flow_control_policy = flow_control_policy
-        self._expected_flow_control_policy = (
-            flow_control_policy if flow_control_policy is not None else self._default_flow_control_policy)
+        self._sni_flow_control_policy = sni_flow_control_policy
+        self._sni_domain = sni_domain
+
+        # For SNI tests, the expected policy is the SNI override if present, otherwise the global policy
+        if sni_flow_control_policy is not None and sni_domain is not None:
+            self._expected_flow_control_policy = sni_flow_control_policy
+        else:
+            self._expected_flow_control_policy = (
+                flow_control_policy if flow_control_policy is not None else self._default_flow_control_policy)
 
         self._flow_control_policy_is_malformed = (
             self._flow_control_policy is not None and self._flow_control_policy not in self._valid_policy_values)
+
+        self._sni_flow_control_policy_is_malformed = (
+            self._sni_flow_control_policy is not None and self._sni_flow_control_policy not in self._valid_policy_values)
 
     def _configure_dns(self, tr: 'TestRun') -> 'Process':
         """Configure the DNS."""
@@ -107,6 +126,9 @@ class Http2FlowControlTest:
         """Configure the test server."""
         if server_type == self.ServerType.HTTP1_CHUNKED:
             replay_file = self._replay_chunked_file
+        elif self._sni_domain is not None:
+            # Use the SNI-specific replay file
+            replay_file = 'http2_flow_control_sni.replay.yaml'
         else:
             replay_file = self._replay_file
 
@@ -166,15 +188,26 @@ class Http2FlowControlTest:
 
         ts.Disk.ssl_multicert_config.AddLine('dest_ip=* ssl_cert_name=server.pem ssl_key_name=server.key')
 
+        # Configure SNI-specific flow control policy if specified
+        if self._sni_flow_control_policy is not None and self._sni_domain is not None:
+            ts.Disk.sni_yaml.AddLines(
+                ['sni:', f'- fqdn: {self._sni_domain}', f'  http2_flow_control_policy_in: {self._sni_flow_control_policy}'])
+
         ts.Disk.remap_config.AddLine(f'map / https://127.0.0.1:{self._server.Variables.https_port}')
 
-        if self._flow_control_policy_is_malformed:
+        if self._flow_control_policy_is_malformed or self._sni_flow_control_policy_is_malformed:
             if is_outbound:
                 configuration = 'proxy.config.http2.flow_control.policy_out'
             else:
                 configuration = 'proxy.config.http2.flow_control.policy_in'
-            ts.Disk.diags_log.Content = Testers.ContainsExpression(
-                f"ERROR.*{configuration}", "Expected an error about an invalid flow control policy.")
+
+            if self._flow_control_policy_is_malformed:
+                ts.Disk.diags_log.Content = Testers.ContainsExpression(
+                    f"ERROR.*{configuration}", "Expected an error about an invalid flow control policy.")
+
+            if self._sni_flow_control_policy_is_malformed:
+                ts.Disk.diags_log.Content = Testers.ContainsExpression(
+                    "ERROR.*http2_flow_control_policy_in", "Expected an error about an invalid SNI flow control policy.")
 
         return ts
 
@@ -186,14 +219,21 @@ class Http2FlowControlTest:
 
         :param tr: The TestRun to associate the client with.
         """
-        tr.AddVerifierClientProcess(
-            f'client-{Http2FlowControlTest._client_counter}', self._replay_file, https_ports=[self._ts.Variables.ssl_port])
+        if self._sni_domain is not None:
+            # For SNI tests, use the SNI-specific replay file
+            tr.AddVerifierClientProcess(
+                f'client-{Http2FlowControlTest._client_counter}',
+                'http2_flow_control_sni.replay.yaml',
+                https_ports=[self._ts.Variables.ssl_port])
+        else:
+            tr.AddVerifierClientProcess(
+                f'client-{Http2FlowControlTest._client_counter}', self._replay_file, https_ports=[self._ts.Variables.ssl_port])
         Http2FlowControlTest._client_counter += 1
 
     def _configure_log_expectations(self, host):
         """Configure the log expectations for the client or server."""
         hostname = "server" if host == self._server else "client"
-        if self._flow_control_policy_is_malformed:
+        if self._flow_control_policy_is_malformed or self._sni_flow_control_policy_is_malformed:
             # Since we're just testing ATS configuration errors, there's no
             # need to set up client expectations.
             return
@@ -289,7 +329,7 @@ class Http2FlowControlTest:
         self._dns = self._configure_dns(tr)
         self._server = self._configure_server(tr, server_type)
         self._ts = self._configure_trafficserver(tr, is_outbound, server_type)
-        if not self._flow_control_policy_is_malformed:
+        if not self._flow_control_policy_is_malformed and not self._sni_flow_control_policy_is_malformed:
             self._configure_client(tr)
             tr.Processes.Default.StartBefore(self._dns)
             tr.Processes.Default.StartBefore(self._server)
@@ -322,11 +362,22 @@ class Http2FlowControlTest:
         self._configure_test_run_common(tr, self.IS_OUTBOUND, self.ServerType.HTTP2)
         self._configure_log_expectations(self._server)
 
+    def _configure_sni_inbound_test_run(self) -> None:
+        """Configure the TestRun for SNI-specific inbound stream configuration."""
+        tr = Test.AddTestRun(f'{self._description} - SNI inbound, HTTP/2 origin')
+        self._configure_test_run_common(tr, self.IS_INBOUND, self.ServerType.HTTP2)
+        self._configure_log_expectations(tr.Processes.Default)
+
     def run(self) -> None:
         """Configure the test run for various origin side configurations."""
-        self._configure_inbound_http1_to_origin_test_run()
-        self._configure_inbound_http2_to_origin_test_run()
-        self._configure_outbound_test_run()
+        if self._sni_domain is not None:
+            # Only run SNI-specific tests
+            self._configure_sni_inbound_test_run()
+        else:
+            # Run the standard tests
+            self._configure_inbound_http1_to_origin_test_run()
+            self._configure_inbound_http2_to_origin_test_run()
+            self._configure_outbound_test_run()
 
 
 #
@@ -369,4 +420,44 @@ test = Http2FlowControlTest(
     max_concurrent_streams=10,
     initial_window_size=10,
     flow_control_policy=2)
+test.run()
+
+#
+# SNI-specific flow control policy tests.
+#
+test = Http2FlowControlTest(
+    description="SNI flow control policy override: global policy 0, SNI policy 1",
+    max_concurrent_streams=10,
+    initial_window_size=100,
+    flow_control_policy=0,  # Global policy
+    sni_flow_control_policy=1,  # SNI-specific override
+    sni_domain="sni-policy-test.example.com")  # Match replay file domain
+test.run()
+
+test = Http2FlowControlTest(
+    description="SNI flow control policy override: global policy 1, SNI policy 2",
+    max_concurrent_streams=10,
+    initial_window_size=100,
+    flow_control_policy=1,  # Global policy
+    sni_flow_control_policy=2,  # SNI-specific override
+    sni_domain="sni-policy-test.example.com")  # Match replay file domain
+test.run()
+
+test = Http2FlowControlTest(
+    description="SNI flow control policy override: global policy 2, SNI policy 0",
+    max_concurrent_streams=10,
+    initial_window_size=100,
+    flow_control_policy=2,  # Global policy
+    sni_flow_control_policy=0,  # SNI-specific override
+    sni_domain="sni-policy-test.example.com")  # Match replay file domain
+test.run()
+
+# Test invalid SNI flow control policy
+test = Http2FlowControlTest(
+    description="SNI flow control policy override: invalid SNI policy",
+    max_concurrent_streams=10,
+    initial_window_size=100,
+    flow_control_policy=0,  # Global policy (valid)
+    sni_flow_control_policy=99,  # Invalid SNI policy
+    sni_domain="sni-policy-test.example.com")  # Use same domain as replay file
 test.run()

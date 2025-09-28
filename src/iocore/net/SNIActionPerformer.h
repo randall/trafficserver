@@ -151,6 +151,18 @@ private:
   int value = -1;
 };
 
+class HTTP2FlowControlPolicyIn : public ActionItem
+{
+public:
+  HTTP2FlowControlPolicyIn(int value) : value(value) {}
+  ~HTTP2FlowControlPolicyIn() override {}
+
+  int SNIAction(SSL &ssl, const Context &ctx) const override;
+
+private:
+  int value = -1;
+};
+
 class TunnelDestination : public ActionItem
 {
   // ID of the configured variable. This will be used to know which function

@@ -1192,6 +1192,11 @@ Http2ConnectionState::_get_configured_flow_control_policy() const
   if (this->session->is_outbound()) {
     return Http2::flow_control_policy_out;
   } else {
+    // Check for SNI override first
+    if (auto snis = session->get_netvc()->get_service<TLSSNISupport>();
+        snis && snis->hints_from_sni.http2_flow_control_policy_in.has_value()) {
+      return static_cast<Http2FlowControlPolicy>(snis->hints_from_sni.http2_flow_control_policy_in.value());
+    }
     return Http2::flow_control_policy_in;
   }
 }
