@@ -1361,13 +1361,17 @@ Http2ConnectionState::send_connection_preface()
 
   configured_settings.set(HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, _adjust_concurrent_stream());
 
-  uint32_t const configured_initial_window_size = this->_get_configured_receive_session_window_size();
+  uint32_t configured_initial_window_size = 0;
   if (this->_has_dynamic_stream_window()) {
-    // Since this is the beginning of the connection and there are no streams
-    // yet, we can just set the stream window size to fill the entire session
-    // window size.
-    configured_settings.set(HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, configured_initial_window_size);
+    configured_initial_window_size = this->_get_configured_receive_session_window_size();
+  } else {
+    configured_initial_window_size = this->_get_configured_initial_window_size();
   }
+
+  // Since this is the beginning of the connection and there are no streams
+  // yet, we can just set the stream window size to fill the entire session
+  // window size.
+  configured_settings.set(HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, configured_initial_window_size);
 
   send_settings_frame(configured_settings);
 
